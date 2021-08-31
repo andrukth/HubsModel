@@ -20,6 +20,45 @@ adding funds=
 		funds per year.
 	|
 
+EFFECT OF NUMBER OF HUBS ON CO2 EMISSIONS PER TON KM = WITH LOOKUP (
+	Logistics Hubs,
+		([(0,0)-(100,1)],(0,1),(1,0.957895),(4,0.900877),(7,0.85614),(10,0.83),(30,0.75),(50\
+		,0.7),(100,0.65) ))
+	~	Dmnl
+	~	The number of hubs reduces the CO2 emissions based on a graph function. \
+		Now the function is limited to a maximum number of hubs of 100
+	|
+
+annual CO2 emissions=
+	CO2 emissions per ton km*ton km travelled
+	~	tonCO2eq/Year
+	~		|
+
+annual CO2 emissions gap=
+	(annual CO2 emissions-ANNUAL CO2 EMISSIONS GOAL)/ANNUAL CO2 EMISSIONS GOAL
+	~	Dmnl
+	~		|
+
+ANNUAL CO2 EMISSIONS GOAL=
+	2
+	~	tonCO2eq/Year [1,20,0.1]
+	~		|
+
+INITIAL CO2 EMISSIONS PER TON KM=
+	2
+	~	tonCO2eq/tonkm
+	~		|
+
+INITIAL TON KM TRAVELLED=
+	2
+	~	tonkm/Year
+	~		|
+
+CO2 emissions per ton km=
+	EFFECT OF NUMBER OF HUBS ON CO2 EMISSIONS PER TON KM*INITIAL CO2 EMISSIONS PER TON KM
+	~	tonCO2eq/tonkm
+	~		|
+
 EFFECT OF NUMBER OF HUBS ON TON KM TRAVELLED = WITH LOOKUP (
 	Logistics Hubs,
 		([(0,0)-(100,1)],(0,1),(1,0.957895),(4,0.900877),(7,0.85614),(10,0.83),(30,0.75),(50\
@@ -27,20 +66,9 @@ EFFECT OF NUMBER OF HUBS ON TON KM TRAVELLED = WITH LOOKUP (
 	~	Dmnl
 	~		|
 
-INITIAL TON KM TRAVELLED=
-	1
+ton km travelled=
+	EFFECT OF NUMBER OF HUBS ON TON KM TRAVELLED*INITIAL TON KM TRAVELLED
 	~	tonkm/Year
-	~		|
-
-CO2 EMISSIONS GOAL=
-	200
-	~	tonCO2eq
-	~		|
-
-CO2 emissions gap  = A FUNCTION OF( CO2 EMISSIONS GOAL) ~~|
-CO2 emissions gap=
-	(CO2 EMISSIONS GOAL-CO2 Emissions)/CO2 EMISSIONS GOAL
-	~	Dmnl
 	~		|
 
 dismissing hubs=
@@ -51,22 +79,8 @@ dismissing hubs=
 		higher order delay is considered is here.
 	|
 
-CO2 emissions per ton km=
-	EFFECT OF NUMBER OF HUBS ON CO2 EMISSIONS PER TON KM*INITIAL CO2 EMISSIONS PER TON KM
-	~	tonCO2eq/tonkm
-	~		|
-
-EFFECT OF NUMBER OF HUBS ON CO2 EMISSIONS PER TON KM = WITH LOOKUP (
-	Logistics Hubs,
-		([(0,0)-(100,1)],(0,1),(1,0.957895),(4,0.900877),(7,0.85614),(10,0.83),(30,0.75),(50\
-		,0.7),(100,0.65) ))
-	~	Dmnl
-	~	The number of hubs reduces the CO2 emissions based on a graph function. \
-		Now the function is limited to a maximum number of hubs of 100
-	|
-
 EFFECT OF GAP ON ADDING FUNDS = WITH LOOKUP (
-	CO2 emissions gap,
+	annual CO2 emissions gap,
 		([(0,0)-(1,1)],(0,0),(1e-05,0.5),(0.5,0.9),(0.75,0.98),(1,1) ))
 	~	Dmnl
 	~	This variable is a lookup (graphical lookup). It represents the effect of \
@@ -76,21 +90,6 @@ EFFECT OF GAP ON ADDING FUNDS = WITH LOOKUP (
 		maximum funds available. When the gap is higher, the funds added are \
 		almost at their maximum value.
 	|
-
-INITIAL CO2 EMISSIONS=
-	100
-	~	tonCO2eq
-	~		|
-
-INITIAL CO2 EMISSIONS PER TON KM=
-	1
-	~	tonCO2eq/tonkm
-	~		|
-
-ton km travelled=
-	EFFECT OF NUMBER OF HUBS ON TON KM TRAVELLED*INITIAL TON KM TRAVELLED
-	~	tonkm/Year
-	~		|
 
 MAXIMUM FUNDS PER YEAR=
 	2000
@@ -242,7 +241,7 @@ $192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|96,9
 Funds
 12,46,0,1253,397,152,152,3,44,0,0,1,0,0,0,0,0,0,0,0,0
 Hubs
-10,47,CO2 emissions gap,712,521,56,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|0||128-128-128,0,0,0,0,0,0
+10,47,annual CO2 emissions gap,712,521,56,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|0||128-128-128,0,0,0,0,0,0
 1,48,47,42,1,0,0,0,0,64,0,-1--1--1,,1|(572,569)|
 \\\---/// Sketch information - do not modify anything except names
 V300  Do not put anything below this section - it will be ignored
@@ -250,21 +249,24 @@ V300  Do not put anything below this section - it will be ignored
 $192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|96,96,100,0
 10,1,CO2 emissions per ton km,329,259,61,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
 10,2,ton km travelled,503,283,51,11,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-10,3,INITIAL CO2 EMISSIONS,544,53,48,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-10,4,CO2 EMISSIONS GOAL,796,265,63,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-10,5,CO2 emissions gap,740,172,49,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-1,6,4,5,0,0,0,0,0,64,0,-1--1--1,,1|(772,224)|
-10,7,EFFECT OF NUMBER OF HUBS ON CO2 EMISSIONS PER TON KM,136,359,101,28,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-10,8,EFFECT OF NUMBER OF HUBS ON TON KM TRAVELLED,525,408,93,28,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-10,9,Logistics Hubs,300,451,56,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|0||128-128-128,0,0,0,0,0,0
-10,10,INITIAL CO2 EMISSIONS PER TON KM,149,244,61,28,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-10,11,INITIAL TON KM TRAVELLED,651,340,65,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-1,12,10,1,0,0,0,0,0,64,0,-1--1--1,,1|(232,249)|
-1,13,7,1,0,0,0,0,0,64,0,-1--1--1,,1|(236,307)|
-1,14,8,2,0,0,0,0,0,64,0,-1--1--1,,1|(513,344)|
-1,15,11,2,0,0,0,0,0,64,0,-1--1--1,,1|(572,308)|
-1,16,9,7,1,0,0,0,0,64,0,-1--1--1,,1|(157,455)|
-1,17,9,8,1,0,0,0,0,64,0,-1--1--1,,1|(393,524)|
+10,7,ANNUAL CO2 EMISSIONS GOAL,771,212,71,31,8,131,0,0,0,0,0,0,0,0,0,0,0,0
+10,8,annual CO2 emissions gap,631,112,49,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,9,7,8,0,0,0,0,0,64,0,-1--1--1,,1|(700,160)|
+10,11,EFFECT OF NUMBER OF HUBS ON CO2 EMISSIONS PER TON KM,136,359,101,28,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,12,EFFECT OF NUMBER OF HUBS ON TON KM TRAVELLED,525,408,93,28,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,13,Logistics Hubs,300,451,56,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|0||128-128-128,0,0,0,0,0,0
+10,14,INITIAL CO2 EMISSIONS PER TON KM,149,244,61,28,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,15,INITIAL TON KM TRAVELLED,651,340,65,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,16,14,1,0,0,0,0,0,64,0,-1--1--1,,1|(232,249)|
+1,17,11,1,0,0,0,0,0,64,0,-1--1--1,,1|(236,307)|
+1,19,12,2,0,0,0,0,0,64,0,-1--1--1,,1|(513,344)|
+1,20,15,2,0,0,0,0,0,64,0,-1--1--1,,1|(572,308)|
+1,22,13,11,1,0,0,0,0,64,0,-1--1--1,,1|(157,455)|
+1,23,13,12,1,0,0,0,0,64,0,-1--1--1,,1|(393,524)|
+10,24,annual CO2 emissions,460,163,39,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,25,1,24,0,0,0,0,0,64,0,-1--1--1,,1|(387,215)|
+1,26,2,24,0,0,0,0,0,64,0,-1--1--1,,1|(484,233)|
+1,27,24,8,0,0,0,0,0,64,0,-1--1--1,,1|(532,141)|
 \\\---/// Sketch information - do not modify anything except names
 V300  Do not put anything below this section - it will be ignored
 *Output graphs
@@ -276,7 +278,7 @@ Hubs
 12,3,0,996,169,285,152,3,188,0,0,1,0,0,0,0,0,0,0,0,0
 co2
 12,4,0,795,357,80,20,3,124,0,0,0,0,0,0,0,0,0,0,0,0
-CO2 EMISSIONS GOAL,100,1000,10
+ANNUAL CO2 EMISSIONS GOAL,100,1000,10
 12,5,0,791,428,80,20,3,124,0,0,0,0,0,0,0,0,0,0,0,0
 INITIAL CO2 EMISSIONS PER TON KM,0,5,0.1
 12,6,0,793,503,80,20,3,124,0,0,0,0,0,0,0,0,0,0,0,0
@@ -303,19 +305,17 @@ MAXIMUM FUNDS PER YEAR,500,50000,500
 :GRAPH co2
 :TITLE CO2 Emissions
 :SCALE
-:VAR CO2 Emissions
-:VAR CO2 EMISSIONS GOAL
-:SCALE
-:VAR emitting CO2
+:VAR annual CO2 emissions
+:VAR ANNUAL CO2 EMISSIONS GOAL
 :L<%^E!@
 1:CO2EMISSIONS.vdfx
 1:Current_3.vdfx
 1:Current_2.vdfx
 1:Current.vdfx
 4:Time
-5:Logistics Hubs
+5:annual CO2 emissions gap
 9:CO2EMISSIONS
-19:100,1
+19:100,2
 24:0
 25:100
 26:100
