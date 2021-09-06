@@ -1,0 +1,206 @@
+{UTF-8}
+adding funds=
+	MAXIMUM FUNDS PER UNIT OF TIME
+	~	$/Month
+	~		|
+
+adding hubs=
+	IF THEN ELSE(Funds>=BUILDING COST OF HUB*ONE HUB, Funds/BUILDING COST OF HUB/TIME STEP\
+		 , 0)
+	~	Hub/Month
+	~		|
+
+BUILDING COST OF HUB=
+	GET XLS CONSTANTS( 'Exogenous values.xlsx' , 'hubs' , 'B1' )
+	~	$/Hub
+	~		|
+
+MAXIMUM FUNDS PER UNIT OF TIME=
+	GET XLS CONSTANTS( 'Exogenous values.xlsx' , 'hubs' , 'B2' )
+	~	$/Month
+	~		|
+
+ONE HUB=
+	1
+	~	Hub
+	~		|
+
+share of companies that use the hub=
+	Company adopters/TOTAL NUMBER OF COMPANIES
+	~	Dmnl
+	~		|
+
+Hubs= INTEG (
+	adding hubs,
+		0)
+	~	Hub
+	~		|
+
+using funds=
+	BUILDING COST OF HUB*adding hubs
+	~	$/Month
+	~		|
+
+Funds= INTEG (
+	adding funds-using funds,
+		0)
+	~	$
+	~		|
+
+Company adopters= INTEG (
+	Company adoption rate,
+		1)
+	~	company
+	~		|
+
+COMPANY ADOPTION FRACTION=
+	GET XLS CONSTANTS('Exogenous values.xlsx', 'company' ,'B3')
+	~	Dmnl
+	~		|
+
+Company adoption rate=
+	Company potential adopters*COMPANY ADOPTION FRACTION*COMPANY CONTACT RATE*(Company adopters\
+		/TOTAL NUMBER OF COMPANIES)
+	~	company/Month
+	~		|
+
+COMPANY CONTACT RATE=
+	GET XLS CONSTANTS('Exogenous values.xlsx', 'company' ,'B2')
+	~	Dmnl/Month
+	~		|
+
+Company potential adopters= INTEG (
+	-Company adoption rate,
+		TOTAL NUMBER OF COMPANIES)
+	~	company
+	~		|
+
+TOTAL NUMBER OF COMPANIES=
+	GET XLS CONSTANTS('Exogenous values.xlsx', 'company' ,'B1')
+	~	company
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 100
+	~	Month
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Month
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Month [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 1
+	~	Month [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*company
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|72,72,100,0
+10,1,Company potential adopters,256,324,40,20,3,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,2,Company adopters,564,319,40,20,3,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,3,5,2,4,0,0,22,0,0,0,-1--1--1,,1|(472,320)|
+1,4,5,1,100,0,0,22,0,0,0,-1--1--1,,1|(352,320)|
+11,5,200,412,320,8,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,6,Company adoption rate,412,336,59,8,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,7,1,6,1,0,0,0,0,64,0,-1--1--1,,1|(317,372)|
+1,8,2,6,1,0,0,0,0,64,0,-1--1--1,,1|(481,379)|
+10,9,TOTAL NUMBER OF COMPANIES,296,208,49,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,10,9,1,0,0,0,0,0,64,1,-1--1--1,,1|(280,257)|
+10,11,COMPANY CONTACT RATE,413,207,48,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,12,COMPANY ADOPTION FRACTION,532,231,33,21,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,13,9,6,1,0,0,0,0,64,0,-1--1--1,,1|(352,272)|
+1,14,11,6,0,0,0,0,0,64,0,-1--1--1,,1|(412,268)|
+1,15,12,6,0,0,0,0,0,64,0,-1--1--1,,1|(469,285)|
+10,16,share of companies that use the hub,697,140,52,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,17,9,16,1,0,0,0,0,64,0,-1--1--1,,1|(420,127)|
+1,18,2,16,1,0,0,0,0,64,0,-1--1--1,,1|(703,276)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*hubs
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|72,72,100,0
+10,1,Funds,364,227,40,20,3,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,2,48,187,224,12,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,4,6,1,4,0,0,22,0,0,0,-1--1--1,,1|(295,224)|
+1,5,6,2,100,0,0,22,0,0,0,-1--1--1,,1|(225,224)|
+11,6,0,260,224,8,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,7,adding funds,260,240,33,8,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,8,48,529,231,12,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,10,12,8,4,0,0,22,0,0,0,-1--1--1,,1|(493,231)|
+1,11,12,1,100,0,0,22,0,0,0,-1--1--1,,1|(429,231)|
+11,12,0,461,231,8,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,13,using funds,461,247,32,8,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,15,Hubs,740,427,40,20,3,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,16,48,536,424,12,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,18,20,15,4,0,0,22,0,0,0,-1--1--1,,1|(664,424)|
+1,19,20,16,100,0,0,22,0,0,0,-1--1--1,,1|(580,424)|
+11,20,0,624,424,8,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,21,adding hubs,624,440,31,8,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,22,1,20,1,0,0,0,0,64,0,-1--1--1,,1|(455,340)|
+1,23,20,13,1,0,0,0,0,64,0,-1--1--1,,1|(569,331)|
+10,24,BUILDING COST OF HUB,697,300,44,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,25,24,20,0,0,0,0,0,64,0,-1--1--1,,1|(660,360)|
+1,26,24,13,0,0,0,0,0,64,0,-1--1--1,,1|(579,272)|
+10,27,MAXIMUM FUNDS PER UNIT OF TIME,143,312,56,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,28,27,7,0,0,0,0,0,64,0,-1--1--1,,1|(200,275)|
+10,29,TIME STEP,552,516,39,8,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|0||128-128-128,0,0,0,0,0,0
+1,30,29,21,0,0,0,0,0,64,0,-1--1--1,,1|(581,484)|
+10,31,ONE HUB,723,367,29,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,32,31,20,0,0,0,0,0,64,0,-1--1--1,,1|(676,393)|
+1,34,15,33,1,0,0,0,0,64,0,-1--1--1,,1|(743,497)|
+///---\\\
+:GRAPH tt
+:TITLE tt
+:SCALE
+:VAR share of companies that use the hub
+:SCALE
+:VAR Hubs
+:L<%^E!@
+1:Innovation diffusion.vdfx
+4:Time
+5:Funds
+9:Innovation diffusion
+19:100,1
+24:0
+25:100
+26:100
+23:0
+15:0,0,0,0,0,0
+27:0,
+34:0,
+42:1
+72:0
+73:0
+35:Date
+36:YYYY-MM-DD
+37:2000
+38:1
+39:1
+40:2
+41:0
+95:0
+96:0
+77:0
+78:0
+93:0
+94:0
+92:0
+91:0
+90:0
+87:0
+75:
+43:
