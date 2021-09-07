@@ -1,4 +1,58 @@
 {UTF-8}
+HUBS LOCATION VARIABLE=
+	GET XLS CONSTANTS('Exogenous values.xlsx', 'cost' , 'B1' )
+	~	Dmnl
+	~		|
+
+increase or decrease in routing and consolidation efficiency=
+	Potential for improving routing and consolidation efficiency*HUBS LOCATION VARIABLE*\
+		share of companies that use the hub
+	*share of demand that goes through the hub/TIME STEP
+	~	Dmnl/Month
+	~		|
+
+INITIAL ROUTING AND CONSOLIDATION EFFICIENCY=
+	GET XLS CONSTANTS('Exogenous values.xlsx', 'cost' , 'B2' )
+	~	Dmnl
+	~		|
+
+effect of the hub=
+	effect of routing and consolidation efficiency-cost of using the hub system
+	~	$/Month
+	~		|
+
+Routing and consolidation efficiency= INTEG (
+	increase or decrease in routing and consolidation efficiency,
+		INITIAL ROUTING AND CONSOLIDATION EFFICIENCY)
+	~	Dmnl
+	~		|
+
+OPERATION COST=
+	GET XLS CONSTANTS('Exogenous values.xlsx', 'cost' , 'B4' )
+	~	$
+	~		|
+
+Potential for improving routing and consolidation efficiency= INTEG (
+	-increase or decrease in routing and consolidation efficiency,
+		1-INITIAL ROUTING AND CONSOLIDATION EFFICIENCY)
+	~	Dmnl
+	~		|
+
+cost of using the hub system=
+	TOTAL OPERATION COST OF ONE HUB*Hubs*share of companies that use the hub
+	~	$/Month
+	~		|
+
+effect of routing and consolidation efficiency=
+	OPERATION COST*increase or decrease in routing and consolidation efficiency
+	~	$/Month
+	~		|
+
+TOTAL OPERATION COST OF ONE HUB=
+	GET XLS CONSTANTS('Exogenous values.xlsx', 'cost' , 'B3' )
+	~	$/Month/Hub
+	~		|
+
 adding funds=
 	MAXIMUM FUNDS PER UNIT OF TIME*gap in share of demand that goes through the hub
 	~	$/Month
@@ -128,7 +182,7 @@ INITIAL TIME  = 0
 	|
 
 SAVEPER  = 
-        TIME STEP 
+        TIME STEP
 	~	Month [0,?]
 	~	The frequency with which output is stored.
 	|
@@ -146,7 +200,7 @@ $192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|72,7
 10,2,Company adopters,564,319,40,20,3,3,0,0,0,0,0,0,0,0,0,0,0,0
 1,3,5,2,4,0,0,22,0,0,0,-1--1--1,,1|(472,320)|
 1,4,5,1,100,0,0,22,0,0,0,-1--1--1,,1|(352,320)|
-11,5,464,412,320,8,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+11,5,684,412,320,8,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
 10,6,Company adoption rate,412,336,59,8,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
 1,7,1,6,1,0,0,0,0,64,0,-1--1--1,,1|(317,372)|
 1,8,2,6,1,0,0,0,0,64,0,-1--1--1,,1|(481,379)|
@@ -192,7 +246,7 @@ $192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|72,7
 1,26,25,17,0,0,0,0,0,64,0,-1--1--1,,1|(584,484)|
 10,27,ONE HUB,723,367,29,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
 1,28,27,16,0,0,0,0,0,64,0,-1--1--1,,1|(676,395)|
-10,29,gap in share of demand that goes through the hub,299,344,63,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|0||128-128-128,0,0,0,0,0,0
+10,29,gap in share of demand that goes through the hub,299,344,63,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128,0,0,0,0,0,0
 1,30,29,6,0,0,0,0,0,64,0,-1--1--1,,1|(280,293)|
 \\\---/// Sketch information - do not modify anything except names
 V300  Do not put anything below this section - it will be ignored
@@ -202,8 +256,8 @@ $192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|72,7
 10,2,total hub system capacity,287,268,39,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
 10,3,SINGLE HUB CAPACITY,224,156,36,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
 10,4,share of demand that goes through the hub,432,288,52,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-10,5,share of companies that use the hub,377,376,52,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|0||128-128-128,0,0,0,0,0,0
-10,6,Hubs,128,265,20,8,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|0||128-128-128,0,0,0,0,0,0
+10,5,share of companies that use the hub,377,376,52,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128,0,0,0,0,0,0
+10,6,Hubs,128,265,20,8,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128,0,0,0,0,0,0
 1,7,3,2,0,0,0,0,0,64,0,-1--1--1,,1|(251,208)|
 1,8,6,2,0,0,0,0,0,64,0,-1--1--1,,1|(191,265)|
 1,9,2,4,0,0,0,0,0,64,0,-1--1--1,,1|(348,275)|
@@ -211,8 +265,43 @@ $192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|72,7
 1,11,1,4,0,0,0,0,0,64,0,-1--1--1,,1|(443,227)|
 10,12,gap in share of demand that goes through the hub,615,308,60,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
 1,13,4,12,0,0,0,0,0,64,0,-1--1--1,,1|(513,296)|
-10,15,GOAL IN SHARE OF DEMAND THAT GOES THRUOGH THE HUB,668,224,64,21,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-1,16,15,12,0,0,0,0,0,64,0,-1--1--1,,1|(641,263)|
+10,14,GOAL IN SHARE OF DEMAND THAT GOES THRUOGH THE HUB,668,224,64,21,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,15,14,12,0,0,0,0,0,64,0,-1--1--1,,1|(641,263)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*cost
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|72,72,100,0
+10,1,cost of using the hub system,691,429,39,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,2,effect of the hub,896,324,40,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,3,HUBS LOCATION VARIABLE,444,149,52,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,4,Routing and consolidation efficiency,620,195,40,28,3,131,0,0,0,0,0,0,0,0,0,0,0,0
+10,5,INITIAL ROUTING AND CONSOLIDATION EFFICIENCY,459,80,67,21,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,6,5,4,1,0,0,0,0,64,1,-1--1--1,,1|(568,101)|
+1,7,8,4,4,0,0,22,0,0,0,-1--1--1,,1|(525,200)|
+11,8,0,467,200,5,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,9,increase or decrease in routing and consolidation efficiency,467,227,59,21,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,10,3,9,0,0,0,0,0,64,0,-1--1--1,,1|(451,179)|
+10,11,share of companies that use the hub,460,359,52,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|0||128-128-128,0,0,0,0,0,0
+10,12,share of demand that goes through the hub,331,328,53,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|0||128-128-128,0,0,0,0,0,0
+1,13,12,9,1,0,0,0,0,64,0,-1--1--1,,1|(401,292)|
+1,14,11,9,1,0,0,0,0,64,0,-1--1--1,,1|(443,305)|
+1,15,11,1,1,0,0,0,0,64,0,-1--1--1,,1|(539,412)|
+10,16,TOTAL OPERATION COST OF ONE HUB,557,516,56,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,17,Hubs,669,557,20,8,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|0||128-128-128,0,0,0,0,0,0
+1,18,16,1,0,0,0,0,0,64,0,-1--1--1,,1|(619,475)|
+1,19,17,1,0,0,0,0,0,64,0,-1--1--1,,1|(677,501)|
+10,20,Potential for improving routing and consolidation efficiency,316,201,47,25,3,131,0,0,0,0,0,0,0,0,0,0,0,0
+1,21,8,20,100,0,0,22,0,0,0,-1--1--1,,1|(413,200)|
+1,22,20,9,1,0,0,0,0,64,0,-1--1--1,,1|(359,243)|
+1,23,5,20,1,0,0,0,0,64,1,-1--1--1,,1|(355,128)|
+1,24,1,2,1,0,0,0,0,64,0,-1--1--1,,1|(827,412)|
+10,25,OPERATION COST,692,263,53,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,26,TIME STEP,536,160,40,8,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|0||128-128-128,0,0,0,0,0,0
+1,27,26,9,0,0,0,0,0,64,0,-1--1--1,,1|(512,184)|
+10,28,effect of routing and consolidation efficiency,708,337,55,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,29,9,28,1,0,0,0,0,64,0,-1--1--1,,1|(588,283)|
+1,30,25,28,0,0,0,0,0,64,0,-1--1--1,,1|(696,295)|
+1,31,28,2,0,0,0,0,0,64,0,-1--1--1,,1|(804,329)|
 ///---\\\
 :GRAPH tt
 :TITLE tt
@@ -221,12 +310,13 @@ $192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|72,7
 :SCALE
 :VAR Hubs
 :L<%^E!@
+1:Innovation diffusion_3.vdfx
 1:Innovation diffusion_2.vdfx
 1:Innovation diffusion.vdfx
 4:Time
-5:Hubs
-9:Innovation diffusion_2
-19:100,1
+5:effect of routing and consolidation efficiency
+9:Innovation diffusion_3
+19:100,3
 24:0
 25:1000
 26:1000
