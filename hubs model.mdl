@@ -13,45 +13,74 @@
 	|
 
 adding funds=
-	MAX(MAXIMUM FUNDS PER YEAR*EFFECT OF GAP ON ADDING FUNDS,minimum funds per year)
+	MAXIMUM FUNDS PER YEAR*EFFECT OF GAP ON ADDING FUNDS
 	~	k$/Year
 	~	Flow of adding funds into the "Funds" stock. This flow is calculated using \
 		the effect of gap on adding funds variable, multiplied by the maximum \
 		funds per year.
 	|
 
+EFFECT OF NUMBER OF HUBS ON CO2 EMISSIONS PER TON KM = WITH LOOKUP (
+	Logistics Hubs,
+		([(0,0)-(100,1)],(0,1),(1,0.957895),(4,0.900877),(7,0.85614),(10,0.83),(30,0.75),(50\
+		,0.7),(100,0.65) ))
+	~	Dmnl
+	~	The number of hubs reduces the CO2 emissions based on a graph function. \
+		Now the function is limited to a maximum number of hubs of 100
+	|
+
+annual CO2 emissions=
+	CO2 emissions per ton km*ton km travelled
+	~	tonCO2eq/Year
+	~		|
+
+annual CO2 emissions gap=
+	(annual CO2 emissions-ANNUAL CO2 EMISSIONS GOAL)/ANNUAL CO2 EMISSIONS GOAL
+	~	Dmnl
+	~		|
+
+ANNUAL CO2 EMISSIONS GOAL=
+	2
+	~	tonCO2eq/Year [1,20,0.1]
+	~		|
+
+INITIAL CO2 EMISSIONS PER TON KM=
+	2
+	~	tonCO2eq/tonkm
+	~		|
+
+INITIAL TON KM TRAVELLED=
+	2
+	~	tonkm/Year
+	~		|
+
+CO2 emissions per ton km=
+	EFFECT OF NUMBER OF HUBS ON CO2 EMISSIONS PER TON KM*INITIAL CO2 EMISSIONS PER TON KM
+	~	tonCO2eq/tonkm
+	~		|
+
+EFFECT OF NUMBER OF HUBS ON TON KM TRAVELLED = WITH LOOKUP (
+	Logistics Hubs,
+		([(0,0)-(100,1)],(0,1),(1,0.957895),(4,0.900877),(7,0.85614),(10,0.83),(30,0.75),(50\
+		,0.7),(100,0.65) ))
+	~	Dmnl
+	~		|
+
+ton km travelled=
+	EFFECT OF NUMBER OF HUBS ON TON KM TRAVELLED*INITIAL TON KM TRAVELLED
+	~	tonkm/Year
+	~		|
+
 dismissing hubs=
-	INTEGER(Logistics Hubs/AVERAGE HUB USAGE TIME)
+	Logistics Hubs/AVERAGE HUB USAGE TIME
 	~	Hub/Year
 	~	Number of hubs that are dismissed, per year. The number is defined based \
 		on the total number of hubs, devided by the average usage time of hubs. No \
 		higher order delay is considered is here.
 	|
 
-minimum funds per year=
-	INTEGER(GOAL NUMBER OF HUBS/AVERAGE HUB USAGE TIME)*COST PER HUB
-	~	k$/Year
-	~	This variable is inserted to check what is the minimum funds needed per \
-		year to satisfy the demand at equilibrium. This means that when the \
-		equilibrium is reached, there will be a number of hubs dismissed, and \
-		these need to be rebuilt. Here it is calculated as money, as it is needed \
-		every year to add a minimum amount of funds to be able to build the \
-		dismissed hub.
-	|
-
-gap in number of hubs=
-	IF THEN ELSE(
-	1-(Logistics Hubs+Hubs in Construction+Funds/COST PER HUB)/GOAL NUMBER OF HUBS>0 ,
-	 1-(Logistics Hubs+Hubs in Construction+Funds/COST PER HUB)/GOAL NUMBER OF HUBS,
-	 0)
-	~	Dmnl
-	~	It represents the percentage of hubs that still needs to be built. This \
-		variable is calculated as a dimentionless variable, because it is \
-		effecting the "effect of gap on adding funds".
-	|
-
 EFFECT OF GAP ON ADDING FUNDS = WITH LOOKUP (
-	gap in number of hubs,
+	annual CO2 emissions gap,
 		([(0,0)-(1,1)],(0,0),(1e-05,0.5),(0.5,0.9),(0.75,0.98),(1,1) ))
 	~	Dmnl
 	~	This variable is a lookup (graphical lookup). It represents the effect of \
@@ -70,7 +99,7 @@ MAXIMUM FUNDS PER YEAR=
 	|
 
 adding hubs=
-	INTEGER(Funds/COST PER HUB/TIME STEP)
+	Funds/COST PER HUB/TIME STEP
 	~	Hub/Year
 	~	Depending on the funds, this flows determins the number of hubs that are \
 		added to the Hubs in Construction stock. The need for a division by a time \
@@ -92,7 +121,7 @@ AVERAGE HUB USAGE TIME=
 	|
 
 completing hubs=
-	INTEGER(Hubs in Construction/AVERAGE HUB CONSTRUCTION TIME)
+	Hubs in Construction/AVERAGE HUB CONSTRUCTION TIME
 	~	Hub/Year
 	~	Number of hubs that are completed, per year. Depends on the number of hubs \
 		that are in construction devided by the average construction time.
@@ -110,15 +139,6 @@ Funds= INTEG (
 	~	k$
 	~	Accumulation of funds available for the construction of hubs. Starts from \
 		0.
-	|
-
-GOAL NUMBER OF HUBS=
-	15
-	~	Hub [1,30,1]
-	~	This is the average number of hubs that is set to be the goal for the \
-		model. The normalized difference between the goal and the number of hubs \
-		in the system influences the number of funds that are added to the funds \
-		stock every year.
 	|
 
 Hubs in Construction= INTEG (
@@ -171,7 +191,7 @@ TIME STEP  = 1
 
 \\\---/// Sketch information - do not modify anything except names
 V300  Do not put anything below this section - it will be ignored
-*View 1
+*Hubs and funds
 $192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|96,96,100,0
 10,1,Logistics Hubs,673,108,40,20,3,3,0,0,0,0,0,0,0,0,0,0,0,0
 10,2,Funds,329,401,40,20,3,3,0,0,0,0,0,0,0,0,0,0,0,0
@@ -191,57 +211,87 @@ $192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|96,9
 11,16,48,436,408,8,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
 10,17,using funds,436,421,35,11,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
 10,18,AVERAGE HUB USAGE TIME,880,216,57,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-10,19,GOAL NUMBER OF HUBS,908,436,60,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-10,20,gap in number of hubs,664,496,56,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-10,21,AVERAGE HUB CONSTRUCTION TIME,612,208,65,28,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-10,22,COST PER HUB,465,261,57,11,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-10,23,Hubs in Construction,413,112,44,20,3,131,0,0,0,0,0,0,0,0,0,0,0,0
-1,24,26,1,4,0,0,22,0,0,0,-1--1--1,,1|(592,112)|
-1,25,26,23,100,0,0,22,0,0,0,-1--1--1,,1|(496,112)|
-11,26,552,540,112,8,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
-10,27,completing hubs,540,127,51,11,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
-12,28,48,216,116,12,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,29,31,23,4,0,0,22,0,0,0,-1--1--1,,1|(337,116)|
-1,30,31,28,100,0,0,22,0,0,0,-1--1--1,,1|(257,116)|
-11,31,48,297,116,8,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
-10,32,adding hubs,297,129,40,11,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,33,22,32,1,0,0,0,0,64,0,-1--1--1,,1|(404,175)|
-1,34,2,32,1,0,0,0,0,64,0,-1--1--1,,1|(223,252)|
-1,35,21,27,0,0,0,0,0,64,0,-1--1--1,,1|(573,163)|
-1,36,23,27,1,0,0,0,0,64,0,-1--1--1,,1|(491,168)|
-1,37,18,12,0,0,0,0,0,64,0,-1--1--1,,1|(836,171)|
-1,38,1,12,1,0,0,0,0,64,0,-1--1--1,,1|(733,176)|
-10,39,TIME STEP,227,29,52,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128,0,0,0,0,0,0
-1,40,39,32,0,0,0,0,0,64,0,-1--1--1,,1|(257,73)|
-1,41,32,16,1,0,0,0,0,64,0,-1--1--1,,1|(300,269)|
-1,42,22,16,1,0,0,0,0,64,0,-1--1--1,,1|(479,348)|
-1,43,19,20,0,0,0,0,0,64,0,-1--1--1,,1|(792,464)|
-1,44,1,20,1,0,0,0,0,64,0,-1--1--1,,1|(692,288)|
-10,45,MAXIMUM FUNDS PER YEAR,112,511,68,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-10,46,EFFECT OF GAP ON ADDING FUNDS,403,553,76,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-1,47,20,46,1,0,0,0,0,64,0,-1--1--1,,1|(564,544)|
-1,48,46,7,1,0,0,0,0,64,0,-1--1--1,,1|(276,512)|
-1,49,45,7,0,0,0,0,0,64,0,-1--1--1,,1|(159,469)|
-12,50,0,1179,135,152,152,3,44,0,0,1,0,0,0,0,0,0,0,0,0
+10,19,AVERAGE HUB CONSTRUCTION TIME,612,208,65,28,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,20,COST PER HUB,465,261,57,11,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,21,Hubs in Construction,413,112,44,20,3,131,0,0,0,0,0,0,0,0,0,0,0,0
+1,22,24,1,4,0,0,22,0,0,0,-1--1--1,,1|(592,112)|
+1,23,24,21,100,0,0,22,0,0,0,-1--1--1,,1|(496,112)|
+11,24,530,540,112,8,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,25,completing hubs,540,127,51,11,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,26,48,216,116,12,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,27,29,21,4,0,0,22,0,0,0,-1--1--1,,1|(337,116)|
+1,28,29,26,100,0,0,22,0,0,0,-1--1--1,,1|(257,116)|
+11,29,48,297,116,8,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,30,adding hubs,297,129,40,11,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,31,20,30,1,0,0,0,0,64,0,-1--1--1,,1|(404,175)|
+1,32,2,30,1,0,0,0,0,64,0,-1--1--1,,1|(223,252)|
+1,33,19,25,0,0,0,0,0,64,0,-1--1--1,,1|(573,164)|
+1,34,21,25,1,0,0,0,0,64,0,-1--1--1,,1|(491,168)|
+1,35,18,12,0,0,0,0,0,64,0,-1--1--1,,1|(835,172)|
+1,36,1,12,1,0,0,0,0,64,0,-1--1--1,,1|(733,176)|
+10,37,TIME STEP,227,29,52,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128,0,0,0,0,0,0
+1,38,37,30,0,0,0,0,0,64,0,-1--1--1,,1|(257,73)|
+1,39,30,16,1,0,0,0,0,64,0,-1--1--1,,1|(300,269)|
+1,40,20,16,1,0,0,0,0,64,0,-1--1--1,,1|(479,348)|
+10,41,MAXIMUM FUNDS PER YEAR,112,511,68,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,42,EFFECT OF GAP ON ADDING FUNDS,403,553,76,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,43,42,7,1,0,0,0,0,64,0,-1--1--1,,1|(276,512)|
+1,44,41,7,0,0,0,0,0,64,0,-1--1--1,,1|(159,472)|
+12,45,0,1253,91,152,152,3,44,0,0,1,0,0,0,0,0,0,0,0,0
 Funds
-12,51,0,1180,439,152,152,3,44,0,0,1,0,0,0,0,0,0,0,0,0
+12,46,0,1253,397,152,152,3,44,0,0,1,0,0,0,0,0,0,0,0,0
 Hubs
-1,52,23,20,1,0,0,0,0,64,0,-1--1--1,,1|(568,277)|
-1,53,2,20,1,0,0,0,0,64,0,-1--1--1,,1|(476,484)|
-1,54,22,20,1,0,0,0,0,64,0,-1--1--1,,1|(585,416)|
-10,55,minimum funds per year,123,328,47,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-1,56,55,6,0,0,0,0,0,64,0,-1--1--1,,1|(167,367)|
-10,57,AVERAGE HUB USAGE TIME,56,259,64,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128,0,0,0,0,0,0
-10,58,GOAL NUMBER OF HUBS,169,224,65,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128,0,0,0,0,0,0
-1,59,58,55,0,0,0,0,0,64,0,-1--1--1,,1|(148,269)|
-1,60,57,55,0,0,0,0,0,64,0,-1--1--1,,1|(84,288)|
-1,61,22,55,0,0,0,0,0,64,0,-1--1--1,,1|(296,293)|
+10,47,annual CO2 emissions gap,712,521,56,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|0||128-128-128,0,0,0,0,0,0
+1,48,47,42,1,0,0,0,0,64,0,-1--1--1,,1|(572,569)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*co2 emissions
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|96,96,100,0
+10,1,CO2 emissions per ton km,329,259,61,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,2,ton km travelled,503,283,51,11,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,7,ANNUAL CO2 EMISSIONS GOAL,771,212,71,31,8,131,0,0,0,0,0,0,0,0,0,0,0,0
+10,8,annual CO2 emissions gap,631,112,49,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,9,7,8,0,0,0,0,0,64,0,-1--1--1,,1|(700,160)|
+10,11,EFFECT OF NUMBER OF HUBS ON CO2 EMISSIONS PER TON KM,136,359,101,28,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,12,EFFECT OF NUMBER OF HUBS ON TON KM TRAVELLED,525,408,93,28,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,13,Logistics Hubs,300,451,56,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|0||128-128-128,0,0,0,0,0,0
+10,14,INITIAL CO2 EMISSIONS PER TON KM,149,244,61,28,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,15,INITIAL TON KM TRAVELLED,651,340,65,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,16,14,1,0,0,0,0,0,64,0,-1--1--1,,1|(232,249)|
+1,17,11,1,0,0,0,0,0,64,0,-1--1--1,,1|(236,307)|
+1,19,12,2,0,0,0,0,0,64,0,-1--1--1,,1|(513,344)|
+1,20,15,2,0,0,0,0,0,64,0,-1--1--1,,1|(572,308)|
+1,22,13,11,1,0,0,0,0,64,0,-1--1--1,,1|(157,455)|
+1,23,13,12,1,0,0,0,0,64,0,-1--1--1,,1|(393,524)|
+10,24,annual CO2 emissions,460,163,39,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,25,1,24,0,0,0,0,0,64,0,-1--1--1,,1|(387,215)|
+1,26,2,24,0,0,0,0,0,64,0,-1--1--1,,1|(484,233)|
+1,27,24,8,0,0,0,0,0,64,0,-1--1--1,,1|(532,141)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Output graphs
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|96,96,100,0
+12,1,0,240,169,152,152,3,44,0,0,1,0,0,0,0,0,0,0,0,0
+Funds
+12,2,0,548,168,152,152,3,44,0,0,1,0,0,0,0,0,0,0,0,0
+Hubs
+12,3,0,996,169,285,152,3,188,0,0,1,0,0,0,0,0,0,0,0,0
+co2
+12,4,0,795,357,80,20,3,124,0,0,0,0,0,0,0,0,0,0,0,0
+ANNUAL CO2 EMISSIONS GOAL,100,1000,10
+12,5,0,791,428,80,20,3,124,0,0,0,0,0,0,0,0,0,0,0,0
+INITIAL CO2 EMISSIONS PER TON KM,0,5,0.1
+12,6,0,793,503,80,20,3,124,0,0,0,0,0,0,0,0,0,0,0,0
+INITIAL TON KM TRAVELLED,0,5,0.1
+12,7,0,488,364,80,20,3,124,0,0,0,0,0,0,0,0,0,0,0,0
+AVERAGE HUB USAGE TIME,5,50,1
+12,8,0,172,363,80,20,3,124,0,0,0,0,0,0,0,0,0,0,0,0
+MAXIMUM FUNDS PER YEAR,500,50000,500
 ///---\\\
 :GRAPH Hubs
 :TITLE Hubs
 :SCALE
 :VAR Logistics Hubs
-:VAR GOAL NUMBER OF HUBS
 :VAR Hubs in Construction
 
 :GRAPH Funds
@@ -251,23 +301,27 @@ Hubs
 :VAR MAXIMUM FUNDS PER YEAR
 :SCALE
 :VAR Funds
+
+:GRAPH co2
+:TITLE CO2 Emissions
+:SCALE
+:VAR annual CO2 emissions
+:VAR ANNUAL CO2 EMISSIONS GOAL
 :L<%^E!@
-1:Current_0802_1.vdfx
-1:Current_0802_.vdfx
-1:Current_0802.vdfx
-1:Current_goal2.vdfx
-1:Current_goal.vdfx
+1:CO2EMISSIONS.vdfx
+1:Current_3.vdfx
+1:Current_2.vdfx
 1:Current.vdfx
 4:Time
-5:minimum funds per year
-9:Current_0802_1
-19:100,0
+5:annual CO2 emissions gap
+9:CO2EMISSIONS
+19:100,2
 24:0
 25:100
 26:100
 23:0
 15:0,0,0,0,0,0
-27:1,
+27:0,
 34:0,
 42:1
 72:0

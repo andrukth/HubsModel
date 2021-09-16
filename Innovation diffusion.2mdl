@@ -1,0 +1,528 @@
+{UTF-8}
+cost of using the hub system=
+	TOTAL OPERATION COST OF ONE HUB*Hubs/(share of companies that use the hub*TOTAL NUMBER OF COMPANIES\
+		)
+	~	$/(Month*company)
+	~		|
+
+adding funds=
+	IF THEN ELSE(utilization rate of hubs<MINIMUM UTILIZATION RATE, 0, MAXIMUM FUNDS PER UNIT OF TIME\
+		*gap of CO2 emissions)
+	~	$/Month
+	~	This variable accounts for the process of adding funds from the public \
+		sector to the system. Every time step, if the hubs utilization rate is \
+		higher than the minimum utilization rate, then a certain amount of funds \
+		is added. If the utilization rate is low, no funds are added (in this way, \
+		if the infrastructure is unutilized, no extra infrastructure is built). \
+		The exact amount depends on the gap of CO2 emissions. In this way, the \
+		larger the gap, the higher the amount of funds that go into the system.
+	|
+
+emissions=
+	EMISSIONS OF ENVIRONMENTALLY FRIENDLY VEHICLE TYPES*TOTAL DEMAND*share of demand that goes through the hub\
+		/Routing and consolidation efficiency
+	 +
+	EMISSIONS OF DIESEL TRUCKS*TOTAL DEMAND*(1-share of demand that goes through the hub\
+		)/INITIAL ROUTING AND CONSOLIDATION EFFICIENCY
+	~	CO2
+	~	The operational emissions are calculated as follows: 1) emissions coming \
+		from the environmentally friendly deliveries, assuming that the whole \
+		demand that goes through the hub is carred out through those vehicles, \
+		according to this emission value that is exogenous, and according to the \
+		routing and consolidation efficiency, to account for the fact that hubs \
+		also improve the efficiency; 2) emissions coming from diesel trucks, \
+		assuming that the rest of the demand is carried out by those vehicles, \
+		according to the emission value that is exogenous, and according to the \
+		initial rounting and consolidation efficiency, assuming that these \
+		deliveries have an unchanged value of efficiency.
+	|
+
+EMISSIONS OF DIESEL TRUCKS=
+	GET XLS CONSTANTS('Exogenous values.xlsx', 'emissions', 'B1' )
+	~	CO2/Box
+	~	Exogenous value that represents the emissions associated with the \
+		transport via a diesel truck of one box to the customer.
+	|
+
+EMISSIONS OF ENVIRONMENTALLY FRIENDLY VEHICLE TYPES=
+	GET XLS CONSTANTS('Exogenous values.xlsx', 'emissions', 'B2' )
+	~	CO2/Box
+	~	Exogenous value that represents the emissions associated with the \
+		transport via an environmentally friendly vehicle of one box to the \
+		customer.
+	|
+
+GOAL OF CO2 EMISSIONS=
+	GET XLS CONSTANTS('Exogenous values.xlsx', 'emissions', 'B3' )
+	~	CO2
+	~	Exogenous value that represents the goal of CO2 emissions for this system.
+	|
+
+MINIMUM UTILIZATION RATE=
+	GET XLS CONSTANTS('Exogenous values.xlsx','hubs','B3')
+	~	Dmnl
+	~	Exogenous value that represents the minimum utilization rate of the hub \
+		system. The utilization rate represents how full the hub is (i.e., how \
+		much demand goes through the hubs compared with the overall capacity of \
+		the hubs system). This minimum value is used to trigger the addition of \
+		funds to the system. When this minimum value is reached, the public sector \
+		can justify the addition of hubs.
+	|
+
+demand that goes through the hub=
+	TOTAL DEMAND*share of demand that goes through the hub
+	~	Box
+	~	This variable represents the demand in boxes that goes through the hub.
+	|
+
+gap of CO2 emissions=
+	IF THEN ELSE((emissions-GOAL OF CO2 EMISSIONS)/GOAL OF CO2 EMISSIONS<0, 0, (emissions\
+		-GOAL OF CO2 EMISSIONS)/GOAL OF CO2 EMISSIONS)
+	~	Dmnl
+	~	This value represents the gap between the emissions of the system and the \
+		goal of emissions. This is used to determine how much funds the public \
+		sector adds to the system. An IF THEN ELSE structure is needed because it \
+		could happen in the system that a lower value is reached, and this cannot \
+		trigger "negative" funds.
+	|
+
+utilization rate of hubs=
+	IF THEN ELSE(total hub system capacity=0, 1, demand that goes through the hub/total hub system capacity\
+		)
+	~	Dmnl
+	~	The utilization rate represents how full the hub is (i.e., how much demand \
+		goes through the hubs compared with the overall capacity of the hubs \
+		system). It is therefore calculated as a division between the demand that \
+		goes through the hub and the total hub system capacity. An IF THEN ELSE \
+		structure is needed because otherwise at time 0, when the total hub system \
+		capacity is 0, there is a division by 0 error.
+	|
+
+INITIAL PUSH TIME=
+	GET XLS CONSTANTS('Exogenous values.xlsx', 'company' , 'B4' )
+	~	Month
+	~	Exogenous value that represents the number of months in which initially \
+		the companies are "pushed" to join the hub. It could represent for example \
+		a pilot study or something similar, that is used to kick off the hub \
+		system and show the transport companies the value of joining the hubs.
+	|
+
+Company adoption rate=
+	Company potential adopters*company adoption fraction*COMPANY CONTACT RATE*(Company adopters\
+		/TOTAL NUMBER OF COMPANIES)
+	~	company/Month
+	~	The company adoption rate is calculated using the innovation diffusion \
+		theory. It represents the rate at which companies, from being potential \
+		adopters, become adopters.
+	|
+
+operation cost with hubs=
+	MINIMUM OPERATION COST/Routing and consolidation efficiency
+	~	$/(Month*company)
+	~	The operation cost with hubs is the cost of deliveries when they go \
+		through the hub system. It is calculated taking a minimum operation cost \
+		and dividing it by the efficiency. In this way, the more demand goes \
+		through the hub, the more efficient the system becomes, and therefore the \
+		lower the cost of deliveries. It is calculated as an average cost per \
+		month.
+	|
+
+operation cost without hubs=
+	MINIMUM OPERATION COST/INITIAL ROUTING AND CONSOLIDATION EFFICIENCY
+	~	$/(Month*company)
+	~	The operation cost without hubs is the cost of deliveries when they do not \
+		go through the hub system. It is calculated taking a minimum operation \
+		cost and dividing it by the initial efficiency. This cost is fixed and \
+		does not change throughout the simulation.
+	|
+
+company adoption fraction=
+	IF THEN ELSE(Time<INITIAL PUSH TIME, INITIAL COMPANY ADOPTION FRACTION, monetary value\
+		/operation cost without hubs)
+	~	Dmnl
+	~	This variable is used in the innovation diffusion to understand how many \
+		companies adopt the innovation (i.e., participate in the hubs). During the \
+		first part of the model (until time=INITIAL PUSH TIME) the adoption \
+		fraction is fixed to INITIAL COMPANY ADOPTION FRACTION. After this initial \
+		time, the adoption fraction is calculated by dividing the monetary value \
+		of the hubs by the operation cost without hubs.
+	|
+
+increase in routing and consolidation efficiency=
+	Potential for improving routing and consolidation efficiency*HUBS LOCATION VARIABLE
+	*share of demand that goes through the hub/TIME STEP
+	~	Dmnl/Month
+	~	This is the rate at which the routing and consolidation efficiency \
+		increases over time. For now, it is connected to the hubs location \
+		variable (that is exogenous) and to the share of demand that goes through \
+		the hub. In this way, the more demand goes through the hub, the higher the \
+		increase. However, here it would be best to instead have it so that it \
+		increases with the increase in demand that goes through the hub, to have a \
+		co-flow in the model. This however would require that the share of demand \
+		is a stock and flow structure.
+	|
+
+cost benefit from routing and consolidation efficiency=
+	operation cost without hubs-operation cost with hubs
+	~	$/(Month*company)
+	~	This is the cost benefit that the company has by joining the hub in terms \
+		of routing and consolidation efficiency. It compares the cost without hubs \
+		and the cost with hubs.
+	|
+
+INITIAL COMPANY ADOPTION FRACTION=
+	GET XLS CONSTANTS('Exogenous values.xlsx', 'company' ,'B3')
+	~	Dmnl
+	~		|
+
+HUBS LOCATION VARIABLE=
+	GET XLS CONSTANTS('Exogenous values.xlsx', 'cost' , 'B1' )
+	~	Dmnl
+	~		|
+
+INITIAL ROUTING AND CONSOLIDATION EFFICIENCY=
+	GET XLS CONSTANTS('Exogenous values.xlsx', 'cost' , 'B2' )
+	~	Dmnl
+	~		|
+
+monetary value=
+	cost benefit from routing and consolidation efficiency-cost of using the hub system
+	~	$/(Month*company)
+	~		|
+
+Routing and consolidation efficiency= INTEG (
+	increase in routing and consolidation efficiency,
+		INITIAL ROUTING AND CONSOLIDATION EFFICIENCY)
+	~	Dmnl
+	~		|
+
+MINIMUM OPERATION COST=
+	GET XLS CONSTANTS('Exogenous values.xlsx', 'cost' , 'B4' )
+	~	$/(Month*company)
+	~		|
+
+Potential for improving routing and consolidation efficiency= INTEG (
+	-increase in routing and consolidation efficiency,
+		1-INITIAL ROUTING AND CONSOLIDATION EFFICIENCY)
+	~	Dmnl
+	~		|
+
+TOTAL OPERATION COST OF ONE HUB=
+	GET XLS CONSTANTS('Exogenous values.xlsx', 'cost' , 'B3' )
+	~	$/Month/Hub
+	~		|
+
+SINGLE HUB CAPACITY=
+	GET XLS CONSTANTS( 'Exogenous values.xlsx' , 'demand' , 'B2' )
+	~	Box/Hub
+	~		|
+
+TOTAL DEMAND=
+	GET XLS CONSTANTS( 'Exogenous values.xlsx' , 'demand' , 'B1' )
+	~	Box
+	~		|
+
+total hub system capacity=
+	Hubs*SINGLE HUB CAPACITY
+	~	Box
+	~		|
+
+share of demand that goes through the hub=
+	IF THEN ELSE( total hub system capacity*share of companies that use the hub > TOTAL DEMAND\
+		, 1, (total hub system capacity*share of companies that use the hub)/TOTAL DEMAND)
+	~	Dmnl
+	~		|
+
+adding hubs=
+	IF THEN ELSE(Funds>=BUILDING COST OF HUB*ONE HUB, INTEGER(Funds/BUILDING COST OF HUB\
+		/TIME STEP) , 0)
+	~	Hub/Month
+	~		|
+
+BUILDING COST OF HUB=
+	GET XLS CONSTANTS( 'Exogenous values.xlsx' , 'hubs' , 'B1' )
+	~	$/Hub
+	~		|
+
+MAXIMUM FUNDS PER UNIT OF TIME=
+	GET XLS CONSTANTS( 'Exogenous values.xlsx' , 'hubs' , 'B2' )
+	~	$/Month
+	~		|
+
+ONE HUB=
+	1
+	~	Hub
+	~		|
+
+share of companies that use the hub=
+	Company adopters/TOTAL NUMBER OF COMPANIES
+	~	Dmnl
+	~		|
+
+Hubs= INTEG (
+	adding hubs,
+		0)
+	~	Hub
+	~		|
+
+using funds=
+	BUILDING COST OF HUB*adding hubs
+	~	$/Month
+	~		|
+
+Funds= INTEG (
+	adding funds-using funds,
+		0)
+	~	$
+	~		|
+
+Company adopters= INTEG (
+	Company adoption rate,
+		1)
+	~	company
+	~		|
+
+COMPANY CONTACT RATE=
+	GET XLS CONSTANTS('Exogenous values.xlsx', 'company' ,'B2')
+	~	Dmnl/Month
+	~		|
+
+Company potential adopters= INTEG (
+	-Company adoption rate,
+		TOTAL NUMBER OF COMPANIES-1)
+	~	company
+	~		|
+
+TOTAL NUMBER OF COMPANIES=
+	GET XLS CONSTANTS('Exogenous values.xlsx', 'company' ,'B1')
+	~	company
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 500
+	~	Month
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Month
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Month [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 1
+	~	Month [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*company
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|72,72,100,0
+10,1,Company potential adopters,256,197,40,20,3,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,2,Company adopters,564,191,40,20,3,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,3,5,2,4,0,0,22,0,0,0,-1--1--1,,1|(472,193)|
+1,4,5,1,100,0,0,22,0,0,0,-1--1--1,,1|(352,193)|
+11,5,794,412,193,8,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,6,Company adoption rate,412,209,59,8,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,7,1,6,1,0,0,0,0,64,0,-1--1--1,,1|(320,232)|
+1,8,2,6,1,0,0,0,0,64,0,-1--1--1,,1|(497,240)|
+10,9,TOTAL NUMBER OF COMPANIES,239,124,49,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,10,9,1,0,0,0,0,0,64,1,-1--1--1,,1|(245,153)|
+10,11,COMPANY CONTACT RATE,452,125,48,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,12,company adoption fraction,489,308,33,21,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,13,9,6,1,0,0,0,0,64,0,-1--1--1,,1|(340,137)|
+1,14,11,6,0,0,0,0,0,64,0,-1--1--1,,1|(432,168)|
+10,15,share of companies that use the hub,465,44,52,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,16,9,15,1,0,0,0,0,64,0,-1--1--1,,1|(328,47)|
+1,17,2,15,1,0,0,0,0,64,0,-1--1--1,,1|(552,100)|
+10,18,monetary value,587,407,43,8,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128,0,0,0,0,0,0
+10,19,INITIAL PUSH TIME,689,323,40,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,20,Time,639,351,20,8,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128,0,0,0,0,0,0
+1,21,12,6,1,0,0,0,0,64,0,-1--1--1,,1|(428,252)|
+1,22,19,12,1,0,0,0,0,64,0,-1--1--1,,1|(599,288)|
+1,23,20,12,1,0,0,0,0,64,0,-1--1--1,,1|(580,332)|
+1,24,18,12,1,0,0,0,0,64,0,-1--1--1,,1|(521,380)|
+10,25,INITIAL COMPANY ADOPTION FRACTION,688,252,65,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,26,25,12,1,0,0,0,0,64,0,-1--1--1,,1|(556,245)|
+10,27,operation cost without hubs,456,407,40,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128,0,0,0,0,0,0
+1,28,27,12,1,0,0,0,0,64,0,-1--1--1,,1|(443,349)|
+12,29,0,1032,256,113,113,3,44,0,0,1,0,0,0,0,0,0,0,0,0
+tt
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*hubs
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|72,72,100,0
+10,1,Funds,404,151,40,20,3,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,2,48,225,148,8,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,3,5,1,4,0,0,22,0,0,0,-1--1--1,,1|(335,148)|
+1,4,5,2,100,0,0,22,0,0,0,-1--1--1,,1|(261,148)|
+11,5,48,299,148,8,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,6,adding funds,299,164,33,8,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,7,48,567,155,8,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,8,10,7,4,0,0,22,0,0,0,-1--1--1,,1|(533,155)|
+1,9,10,1,100,0,0,22,0,0,0,-1--1--1,,1|(467,155)|
+11,10,48,500,155,8,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,11,using funds,500,172,32,8,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,12,Hubs,693,316,40,20,3,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,13,48,489,311,8,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,14,16,12,4,0,0,22,0,0,0,-1--1--1,,1|(620,311)|
+1,15,16,13,100,0,0,22,0,0,0,-1--1--1,,1|(533,311)|
+11,16,48,580,311,8,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,17,adding hubs,580,327,31,8,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,18,1,16,1,0,0,0,0,64,0,-1--1--1,,1|(460,239)|
+1,19,16,11,1,0,0,0,0,64,0,-1--1--1,,1|(572,247)|
+10,20,BUILDING COST OF HUB,704,188,44,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,21,20,16,0,0,0,0,0,64,0,-1--1--1,,1|(639,251)|
+1,22,20,11,0,0,0,0,0,64,0,-1--1--1,,1|(600,180)|
+10,23,MAXIMUM FUNDS PER UNIT OF TIME,176,223,56,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,24,23,6,0,0,0,0,0,64,0,-1--1--1,,1|(239,192)|
+10,25,TIME STEP,508,403,39,8,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128,0,0,0,0,0,0
+1,26,25,17,0,0,0,0,0,64,0,-1--1--1,,1|(537,368)|
+10,27,ONE HUB,680,256,29,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,28,27,16,0,0,0,0,0,64,0,-1--1--1,,1|(629,283)|
+10,29,gap of CO2 emissions,335,255,33,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128,0,0,0,0,0,0
+1,30,29,6,0,0,0,0,0,64,0,-1--1--1,,1|(317,212)|
+10,31,MINIMUM UTILIZATION RATE,191,57,56,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,32,utilization rate of hubs,308,44,43,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128,0,0,0,0,0,0
+1,33,32,5,0,0,0,0,0,64,0,-1--1--1,,1|(303,95)|
+1,34,31,5,0,0,0,0,0,64,0,-1--1--1,,1|(248,104)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*demand
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|72,72,100,0
+10,1,TOTAL DEMAND,677,219,27,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,2,total hub system capacity,344,268,39,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,3,SINGLE HUB CAPACITY,212,155,36,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,4,share of demand that goes through the hub,515,292,52,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,5,share of companies that use the hub,493,400,52,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128,0,0,0,0,0,0
+10,6,Hubs,176,292,20,8,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128,0,0,0,0,0,0
+1,7,3,2,0,0,0,0,0,64,0,-1--1--1,,1|(272,207)|
+1,8,6,2,0,0,0,0,0,64,0,-1--1--1,,1|(243,281)|
+1,9,2,4,0,0,0,0,0,64,0,-1--1--1,,1|(417,276)|
+1,10,5,4,0,0,0,0,0,64,0,-1--1--1,,1|(503,348)|
+1,11,1,4,0,0,0,0,0,64,0,-1--1--1,,1|(603,251)|
+10,12,demand that goes through the hub,537,145,44,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,13,1,12,0,0,0,0,0,64,0,-1--1--1,,1|(611,184)|
+1,14,4,12,0,0,0,0,0,64,0,-1--1--1,,1|(524,224)|
+10,15,utilization rate of hubs,364,141,39,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,16,2,15,0,0,0,0,0,64,0,-1--1--1,,1|(352,208)|
+1,17,12,15,0,0,0,0,0,64,0,-1--1--1,,1|(452,143)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*cost
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|72,72,100,0
+10,1,cost of using the hub system,665,404,39,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,2,monetary value,848,432,40,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,3,HUBS LOCATION VARIABLE,403,121,52,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,4,Routing and consolidation efficiency,595,172,40,28,3,131,0,0,0,0,0,0,0,0,0,0,0,0
+10,5,INITIAL ROUTING AND CONSOLIDATION EFFICIENCY,419,53,67,21,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,6,5,4,1,0,0,0,0,64,1,-1--1--1,,1|(540,68)|
+1,7,8,4,4,0,0,22,0,0,0,-1--1--1,,1|(497,176)|
+11,8,508,435,176,5,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,9,increase in routing and consolidation efficiency,435,205,59,21,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,10,3,9,0,0,0,0,0,64,0,-1--1--1,,1|(416,155)|
+10,11,share of companies that use the hub,507,360,52,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128,0,0,0,0,0,0
+10,12,share of demand that goes through the hub,448,272,53,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128,0,0,0,0,0,0
+1,13,12,9,1,0,0,0,0,64,0,-1--1--1,,1|(443,239)|
+1,14,11,1,1,0,0,0,0,64,0,-1--1--1,,1|(563,389)|
+10,15,TOTAL OPERATION COST OF ONE HUB,515,480,56,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,16,Hubs,641,521,20,8,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128,0,0,0,0,0,0
+1,17,15,1,0,0,0,0,0,64,0,-1--1--1,,1|(585,443)|
+1,18,16,1,0,0,0,0,0,64,0,-1--1--1,,1|(651,471)|
+10,19,Potential for improving routing and consolidation efficiency,292,176,47,25,3,131,0,0,0,0,0,0,0,0,0,0,0,0
+1,20,8,19,100,0,0,22,0,0,0,-1--1--1,,1|(384,176)|
+1,21,19,9,1,0,0,0,0,64,0,-1--1--1,,1|(329,224)|
+1,22,5,19,1,0,0,0,0,64,1,-1--1--1,,1|(323,104)|
+1,23,1,2,1,0,0,0,0,64,0,-1--1--1,,1|(752,452)|
+10,24,MINIMUM OPERATION COST,712,145,53,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,25,TIME STEP,508,136,40,8,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128,0,0,0,0,0,0
+1,26,25,9,0,0,0,0,0,64,0,-1--1--1,,1|(484,160)|
+10,27,cost benefit from routing and consolidation efficiency,793,320,67,21,8,131,0,0,0,0,0,0,0,0,0,0,0,0
+1,28,27,2,1,0,0,0,0,64,0,-1--1--1,,1|(881,384)|
+10,29,operation cost without hubs,833,205,35,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,30,5,29,1,0,0,0,0,64,0,-1--1--1,,1|(705,61)|
+1,31,24,29,1,0,0,0,0,64,0,-1--1--1,,1|(763,197)|
+10,32,operation cost with hubs,680,233,35,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,33,4,32,1,0,0,0,0,64,0,-1--1--1,,1|(607,236)|
+1,34,24,32,1,0,0,0,0,64,0,-1--1--1,,1|(716,193)|
+1,35,29,27,1,0,0,0,0,64,0,-1--1--1,,1|(821,252)|
+1,36,32,27,1,0,0,0,0,64,0,-1--1--1,,1|(719,289)|
+12,37,0,1049,199,113,113,3,44,0,0,1,0,0,0,0,0,0,0,0,0
+tt
+10,38,TOTAL NUMBER OF COMPANIES,587,329,51,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|0||128-128-128,0,0,0,0,0,0
+1,39,38,1,1,0,0,0,0,64,0,-1--1--1,,1|(625,352)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*emissions
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|72,72,100,0
+10,1,share of demand that goes through the hub,679,387,53,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128,0,0,0,0,0,0
+10,2,Routing and consolidation efficiency,288,548,59,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128,0,0,0,0,0,0
+10,3,EMISSIONS OF DIESEL TRUCKS,179,304,47,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,4,EMISSIONS OF ENVIRONMENTALLY FRIENDLY VEHICLE TYPES,128,361,77,21,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,5,emissions,428,409,23,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,6,3,5,0,0,0,0,0,64,0,-1--1--1,,1|(305,356)|
+1,7,4,5,0,0,0,0,0,64,0,-1--1--1,,1|(300,388)|
+1,8,2,5,0,0,0,0,0,64,0,-1--1--1,,1|(357,479)|
+10,9,TOTAL DEMAND,616,493,31,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128,0,0,0,0,0,0
+1,10,9,5,0,0,0,0,0,64,0,-1--1--1,,1|(520,452)|
+1,11,1,5,0,0,0,0,0,64,0,-1--1--1,,1|(543,400)|
+10,12,INITIAL ROUTING AND CONSOLIDATION EFFICIENCY,461,284,72,21,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128,0,0,0,0,0,0
+1,13,12,5,0,0,0,0,0,64,0,-1--1--1,,1|(443,347)|
+10,14,GOAL OF CO2 EMISSIONS,629,575,41,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,15,gap of CO2 emissions,451,576,29,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,16,5,15,0,0,0,0,0,64,0,-1--1--1,,1|(440,483)|
+1,17,14,15,0,0,0,0,0,64,0,-1--1--1,,1|(539,575)|
+///---\\\
+:GRAPH tt
+:TITLE tt
+:SCALE
+:VAR share of companies that use the hub
+:SCALE
+:VAR Hubs
+:L<%^E!@
+1:emissions gap_2.vdfx
+1:emissions gap.vdfx
+4:Time
+5:Company adoption rate
+9:emissions gap
+19:100,0
+24:0
+25:500
+26:500
+23:0
+15:0,0,0,0,0,0
+27:0,
+34:0,
+42:1
+72:0
+73:0
+35:Date
+36:YYYY-MM-DD
+37:2000
+38:1
+39:1
+40:2
+41:0
+95:0
+96:0
+77:0
+78:0
+93:0
+94:0
+92:0
+91:0
+90:0
+87:0
+75:
+43:
