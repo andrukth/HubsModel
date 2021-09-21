@@ -1,17 +1,64 @@
 {UTF-8}
+adding funds from private sector=
+	IF THEN ELSE(increase in routing and consolidation efficiency>0.0001:AND:PRIVATE SECTOR FUNDS ON OFF\
+		=1, monetary value*PERCENTAGE OF PROFIT FOR HUB FUNDS
+	*Company adopters, 0)
+	~	$/Month
+	~		|
+
+adding funds from public sector=
+	IF THEN ELSE(utilization rate of hubs<MINIMUM UTILIZATION RATE:OR:PUBLIC SECTOR FUNDS ON OFF\
+		=0, 0, MAXIMUM FUNDS PER UNIT OF TIME*gap of CO2 emissions)
+	~	$/Month
+	~	This variable accounts for the process of adding funds from the public \
+		sector to the system. Every time step, if the hubs utilization rate is \
+		higher than the minimum utilization rate, then a certain amount of funds \
+		is added. If the utilization rate is low, no funds are added (in this way, \
+		if the infrastructure is unutilized, no extra infrastructure is built). \
+		The exact amount depends on the gap of CO2 emissions. In this way, the \
+		larger the gap, the higher the amount of funds that go into the system. \
+		This variable for now accounts only for public funding.
+	|
+
+PRIVATE SECTOR FUNDS ON OFF=
+	GET XLS CONSTANTS('Exogenous values.xlsm', 'hubs', 'B8')
+	~	Dmnl [0,1,1]
+	~		|
+
+PUBLIC SECTOR FUNDS ON OFF=
+	GET XLS CONSTANTS('Exogenous values.xlsm', 'hubs', 'B7')
+	~	Dmnl [0,1,1]
+	~		|
+
+Funds= INTEG (
+	adding funds from private sector+adding funds from public sector-using funds,
+		0)
+	~	$
+	~	Stock that represents the funds available for building hubs.
+	|
+
+PERCENTAGE OF PROFIT FOR HUB FUNDS=
+	GET XLS CONSTANTS('Exogenous values.xlsm', 'hubs','B9')
+	~	Dmnl
+	~		|
+
 increase in routing and consolidation efficiency=
 	Potential for improving routing and consolidation efficiency*HUBS LOCATION VARIABLE
 	*effect of using hub capacity on increase in routing and consolidation efficiency
 	~	Dmnl/Month
 	~	This is the rate at which the routing and consolidation efficiency \
 		increases over time. For now, it is connected to the hubs location \
-		variable (that is exogenous) and to the effect that using hub capacity has to the increase.
+		variable (that is exogenous) and to the effect that using hub capacity has \
+		to the increase.
 	|
 
 effect of using hub capacity on increase in routing and consolidation efficiency=
 	using hub capacity/TOTAL DEMAND*10
 	~	1/Month
-	~	This variable measures the effect that the fact that the capacity of the hub is being used has on the increase in routing and consolidation efficiency. It is divided by the total demand, which gives a 1/Month unit variable, and it is multiplied by 10 to account for a bigger change. 
+	~	This variable measures the effect that the fact that the capacity of the \
+		hub is being used has on the increase in routing and consolidation \
+		efficiency. It is divided by the total demand, which gives a 1/Month unit \
+		variable, and it is multiplied by 10 to account for a bigger change.
 	|
 
 using hub capacity=
@@ -20,14 +67,18 @@ using hub capacity=
 		)
 	~	Box/Month
 	~	Outflow from the available hub capacity. It represents the act of companies of using \
-		the hub capacity for their deliveries. It is calculated by using the gap of total utilized capacity, but it also accounts for the limited availability in hub capacity (therefore it needs an IF THEN ELSE structure).
+		the hub capacity for their deliveries. It is calculated by using the gap \
+		of total utilized capacity, but it also accounts for the limited \
+		availability in hub capacity (therefore it needs an IF THEN ELSE \
+		structure).
 		//
 	|
 
 gap of total utilized capacity=
 	goal of total utilized capacity-Total utilized capacity
 	~	Box
-	~	Variable that calculates the gap between the goal of total utilized capacity and the total utilized capacity.
+	~	Variable that calculates the gap between the goal of total utilized \
+		capacity and the total utilized capacity.
 	|
 
 emissions=
@@ -112,20 +163,6 @@ Company adoption rate=
 		companies will take a certain amount of time (AVERAGE DELAY TIME IN \
 		DROPPING OUT) to understand that the monetary value is negative and to act \
 		on this knowledge, and drop out.
-	|
-
-adding funds=
-	IF THEN ELSE(utilization rate of hubs<MINIMUM UTILIZATION RATE, 0, MAXIMUM FUNDS PER UNIT OF TIME\
-		*gap of CO2 emissions)
-	~	$/Month
-	~	This variable accounts for the process of adding funds from the public \
-		sector to the system. Every time step, if the hubs utilization rate is \
-		higher than the minimum utilization rate, then a certain amount of funds \
-		is added. If the utilization rate is low, no funds are added (in this way, \
-		if the infrastructure is unutilized, no extra infrastructure is built). \
-		The exact amount depends on the gap of CO2 emissions. In this way, the \
-		larger the gap, the higher the amount of funds that go into the system. \
-		This variable for now accounts only for public funding.
 	|
 
 adding hub capacity=
@@ -389,13 +426,6 @@ using funds=
 	~	Flow that represents the usage of funds in the system to build hubs.
 	|
 
-Funds= INTEG (
-	adding funds-using funds,
-		0)
-	~	$
-	~	Stock that represents the funds available for building hubs.
-	|
-
 Company adopters= INTEG (
 	Company adoption rate,
 		1)
@@ -460,7 +490,7 @@ $192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|72,7
 10,2,Company adopters,539,191,40,20,3,3,0,0,0,0,0,0,0,0,0,0,0,0
 1,3,5,2,4,0,0,22,0,0,0,-1--1--1,,1|(448,193)|
 1,4,5,1,68,0,0,22,2,0,0,-1--1--1,|12||0-0-0,1|(327,193)|
-11,5,992,388,193,5,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+11,5,266,388,193,5,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
 10,6,Company adoption rate,388,207,59,8,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
 1,7,1,6,1,0,0,0,0,64,0,-1--1--1,,1|(296,232)|
 1,8,2,6,1,0,0,0,0,64,0,-1--1--1,,1|(476,240)|
@@ -490,121 +520,138 @@ $192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|72,7
 V300  Do not put anything below this section - it will be ignored
 *hubs
 $192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|72,72,100,0
-10,1,Funds,277,-40,40,20,3,3,0,0,0,0,0,0,0,0,0,0,0,0
-12,2,48,100,-43,8,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,3,5,1,4,0,0,22,0,0,0,-1--1--1,,1|(209,-43)|
-1,4,5,2,100,0,0,22,0,0,0,-1--1--1,,1|(136,-43)|
-11,5,48,172,-43,8,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
-10,6,adding funds,172,-24,33,8,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
-12,7,48,440,-35,8,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,8,10,7,4,0,0,22,0,0,0,-1--1--1,,1|(407,-35)|
-1,9,10,1,100,0,0,22,0,0,0,-1--1--1,,1|(341,-35)|
-11,10,48,373,-35,8,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
-10,11,using funds,373,-19,32,8,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,12,Hubs,568,125,40,20,3,3,0,0,0,0,0,0,0,0,0,0,0,0
-12,13,48,364,121,8,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,14,16,12,4,0,0,22,0,0,0,-1--1--1,,1|(493,121)|
-1,15,16,13,100,0,0,22,0,0,0,-1--1--1,,1|(407,121)|
-11,16,48,452,121,8,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
-10,17,adding hubs,452,136,31,8,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,18,1,16,1,0,0,0,0,64,0,-1--1--1,,1|(332,49)|
-1,19,16,11,1,0,0,0,0,64,0,-1--1--1,,1|(445,56)|
-10,20,BUILDING COST OF HUB,508,5,44,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-1,21,20,16,0,0,0,0,0,64,0,-1--1--1,,1|(480,64)|
-1,22,20,11,0,0,0,0,0,64,0,-1--1--1,,1|(439,-8)|
-10,23,MAXIMUM FUNDS PER UNIT OF TIME,49,32,56,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-1,24,23,6,0,0,0,0,0,64,0,-1--1--1,,1|(113,1)|
-10,25,TIME STEP,356,181,39,8,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128,0,0,0,0,0,0
-1,26,25,17,0,0,0,0,0,64,0,-1--1--1,,1|(400,160)|
-10,27,ONE HUB,553,65,29,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-1,28,27,16,0,0,0,0,0,64,0,-1--1--1,,1|(503,92)|
-10,29,gap of CO2 emissions,208,64,33,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128,0,0,0,0,0,0
-1,30,29,6,0,0,0,0,0,64,0,-1--1--1,,1|(192,20)|
-10,31,MINIMUM UTILIZATION RATE,64,-132,56,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-1,32,31,5,0,0,0,0,0,64,0,-1--1--1,,1|(119,-84)|
-10,33,Total available hub capacity,563,305,40,23,3,131,0,0,0,0,0,0,0,0,0,0,0,0
-10,34,Total utilized capacity,780,305,36,24,3,131,0,0,0,0,0,0,0,0,0,0,0,0
-12,35,48,377,308,8,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,36,42,33,4,0,0,22,0,0,0,-1--1--1,,1|(492,308)|
-1,37,42,35,100,0,0,22,0,0,0,-1--1--1,,1|(417,308)|
-1,38,40,34,4,0,0,22,0,0,0,-1--1--1,,1|(712,305)|
-1,39,40,33,100,0,0,22,0,0,0,-1--1--1,,1|(635,305)|
-11,40,48,673,305,5,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
-10,41,using hub capacity,673,317,43,8,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
-11,42,662,455,308,5,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
-10,43,adding hub capacity,455,329,28,16,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,44,17,42,0,0,0,0,0,64,0,-1--1--1,,1|(453,220)|
-10,45,TOTAL DEMAND,1001,304,27,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-10,46,total hub system capacity,736,131,39,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-10,47,SINGLE HUB CAPACITY,551,220,36,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-10,48,share of demand that goes through the hub,877,205,56,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-1,49,47,46,0,0,0,0,0,64,0,-1--1--1,,1|(640,176)|
-1,50,45,48,0,0,0,0,0,64,0,-1--1--1,,1|(944,257)|
-10,51,utilization rate of hubs,757,209,39,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-1,52,46,51,0,0,0,0,0,64,0,-1--1--1,,1|(744,164)|
-1,53,47,43,0,0,0,0,0,64,0,-1--1--1,,1|(508,269)|
-10,54,ADJUSTMENT TIME FOR TOTAL UTILIZED CAPACITY,676,253,63,28,8,131,0,0,0,0,0,0,0,0,0,0,0,0
-1,55,34,48,0,0,0,0,0,64,0,-1--1--1,,1|(827,256)|
-1,56,54,41,0,0,0,0,0,64,0,-1--1--1,,1|(673,289)|
-1,57,12,46,0,0,0,0,0,64,0,-1--1--1,,1|(648,127)|
-1,58,34,51,0,0,0,0,0,64,0,-1--1--1,,1|(767,257)|
-10,59,utilization rate of hubs,240,-131,43,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128,0,0,0,0,0,0
-1,60,59,5,0,0,0,0,0,64,0,-1--1--1,,1|(204,-84)|
-10,62,share of companies that use the hub,1004,416,52,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128,0,0,0,0,0,0
-10,63,goal of total utilized capacity,892,376,48,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-1,64,45,63,0,0,0,0,0,64,0,-1--1--1,,1|(949,336)|
-1,65,62,63,0,0,0,0,0,64,0,-1--1--1,,1|(952,397)|
-10,68,gap of total utilized capacity,767,407,45,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-1,70,63,68,1,0,0,0,0,64,0,-1--1--1,,1|(856,409)|
-1,71,33,41,1,0,0,0,0,64,0,-1--1--1,,1|(608,344)|
-1,72,68,41,1,0,0,0,0,64,0,-1--1--1,,1|(680,384)|
-1,73,34,68,1,0,0,0,0,64,0,-1--1--1,,1|(795,371)|
+10,1,Funds,315,215,40,20,3,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,2,48,140,212,8,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,3,5,1,4,0,0,22,0,0,0,-1--1--1,,1|(248,212)|
+1,4,5,2,100,0,0,22,0,0,0,-1--1--1,,1|(176,212)|
+11,5,48,212,212,8,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,6,adding funds from public sector,212,232,43,16,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,7,48,479,220,8,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,8,10,7,4,0,0,22,0,0,0,-1--1--1,,1|(448,220)|
+1,9,10,1,100,0,0,22,0,0,0,-1--1--1,,1|(379,220)|
+11,10,48,411,220,8,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,11,using funds,411,236,32,8,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,12,Hubs,608,380,40,20,3,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,13,48,404,376,8,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,14,16,12,4,0,0,22,0,0,0,-1--1--1,,1|(536,376)|
+1,15,16,13,100,0,0,22,0,0,0,-1--1--1,,1|(447,376)|
+11,16,48,491,376,8,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,17,adding hubs,491,392,31,8,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,18,1,16,1,0,0,0,0,64,0,-1--1--1,,1|(371,304)|
+1,19,16,11,1,0,0,0,0,64,0,-1--1--1,,1|(483,311)|
+10,20,BUILDING COST OF HUB,548,260,44,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,21,20,16,0,0,0,0,0,64,0,-1--1--1,,1|(520,317)|
+1,22,20,11,0,0,0,0,0,64,0,-1--1--1,,1|(479,248)|
+10,23,MAXIMUM FUNDS PER UNIT OF TIME,87,287,56,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,24,23,6,0,0,0,0,0,64,0,-1--1--1,,1|(144,261)|
+10,25,TIME STEP,395,436,39,8,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128,0,0,0,0,0,0
+1,26,25,17,0,0,0,0,0,64,0,-1--1--1,,1|(440,416)|
+10,27,ONE HUB,591,320,29,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,28,27,16,0,0,0,0,0,64,0,-1--1--1,,1|(544,347)|
+10,29,gap of CO2 emissions,248,320,33,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128,0,0,0,0,0,0
+1,30,29,6,0,0,0,0,0,64,0,-1--1--1,,1|(232,281)|
+10,31,MINIMUM UTILIZATION RATE,104,124,56,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,32,31,5,0,0,0,0,0,64,0,-1--1--1,,1|(160,172)|
+10,33,Total available hub capacity,604,560,40,23,3,131,0,0,0,0,0,0,0,0,0,0,0,0
+10,34,Total utilized capacity,820,560,36,24,3,131,0,0,0,0,0,0,0,0,0,0,0,0
+12,35,48,416,563,8,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,36,42,33,4,0,0,22,0,0,0,-1--1--1,,1|(533,563)|
+1,37,42,35,100,0,0,22,0,0,0,-1--1--1,,1|(457,563)|
+1,38,40,34,4,0,0,22,0,0,0,-1--1--1,,1|(752,560)|
+1,39,40,33,100,0,0,22,0,0,0,-1--1--1,,1|(676,560)|
+11,40,48,711,560,5,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,41,using hub capacity,711,572,43,8,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,42,508,496,563,5,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,43,adding hub capacity,496,584,28,16,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,44,17,42,0,0,0,0,0,64,0,-1--1--1,,1|(493,476)|
+10,45,TOTAL DEMAND,1040,560,27,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,46,total hub system capacity,776,389,39,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,47,SINGLE HUB CAPACITY,592,476,36,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,48,share of demand that goes through the hub,915,460,56,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,49,47,46,0,0,0,0,0,64,0,-1--1--1,,1|(679,436)|
+1,50,45,48,0,0,0,0,0,64,0,-1--1--1,,1|(981,513)|
+10,51,utilization rate of hubs,795,464,39,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,52,46,51,0,0,0,0,0,64,0,-1--1--1,,1|(784,421)|
+1,53,47,43,0,0,0,0,0,64,0,-1--1--1,,1|(547,528)|
+10,54,ADJUSTMENT TIME FOR TOTAL UTILIZED CAPACITY,716,508,63,28,8,131,0,0,0,0,0,0,0,0,0,0,0,0
+1,55,34,48,0,0,0,0,0,64,0,-1--1--1,,1|(867,509)|
+1,56,54,41,0,0,0,0,0,64,0,-1--1--1,,1|(713,545)|
+1,57,12,46,0,0,0,0,0,64,0,-1--1--1,,1|(687,383)|
+1,58,34,51,0,0,0,0,0,64,0,-1--1--1,,1|(807,513)|
+10,59,utilization rate of hubs,232,116,43,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128,0,0,0,0,0,0
+1,60,59,5,0,0,0,0,0,64,0,-1--1--1,,1|(224,163)|
+10,61,share of companies that use the hub,1043,671,52,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128,0,0,0,0,0,0
+10,62,goal of total utilized capacity,932,632,48,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,63,45,62,0,0,0,0,0,64,0,-1--1--1,,1|(992,593)|
+1,64,61,62,0,0,0,0,0,64,0,-1--1--1,,1|(992,653)|
+10,65,gap of total utilized capacity,808,665,45,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,66,62,65,1,0,0,0,0,64,0,-1--1--1,,1|(896,664)|
+1,67,33,41,1,0,0,0,0,64,0,-1--1--1,,1|(647,599)|
+1,68,65,41,1,0,0,0,0,64,0,-1--1--1,,1|(719,640)|
+1,69,34,65,1,0,0,0,0,64,0,-1--1--1,,1|(833,629)|
+12,70,48,309,104,8,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,71,73,1,4,0,0,22,0,0,0,-1--1--1,,1|(309,176)|
+1,72,73,70,100,0,0,22,0,0,0,-1--1--1,,1|(309,128)|
+11,73,48,309,152,8,5,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,74,adding funds from private sector,360,152,43,16,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,75,monetary value,581,128,43,8,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128,0,0,0,0,0,0
+1,76,75,74,0,0,0,0,0,64,0,-1--1--1,,1|(476,139)|
+10,77,PERCENTAGE OF PROFIT FOR HUB FUNDS,567,176,52,21,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,78,77,74,0,0,0,0,0,64,0,-1--1--1,,1|(464,163)|
+10,79,Company adopters,504,92,27,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128,0,0,0,0,0,0
+1,80,79,74,0,0,0,0,0,64,0,-1--1--1,,1|(440,120)|
+10,81,increase in routing and consolidation efficiency,453,52,59,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|0||128-128-128,0,0,0,0,0,0
+1,82,81,74,0,0,0,0,0,64,0,-1--1--1,,1|(412,97)|
+10,83,PRIVATE SECTOR FUNDS ON OFF,332,40,51,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,84,PUBLIC SECTOR FUNDS ON OFF,64,205,47,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,85,84,6,0,0,0,0,0,64,0,-1--1--1,,1|(136,217)|
+1,86,83,74,0,0,0,0,0,64,0,-1--1--1,,1|(344,92)|
 \\\---/// Sketch information - do not modify anything except names
 V300  Do not put anything below this section - it will be ignored
 *cost
 $192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|72,72,100,0
-10,1,cost of using the hub system,665,404,39,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-10,2,monetary value,848,432,40,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-10,3,HUBS LOCATION VARIABLE,403,121,52,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-10,4,Routing and consolidation efficiency,595,172,40,28,3,131,0,0,0,0,0,0,0,0,0,0,0,0
-10,5,INITIAL ROUTING AND CONSOLIDATION EFFICIENCY,419,53,67,21,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-1,6,5,4,1,0,0,0,0,64,1,-1--1--1,,1|(540,68)|
-1,7,8,4,4,0,0,22,0,0,0,-1--1--1,,1|(497,176)|
-11,8,332,435,176,5,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
-10,9,increase in routing and consolidation efficiency,435,205,59,21,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
-1,10,3,9,0,0,0,0,0,64,0,-1--1--1,,1|(416,155)|
-10,11,share of companies that use the hub,507,360,52,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128,0,0,0,0,0,0
-1,12,11,1,1,0,0,0,0,64,0,-1--1--1,,1|(563,389)|
-10,13,TOTAL OPERATION COST OF ONE HUB,515,480,56,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-10,14,Hubs,641,521,20,8,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128,0,0,0,0,0,0
-1,15,13,1,0,0,0,0,0,64,0,-1--1--1,,1|(585,444)|
-1,16,14,1,0,0,0,0,0,64,0,-1--1--1,,1|(651,471)|
-10,17,Potential for improving routing and consolidation efficiency,292,176,47,25,3,131,0,0,0,0,0,0,0,0,0,0,0,0
-1,18,8,17,100,0,0,22,0,0,0,-1--1--1,,1|(384,176)|
-1,19,17,9,1,0,0,0,0,64,0,-1--1--1,,1|(329,224)|
-1,20,5,17,1,0,0,0,0,64,1,-1--1--1,,1|(323,104)|
-1,21,1,2,1,0,0,0,0,64,0,-1--1--1,,1|(752,452)|
-10,22,MINIMUM OPERATION COST,712,145,53,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-10,23,cost benefit from routing and consolidation efficiency,793,320,67,21,8,131,0,0,0,0,0,0,0,0,0,0,0,0
-1,24,23,2,1,0,0,0,0,64,0,-1--1--1,,1|(881,384)|
-10,25,operation cost without hubs,833,205,35,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-1,26,5,25,1,0,0,0,0,64,0,-1--1--1,,1|(705,61)|
-1,27,22,25,1,0,0,0,0,64,0,-1--1--1,,1|(763,197)|
-10,28,operation cost with hubs,680,233,35,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-1,29,4,28,1,0,0,0,0,64,0,-1--1--1,,1|(607,236)|
-1,30,22,28,1,0,0,0,0,64,0,-1--1--1,,1|(716,193)|
-1,31,25,23,1,0,0,0,0,64,0,-1--1--1,,1|(821,252)|
-1,32,28,23,1,0,0,0,0,64,0,-1--1--1,,1|(719,289)|
-10,33,TOTAL NUMBER OF COMPANIES,587,329,51,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128,0,0,0,0,0,0
-1,34,33,1,1,0,0,0,0,64,0,-1--1--1,,1|(625,352)|
-10,35,ONE COMPANY,469,411,32,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-1,36,35,1,0,0,0,0,0,64,0,-1--1--1,,1|(560,407)|
-10,37,using hub capacity,347,347,28,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128,0,0,0,0,0,0
-10,38,effect of using hub capacity on increase in routing and consolidation efficiency,477,277,71,24,8,131,0,0,0,0,0,0,0,0,0,0,0,0
-1,39,37,38,1,0,0,0,0,64,0,-1--1--1,,1|(405,323)|
-1,40,38,9,0,0,0,0,0,64,0,-1--1--1,,1|(460,245)|
-10,41,TOTAL DEMAND,269,311,31,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|0||128-128-128,0,0,0,0,0,0
-1,42,41,38,1,0,0,0,0,64,0,-1--1--1,,1|(347,280)|
+10,1,cost of using the hub system,616,328,39,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,2,monetary value,797,356,40,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,3,HUBS LOCATION VARIABLE,352,44,52,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,4,Routing and consolidation efficiency,544,95,40,28,3,131,0,0,0,0,0,0,0,0,0,0,0,0
+10,5,INITIAL ROUTING AND CONSOLIDATION EFFICIENCY,368,-23,67,21,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,6,5,4,1,0,0,0,0,64,1,-1--1--1,,1|(489,-8)|
+1,7,8,4,4,0,0,22,0,0,0,-1--1--1,,1|(448,100)|
+11,8,838,384,100,5,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,9,increase in routing and consolidation efficiency,384,128,59,21,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,10,3,9,0,0,0,0,0,64,0,-1--1--1,,1|(365,80)|
+10,11,share of companies that use the hub,456,284,52,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128,0,0,0,0,0,0
+1,12,11,1,1,0,0,0,0,64,0,-1--1--1,,1|(512,313)|
+10,13,TOTAL OPERATION COST OF ONE HUB,464,404,56,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,14,Hubs,592,445,20,8,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128,0,0,0,0,0,0
+1,15,13,1,0,0,0,0,0,64,0,-1--1--1,,1|(536,368)|
+1,16,14,1,0,0,0,0,0,64,0,-1--1--1,,1|(600,395)|
+10,17,Potential for improving routing and consolidation efficiency,241,100,47,25,3,131,0,0,0,0,0,0,0,0,0,0,0,0
+1,18,8,17,100,0,0,22,0,0,0,-1--1--1,,1|(333,100)|
+1,19,17,9,1,0,0,0,0,64,0,-1--1--1,,1|(280,148)|
+1,20,5,17,1,0,0,0,0,64,1,-1--1--1,,1|(272,28)|
+1,21,1,2,1,0,0,0,0,64,0,-1--1--1,,1|(701,376)|
+10,22,MINIMUM OPERATION COST,661,68,53,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,23,cost benefit from routing and consolidation efficiency,744,244,67,21,8,131,0,0,0,0,0,0,0,0,0,0,0,0
+1,24,23,2,1,0,0,0,0,64,0,-1--1--1,,1|(832,308)|
+10,25,operation cost without hubs,784,128,35,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,26,5,25,1,0,0,0,0,64,0,-1--1--1,,1|(656,-16)|
+1,27,22,25,1,0,0,0,0,64,0,-1--1--1,,1|(712,121)|
+10,28,operation cost with hubs,629,157,35,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,29,4,28,1,0,0,0,0,64,0,-1--1--1,,1|(556,160)|
+1,30,22,28,1,0,0,0,0,64,0,-1--1--1,,1|(665,116)|
+1,31,25,23,1,0,0,0,0,64,0,-1--1--1,,1|(772,176)|
+1,32,28,23,1,0,0,0,0,64,0,-1--1--1,,1|(668,212)|
+10,33,TOTAL NUMBER OF COMPANIES,536,253,51,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128,0,0,0,0,0,0
+1,34,33,1,1,0,0,0,0,64,0,-1--1--1,,1|(576,275)|
+10,35,ONE COMPANY,420,335,32,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,36,35,1,0,0,0,0,0,64,0,-1--1--1,,1|(507,331)|
+10,37,using hub capacity,296,271,28,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128,0,0,0,0,0,0
+10,38,effect of using hub capacity on increase in routing and consolidation efficiency,428,200,71,24,8,131,0,0,0,0,0,0,0,0,0,0,0,0
+1,39,37,38,1,0,0,0,0,64,0,-1--1--1,,1|(356,247)|
+1,40,38,9,0,0,0,0,0,64,0,-1--1--1,,1|(407,167)|
+10,41,TOTAL DEMAND,220,235,31,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128,0,0,0,0,0,0
+1,42,41,38,1,0,0,0,0,64,0,-1--1--1,,1|(296,203)|
 \\\---/// Sketch information - do not modify anything except names
 V300  Do not put anything below this section - it will be ignored
 *emissions
@@ -629,10 +676,10 @@ $192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|72,7
 \\\---/// Sketch information - do not modify anything except names
 V300  Do not put anything below this section - it will be ignored
 *Play around view
-$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|72,72,100,0
-12,1,0,600,308,143,144,3,188,0,0,1,0,0,0,0,0,0,0,0,0
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|72,72,88,0
+12,1,0,644,308,185,144,3,188,0,0,1,0,0,0,0,0,0,0,0,0
 Companies
-12,2,0,880,308,140,145,3,188,0,0,1,0,0,0,0,0,0,0,0,0
+12,2,0,1033,305,200,147,3,188,0,0,1,0,0,0,0,0,0,0,0,0
 Hubs
 12,3,0,640,576,189,121,3,188,0,0,1,0,0,0,0,0,0,0,0,0
 Emissions
@@ -654,12 +701,10 @@ Emissions
 10,19,ADJUSTMENT TIME FOR TOTAL UTILIZED CAPACITY,871,47,64,21,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128,0,0,0,0,0,0
 10,20,HUBS LOCATION VARIABLE,863,101,53,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128,0,0,0,0,0,0
 10,21,TOTAL DEMAND,1000,71,31,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128,0,0,0,0,0,0
-12,22,0,952,580,115,121,3,188,0,0,1,0,0,0,0,0,0,0,0,0
+12,22,0,1037,580,200,119,3,188,0,0,1,0,0,0,0,0,0,0,0,0
 Efficiency
-\\\---/// Sketch information - do not modify anything except names
-V300  Do not put anything below this section - it will be ignored
-*View 6
-$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|72,72,100,0
+10,23,PUBLIC SECTOR FUNDS ON OFF,280,48,51,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|0||128-128-128,0,0,0,0,0,0
+10,24,PRIVATE SECTOR FUNDS ON OFF,269,103,56,16,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|0||128-128-128,0,0,0,0,0,0
 ///---\\\
 :GRAPH Hubs
 :TITLE Hubs
@@ -668,6 +713,7 @@ $192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|72,7
 :SCALE
 :VAR Total available hub capacity
 :VAR Total utilized capacity
+:VAR TOTAL DEMAND
 
 :GRAPH Companies
 :TITLE Companies
@@ -690,15 +736,36 @@ $192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|72,7
 :SCALE
 :VAR Routing and consolidation efficiency
 :L<%^E!@
-1:capacity_errorfix2.vdfx
-1:capacity_errorfix.vdfx
+1:scenario 2.vdfx
+1:scenario 1.vdfx
+1:base scenario.vdfx
 4:Time
-5:TOTAL OPERATION COST OF ONE HUB
-9:capacity_errorfix2
-19:100,4
+5:PERCENTAGE OF PROFIT FOR HUB FUNDS
+9:scenario 2
+19:88,4
 24:0
 25:1000
 26:1000
+57:1
+54:0
+55:0
+82:0
+86:0
+59:0
+56:0
+58:0
+71:0
+44:65001
+46:0
+45:5
+49:0
+50:0
+51:
+52:
+53:
+43:base scenario
+47:base scenario
+48:
 23:0
 15:0,0,0,0,0,0
 27:0,
@@ -724,4 +791,4 @@ $192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|72,7
 90:0
 87:0
 75:
-43:
+43:base scenario
