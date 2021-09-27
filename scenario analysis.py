@@ -7,26 +7,87 @@ Created on Tue Sep 21 17:18:49 2021
 
 import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns
-
-base_scenario = pd.read_csv('C:/Users/andru/Downloads/base scenario.csv')
-
-base_scenario = base_scenario.fillna('Unknown')
+#import seaborn as sns
 
 
-for i in range(base_scenario.shape[0]):
-    if base_scenario.iloc[i,2] == 'Unknown':
-        for j in range(2,base_scenario.shape[1]):
-            base_scenario.iloc[i,j]=base_scenario.iloc[i,1]
 
-base_scenario = base_scenario.set_index('Time')
-base_scenario = base_scenario.transpose()
+def reshape_scenarios(scenario_name):
+    scenario_name = scenario_name.fillna('Unknown')
+    for i in range(scenario_name.shape[0]):
+        if scenario_name.iloc[i,2] == 'Unknown':
+            for j in range(2,scenario_name.shape[1]):
+                scenario_name.iloc[i,j]=scenario_name.iloc[i,1]
+    scenario_name = scenario_name.set_index('Time')
+    scenario_name = scenario_name.transpose() 
+    scenario_name = scenario_name.apply(pd.to_numeric)
+    for col in scenario_name.columns:
+        if col.isupper()==True:
+            del scenario_name[col]
 
-base_scenario = base_scenario.apply(pd.to_numeric)
+    return scenario_name
 
-for i in range(base_scenario.shape[1]):
-    
+base_scenario = pd.read_csv('//ug.kth.se/dfs/home/a/n/andru/appdata/xp.V2/Documents/GitHub/HubsModel/base scenario.csv')
+base_scenario = reshape_scenarios(base_scenario)
+base_scenario_name = 'Base Scenario'
 
-plt.figure()
-sns.lineplot(data=base_scenario)
+scenario_1 = pd.read_csv('//ug.kth.se/dfs/home/a/n/andru/appdata/xp.V2/Documents/GitHub/HubsModel/scenario 1.csv')
+scenario_1 = reshape_scenarios(scenario_1)
+scenario_1_name = 'Scenario 1'
+
+scenario_2 = pd.read_csv('//ug.kth.se/dfs/home/a/n/andru/appdata/xp.V2/Documents/GitHub/HubsModel/scenario 2.csv')
+scenario_2 = reshape_scenarios(scenario_2)
+scenario_2_name = 'Scenario 2'
+
+x = base_scenario.index
+plt.plot(x,base_scenario['Hubs'],label=base_scenario_name)
+plt.plot(x,scenario_1['Hubs'],label=scenario_1_name)
+plt.plot(x,scenario_2['Hubs'],label=scenario_2_name)
+plt.xticks(range(0,1000,100))
+plt.yticks(range(0,20,1))
+plt.xlabel('Time')
+plt.ylabel('Number of hubs')
+plt.legend()
+plt.title('Number of hubs over time')
+plt.savefig('Number of hubs over time.eps', format='eps')
+plt.show()
+
+x = base_scenario.index
+plt.plot(x,base_scenario['emissions'],label=base_scenario_name)
+plt.plot(x,scenario_1['emissions'],label=scenario_1_name)
+plt.plot(x,scenario_2['emissions'],label=scenario_2_name)
+plt.xticks(range(0,1000,100))
+#plt.yticks(range(0,20,1))
+plt.xlabel('Time')
+plt.ylabel('CO2 emissions')
+plt.legend()
+plt.title('Emissions over time')
+plt.savefig('Emissions over time.eps', format='eps')
+plt.show()
+
+
+x = base_scenario.index
+plt.plot(x,base_scenario['Routing and consolidation efficiency'],label=base_scenario_name)
+plt.plot(x,scenario_1['Routing and consolidation efficiency'],label=scenario_1_name)
+plt.plot(x,scenario_2['Routing and consolidation efficiency'],label=scenario_2_name)
+plt.xticks(range(0,1000,100))
+#plt.yticks(range(0,20,1))
+plt.xlabel('Time')
+plt.ylabel('Efficiency')
+plt.legend()
+plt.title('Routing and consolidation efficiency over time')
+plt.savefig('Routing and consolidation efficiency over time.eps', format='eps')
+plt.show()
+
+
+x = base_scenario.index
+plt.plot(x,base_scenario['share of demand that goes through the hub'],label=base_scenario_name)
+plt.plot(x,scenario_1['share of demand that goes through the hub'],label=scenario_1_name)
+plt.plot(x,scenario_2['share of demand that goes through the hub'],label=scenario_2_name)
+plt.xticks(range(0,1000,100))
+#plt.yticks(range(0,20,1))
+plt.xlabel('Time')
+plt.ylabel('Share of demand')
+plt.legend()
+plt.title('Share of demand that goes through the hub over time')
+plt.savefig('Share of demand that goes through the hub over time.eps', format='eps')
 plt.show()
