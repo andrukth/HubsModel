@@ -34,7 +34,7 @@ Delivery time=
 GOAL OF VEHICLE KM DRIVEN=A FUNCTION OF(GOAL OF VEHICLE KM DRIVEN) ~~|
 GOAL OF VEHICLE KM DRIVEN=
 	~	Vehicle*km/Month
-	~	Goal of vehicle km driven
+	~	Goal of vehicle km driven per month
 	|
 
 Share of private profit to funding=A FUNCTION OF(Share of private profit to funding,Monetary value of hubs\
@@ -49,7 +49,7 @@ Gap of CO2 emissions=A FUNCTION OF(Gap of CO2 emissions,CO2 emissions,GOAL OF CO
 		) ~~|
 Gap of CO2 emissions=
 	~	Dmnl
-	~	This value represents the gap between the emissions of the system and the \
+	~	Gap between the emissions of the system and the \
 		goal of emissions. This is used to determine how much funds the public \
 		sector adds to the system.
 	|

@@ -18,7 +18,8 @@ Hubs= INTEG (
 EXTRA HANDLING COST PER BOX=
 	GET XLS CONSTANTS('Exogenous values.xlsm','cost','B6')
 	~	$/Box [1,50,1]
-	~		|
+	~	Input variable that measures the extra per box cost due to the fact that the boxes need to be handled in a different way when going through the hub system.
+	|
 
 monetary value=
 	cost benefit from routing and consolidation efficiency-cost of using the hub system-\
@@ -26,14 +27,15 @@ monetary value=
 	~	$/(Month*company)
 	~	Monetary value that the companies would have in joining the hubs system, \
 		compared with not joining the hub system and carrying out their deliveries \
-		by themselves. This value can be negative if the cost of joining the hubs \
-		is higher than the benefit from routing and consolidation efficiency.
+		by themselves. This value can be negative if the cost of using the hubs \
+		is higher than the benefit from routing and consolidation efficiency. Also the extra cost of due to potential higher handling costs for the boxes that go through the hub system. 
 	|
 
 extra cost for demand that goes through the hub system=
 	EXTRA HANDLING COST PER BOX*share of demand that goes through the hub*TOTAL DEMAND/Company adopters
 	~	$/(company*Month)
-	~		|
+	~	Total cost per company per month due to the higher handling cost for the boxes that go throguh the hub system. 
+	|
 
 adding funds from private sector=
 	IF THEN ELSE((utilization rate of hubs>MINIMUM UTILIZATION RATE:AND:monetary value/maximum monetary value\
@@ -88,7 +90,7 @@ gap of CO2 emissions=
 	IF THEN ELSE((emissions-GOAL OF CO2 EMISSIONS)/emissions<0:OR:GOAL OF CO2 EMISSIONS ON OFF\
 		=0, 0, (emissions-GOAL OF CO2 EMISSIONS)/emissions)
 	~	Dmnl
-	~	This value represents the gap between the emissions of the system and the \
+	~	Gap between the emissions of the system and the \
 		goal of emissions. This is used to determine how much funds the public \
 		sector adds to the system. An IF THEN ELSE structure is needed because it \
 		could happen in the system that a lower value is reached, and this cannot \
@@ -100,7 +102,7 @@ gap of vehicle km=
 	IF THEN ELSE((vehicle km-GOAL OF VEHICLE KM)/vehicle km<0:OR:GOAL OF VEHICLE KM ON OFF\
 		=0, 0, (vehicle km-GOAL OF VEHICLE KM)/vehicle km)
 	~	Dmnl
-	~	This value represents the gap between the vehicle km of the system and the \
+	~	Gap between the vehicle km of the system and the \
 		goal of vehicle km in the city. This is used to determin how much funds \
 		the public sector adds to the system. An IF THEN ELSE FUNCTION is needed \
 		because it could happen in the system that a lower value is reached, and \
@@ -186,7 +188,7 @@ emissions=
 effect of monetary value on company adoption fraction=
 	monetary value/maximum monetary value
 	~	Dmnl
-	~	This variable as a Dmnl value that is supposed to influence the decision \
+	~	This variable is a Dmnl value that is supposed to influence the decision \
 		making process of the companies to join the hubs.
 	|
 
@@ -226,7 +228,7 @@ operation cost with hubs=
 	~	$/Box
 	~	The operation cost with hubs is the cost of deliveries when they go \
 		through the hub system. It is calculated by multiplying the number of \
-		vehicles times the cost per vehicle and summing with thecost per km \
+		vehicles times the cost per vehicle and summing with the cost per km \
 		multiplied by the km. This cost is calculated per demand unit.
 	|
 
@@ -343,13 +345,13 @@ COST PER KM=
 PRIVATE SECTOR FUNDS ON OFF=
 	GET XLS CONSTANTS('Exogenous values.xlsm', 'hubs', 'B8')
 	~	Dmnl [0,1,1]
-	~	On off variable that regulates the private funds.
+	~	On-off variable that regulates the private funds.
 	|
 
 PUBLIC SECTOR FUNDS ON OFF=
 	GET XLS CONSTANTS('Exogenous values.xlsm', 'hubs', 'B7')
 	~	Dmnl [0,1,1]
-	~	On off variable that regulates the public funds.
+	~	On-off variable that regulates the public funds.
 	|
 
 PERCENTAGE OF PROFIT FOR HUB FUNDS=
@@ -378,7 +380,6 @@ using hub capacity=
 		of total utilized capacity, but it also accounts for the limited \
 		availability in hub capacity (therefore it needs an IF THEN ELSE \
 		structure).
-		//
 	|
 
 gap of total utilized capacity=
@@ -588,7 +589,8 @@ MAXIMUM FUNDS PER UNIT OF TIME=
 ONE HUB=
 	1
 	~	Hub
-	~		|
+	~	Variable representing one hub in the system.
+	|
 
 share of companies that use the hub=
 	Company adopters/TOTAL NUMBER OF COMPANIES
