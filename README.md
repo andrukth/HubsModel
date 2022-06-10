@@ -3,7 +3,7 @@ Logistics hubs are a possible solution to the negative externalities of the tran
 Example: The target value of CO2 emissions in 2050 is 500 ktCO2eq/year, while at present the value is 1500 ktCO2eq/year. The gap is 1000 ktCO2eq/year.
 
 In this working folder you can find: 
-1) the hubs model
-2) two simplified model sketches
-3) an Excel file with the exogenous values in the model, which can enable scenario analysis. Note that these parameters are NOT VALIDATED!
+1) the hubs model - stock and flow model
+2) two CLD that represent the model structure
+3) an Excel file with the exogenous values in the model, which can enable scenario analysis. Note that these parameters are NOT VALIDATED! Note also that the Excel file must be opened to allow Vensim to run the model
 4) some python files used for the analysis of data
