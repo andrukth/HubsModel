@@ -4,6 +4,6 @@ Example: The target value of CO2 emissions in 2050 is 500 ktCO2eq/year, while at
 
 In this working folder you can find: 
 1) the hubs model - stock and flow model
-2) two CLD that represent the model structure
+2) two CLD that represent the model structure - the preliminary CLD has been made mainly for paper submission.
 3) an Excel file with the exogenous values in the model, which can enable scenario analysis. Note that these parameters are NOT VALIDATED! Note also that the Excel file must be opened to allow Vensim to run the model
 4) some python files used for the analysis of data
