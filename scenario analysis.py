@@ -62,7 +62,7 @@ plt.yticks(range(0,15,1))
 plt.xlabel('Time')
 plt.ylabel('Number of hubs')
 plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=3)
-#plt.savefig('Number of hubs over time.eps', format='eps')
+plt.savefig('Number of hubs over time.eps', format='eps')
 props = dict(boxstyle='round', facecolor='white', alpha=0.5)
 textstr = '- - Total utilized capacity\n'+u'\u2500'+'  Number of hubs'
 ax.text(1.1, 0.05, textstr, transform=ax.transAxes, fontsize=10,
@@ -77,6 +77,7 @@ ax2.set_ylabel('Utilized hub capacity')
 plt.xticks(range(0,500,100))
 plt.xlim(xlim_left,xlim_right)
 plt.title('Number of hubs and utilized capacity over time')
+plt.savefig('Number of hubs and utilized capacity over time.eps', format='eps')
 plt.show()
 
 fig,ax=plt.subplots()
@@ -105,7 +106,7 @@ ax2.set_ylabel('Vehicle km')
 plt.xticks(range(0,1000,100))
 plt.xlim(xlim_left,xlim_right)
 plt.title('Emissions and vehicle km over time')
-#plt.savefig('Emissions over time.eps', format='eps')
+plt.savefig('Emissions and vehicle km over time.eps', format='eps')
 plt.show()
 
 fig,ax=plt.subplots()
@@ -131,7 +132,7 @@ textstr = '- - Fill rate\n'+u'\u2500'+'  Routing efficiency'
 ax.text(1.01, 0.05, textstr, transform=ax.transAxes, fontsize=10,
         verticalalignment='bottom', bbox=props)
 plt.title('Efficiencies over time')
-#plt.savefig('Routing and consolidation efficiency over time.eps', format='eps')
+plt.savefig('Efficiencies over time.eps', format='eps')
 plt.show()
 
 fig,ax=plt.subplots()
@@ -157,7 +158,6 @@ textstr = '- - Companies\n'+u'\u2500'+'  Demand'
 ax.text(1.01, 0.05, textstr, transform=ax.transAxes, fontsize=10,
         verticalalignment='bottom', bbox=props)
 plt.title('Share of demand that goes through the hub and\nshare of companies that use the hub over time')
-#plt.savefig('Share of demand that goes through the hub over time.eps', format='eps')
 plt.show()
 
 fig,ax=plt.subplots()
@@ -184,4 +184,10 @@ ax2.set_ylabel('$/Box')
 plt.xticks(range(0,1000,100))
 plt.xlim(xlim_left,xlim_right)
 plt.title('Costs and values')
+plt.savefig('Costs and values.eps', format='eps')
 plt.show()
+
+
+
+plt.savefig('Share of demand that goes through the hub over time.eps', format='eps')
+
