@@ -1,0 +1,1487 @@
+<xmile xmlns="http://docs.oasis-open.org/xmile/ns/XMILE/v1.0" xmlns:isee="http://iseesystems.com/XMILE" version="1.0">
+    <isee:prefs show_module_prefix="true" layer="model"/>
+    <header>
+        <options namespace="std"/>
+        <vendor>Ventana Systems, xmutil</vendor>
+        <product lang="en">Vensim, xmutil</product>
+    </header>
+    <sim_specs method="Euler" time_units="Month" isee:sim_duration="0">
+        <start>0</start>
+        <stop>1000</stop>
+        <dt>1</dt>
+    </sim_specs>
+    <model_units/>
+    <dimensions/>
+    <model>
+        <variables>
+            <module name="company">
+                <connect to="company.monetary_value" from="cost.monetary_value"/>
+                <connect to="company.maximum_monetary_value" from="cost.maximum_monetary_value"/>
+            </module>
+            <module name="hubs1">
+                <connect to="hubs1.share_of_companies_that_use_the_hub" from="company.share_of_companies_that_use_the_hub"/>
+                <connect to="hubs1.monetary_value" from="cost.monetary_value"/>
+                <connect to="hubs1.maximum_monetary_value" from="cost.maximum_monetary_value"/>
+                <connect to="hubs1.Company_adopters" from="company.Company_adopters"/>
+                <connect to="hubs1.gap_of_CO2_emissions" from="goals.gap_of_CO2_emissions"/>
+                <connect to="hubs1.gap_of_vehicle_km" from="goals.gap_of_vehicle_km"/>
+            </module>
+            <module name="cost">
+                <connect to="cost.Hubs" from="hubs1.Hubs"/>
+                <connect to="cost.share_of_companies_that_use_the_hub" from="company.share_of_companies_that_use_the_hub"/>
+                <connect to="cost.TOTAL_NUMBER_OF_COMPANIES" from="company.TOTAL_NUMBER_OF_COMPANIES"/>
+                <connect to="cost.INITIAL_DELIVERY_TIME" from="Efficiencies.INITIAL_DELIVERY_TIME"/>
+                <connect to="cost.MINIMUM_DELIVERY_TIME" from="Efficiencies.MINIMUM_DELIVERY_TIME"/>
+                <connect to="cost.Delivery_time" from="Efficiencies.Delivery_time"/>
+                <connect to="cost.share_of_demand_that_goes_through_the_hub" from="hubs1.share_of_demand_that_goes_through_the_hub"/>
+                <connect to="cost.Company_adopters" from="company.Company_adopters"/>
+                <connect to="cost.INITIAL_ROUTING_EFFICIENCY" from="Efficiencies.INITIAL_ROUTING_EFFICIENCY"/>
+                <connect to="cost.INITIAL_FILL_RATE" from="Efficiencies.INITIAL_FILL_RATE"/>
+                <connect to="cost.Routing_efficiency" from="Efficiencies.Routing_efficiency"/>
+                <connect to="cost.Fill_rate" from="Efficiencies.Fill_rate"/>
+                <connect to="cost.TOTAL_DEMAND" from="hubs1.TOTAL_DEMAND"/>
+            </module>
+            <module name="goals">
+                <connect to="goals.share_of_demand_that_goes_through_the_hub" from="hubs1.share_of_demand_that_goes_through_the_hub"/>
+                <connect to="goals.km_required_per_box_without_hubs" from="cost.km_required_per_box_without_hubs"/>
+                <connect to="goals.number_of_vehicles_required_per_box_without_hubs" from="cost.number_of_vehicles_required_per_box_without_hubs"/>
+                <connect to="goals.km_required_per_box_with_hubs" from="cost.km_required_per_box_with_hubs"/>
+                <connect to="goals.number_of_vehicles_required_per_box_with_hubs" from="cost.number_of_vehicles_required_per_box_with_hubs"/>
+                <connect to="goals.TOTAL_DEMAND" from="hubs1.TOTAL_DEMAND"/>
+            </module>
+            <module name="Play around view"/>
+            <module name="Efficiencies">
+                <connect to="Efficiencies.using_hub_capacity" from="hubs1.using_hub_capacity"/>
+                <connect to="Efficiencies.TOTAL_DEMAND" from="hubs1.TOTAL_DEMAND"/>
+            </module>
+        </variables>
+    </model>
+    <model name="company">
+        <variables>
+            <aux name="share of companies that use the hub">
+                <doc>	Represents the share of the companies that use the hub, compared to the total number of companies in the system.</doc>
+                <eqn>Company_adopters/TOTAL_NUMBER_OF_COMPANIES</eqn>
+                <units>Dmnl</units>
+            </aux>
+            <aux name="TOTAL NUMBER OF COMPANIES">
+                <doc>	Exogenous variable that represents the total number of companies in the system.</doc>
+                <eqn>{GET_XLS_CONSTANTS('Exogenous_values.xlsm',_'company'_,'B1')}</eqn>
+                <units>company</units>
+            </aux>
+            <stock name="Company adopters">
+                <doc>	Companies that decide to join the hub system.</doc>
+                <inflow>Company_adoption_rate</inflow>
+                <eqn>1</eqn>
+                <units>company</units>
+            </stock>
+            <aux name="AVERAGE DELAY TIME IN DROPPING OUT">
+                <doc>	This is the average time, in months, that companies take to understand that the monetary value of joining the hubs is actually negative, and therefore decide to drop out of the system of hubs.</doc>
+                <eqn>{GET_XLS_CONSTANTS('Exogenous_values.xlsm',_'company'_,_'B5')}</eqn>
+                <units>Month</units>
+            </aux>
+            <aux name="company adoption fraction">
+                <doc>	This variable is used in the innovation diffusion to understand how many companies adopt the innovation (i.e., participate in the hubs). During the first part of the model (until time=INITIAL PUSH TIME) the adoption fraction is fixed to INITIAL COMPANY ADOPTION FRACTION. After this initial time, the adoption fraction is calculated using the variable that measures the effect of the monetary value on company adoption fraction.</doc>
+                <eqn>( IF Time &lt; INITIAL_PUSH_TIME THEN INITIAL_COMPANY_ADOPTION_FRACTION ELSE effect_of_monetary_value_on_company_adoption_fraction )</eqn>
+                <units>Dmnl</units>
+            </aux>
+            <aux name="INITIAL PUSH TIME">
+                <doc>	Exogenous value that represents the number of months in which initially the companies are "pushed" to join the hub. It could represent for example a pilot study or something similar, that is used to kick off the hub system and show the transport companies the value of joining the hubs.</doc>
+                <eqn>{GET_XLS_CONSTANTS('Exogenous_values.xlsm',_'company'_,_'B4'_)}</eqn>
+                <units>Month</units>
+            </aux>
+            <aux name="INITIAL COMPANY ADOPTION FRACTION">
+                <doc>	Exogenous value representing the initial adoption fraction.</doc>
+                <eqn>{GET_XLS_CONSTANTS('Exogenous_values.xlsm',_'company'_,'B3')}</eqn>
+                <units>Dmnl</units>
+            </aux>
+            <aux name="effect of monetary value on company adoption fraction">
+                <doc>	This variable is a Dmnl value that is supposed to influence the decision making process of the companies to join the hubs.</doc>
+                <eqn>monetary_value/maximum_monetary_value</eqn>
+                <units>Dmnl</units>
+            </aux>
+            <flow name="Company adoption rate">
+                <doc>	The company adoption rate is calculated using the innovation diffusion theory. It represents the rate at which companies, from being potential adopters, become adopters. There is an IF THEN ELSE structure, because the company adoption fraction (as it is set up now) can be negative. It becomes negative when the monetary value is negative. This means, that when the monetary value is negative, companies will decide to drop out (i.e. from adopters they go back again to being potential adopters). The case when the monetary value is negative is here modelled as a delay: the companies will take a certain amount of time (AVERAGE DELAY TIME IN DROPPING OUT) to understand that the monetary value is negative and to act on this knowledge, and drop out.</doc>
+                <eqn>( IF company_adoption_fraction &gt; 0 THEN Company_potential_adopters*company_adoption_fraction*COMPANY_CONTACT_RATE*(Company_adopters/TOTAL_NUMBER_OF_COMPANIES) ELSE -Company_adopters/AVERAGE_DELAY_TIME_IN_DROPPING_OUT )</eqn>
+                <units>company/Month</units>
+            </flow>
+            <stock name="Company potential adopters">
+                <doc>	Companies that have not joined the hub system.</doc>
+                <outflow>Company_adoption_rate</outflow>
+                <eqn>TOTAL_NUMBER_OF_COMPANIES-1</eqn>
+                <units>company</units>
+            </stock>
+            <aux name="COMPANY CONTACT RATE">
+                <doc>	Exogenous variable that represents the contact rate, which is the frequency with which adopters and potential adopters come in contact with one another.</doc>
+                <eqn>{GET_XLS_CONSTANTS('Exogenous_values.xlsm',_'company'_,'B2')}</eqn>
+                <units>Dmnl/Month</units>
+            </aux>
+            <aux name="monetary value" access="input"/>
+            <aux name="maximum monetary value" access="input"/>
+        </variables>
+        <views>
+            <view>
+                <stock name="Company_potential_adopters" x="116" y="250"/>
+                <stock name="Company_adopters" x="424" y="244"/>
+                <flow name="Company_adoption_rate" x="272" y="249">
+                    <pts>
+                        <pt x="116" y="249"/>
+                        <pt x="424" y="249"/>
+                    </pts>
+                </flow>
+                <connector uid="7" angle="-46.493043940921524">
+                    <from>Company_potential_adopters</from>
+                    <to>Company_adoption_rate</to>
+                </connector>
+                <connector uid="8" angle="-111.75828496813354">
+                    <from>Company_adopters</from>
+                    <to>Company_adoption_rate</to>
+                </connector>
+                <aux name="TOTAL_NUMBER_OF_COMPANIES" x="100" y="176"/>
+                <aux name="COMPANY_CONTACT_RATE" x="311" y="178"/>
+                <aux name="company_adoption_fraction" x="340" y="373"/>
+                <connector uid="13" angle="10.193867959062914">
+                    <from>TOTAL_NUMBER_OF_COMPANIES</from>
+                    <to>Company_adoption_rate</to>
+                </connector>
+                <connector uid="14" angle="-115.38058942749424">
+                    <from>COMPANY_CONTACT_RATE</from>
+                    <to>Company_adoption_rate</to>
+                </connector>
+                <aux name="share_of_companies_that_use_the_hub" x="323" y="101"/>
+                <connector uid="16" angle="59.828458658837548">
+                    <from>TOTAL_NUMBER_OF_COMPANIES</from>
+                    <to>share_of_companies_that_use_the_hub</to>
+                </connector>
+                <connector uid="17" angle="72.478891313198474">
+                    <from>Company_adopters</from>
+                    <to>share_of_companies_that_use_the_hub</to>
+                </connector>
+                <aux name="monetary_value" x="419" y="497"/>
+                <aux name="INITIAL_PUSH_TIME" x="551" y="376"/>
+                <connector uid="21" angle="-211.53659659057894">
+                    <from>company_adoption_fraction</from>
+                    <to>Company_adoption_rate</to>
+                </connector>
+                <connector uid="22" angle="144.75986308520902">
+                    <from>INITIAL_PUSH_TIME</from>
+                    <to>company_adoption_fraction</to>
+                </connector>
+                <connector uid="23" angle="163.87921899745595">
+                    <from>Time</from>
+                    <to>company_adoption_fraction</to>
+                </connector>
+                <aux name="INITIAL_COMPANY_ADOPTION_FRACTION" x="548" y="309"/>
+                <connector uid="25" angle="150.88385373392114">
+                    <from>INITIAL_COMPANY_ADOPTION_FRACTION</from>
+                    <to>company_adoption_fraction</to>
+                </connector>
+                <aux name="AVERAGE_DELAY_TIME_IN_DROPPING_OUT" x="179" y="362"/>
+                <connector uid="27" angle="49.161395691500047">
+                    <from>AVERAGE_DELAY_TIME_IN_DROPPING_OUT</from>
+                    <to>Company_adoption_rate</to>
+                </connector>
+                <aux name="maximum_monetary_value" x="260" y="501"/>
+                <aux name="effect_of_monetary_value_on_company_adoption_fraction" x="327" y="449"/>
+                <connector uid="30" angle="-206.04537581794295">
+                    <from>monetary_value</from>
+                    <to>effect_of_monetary_value_on_company_adoption_fraction</to>
+                </connector>
+                <connector uid="31" angle="35.535389245739076">
+                    <from>maximum_monetary_value</from>
+                    <to>effect_of_monetary_value_on_company_adoption_fraction</to>
+                </connector>
+                <connector uid="32" angle="84.250900704788336">
+                    <from>effect_of_monetary_value_on_company_adoption_fraction</from>
+                    <to>company_adoption_fraction</to>
+                </connector>
+            </view>
+        </views>
+    </model>
+    <model name="hubs1">
+        <variables>
+            <flow name="adding hub capacity">
+                <doc>	Every time that a hub is added, the equivalent capacity is added to the system.</doc>
+                <eqn>building_hubs*SINGLE_HUB_CAPACITY</eqn>
+                <units>Box/(Month*Month)</units>
+            </flow>
+            <flow name="building hubs">
+                <eqn>DELAY(planning_hubs, ADJUSTMENT_TIME_FOR_ADDING_HUBS, 0)</eqn>
+                <units>Hub/Month</units>
+            </flow>
+            <aux name="SINGLE HUB CAPACITY">
+                <doc>	Exogenous value for the average capacity of a single hub.</doc>
+                <eqn>{GET_XLS_CONSTANTS(_'Exogenous_values.xlsm'_,_'hubs',_'B6'_)}</eqn>
+                <units>Box/(Hub*Month)</units>
+            </aux>
+            <stock name="Hubs">
+                <inflow>building_hubs</inflow>
+                <eqn>0</eqn>
+                <units>Hub</units>
+            </stock>
+            <flow name="planning hubs">
+                <doc>	This flow calculates the hubs that are added to the system at each time step. If the funds available are enough, one hub is planned.</doc>
+                <eqn>( IF Funds &gt;= BUILDING_COST_OF_HUB*ONE_HUB and utilization_rate_of_hubs &gt; MINIMUM_UTILIZATION_RATE THEN ONE_HUB/DT ELSE 0 )</eqn>
+                <units>Hub/Month</units>
+            </flow>
+            <aux name="ADJUSTMENT TIME FOR ADDING HUBS">
+                <doc>	The average time, in months, that it takes before a hub becomes useable in the system (i.e. building time of the hub).</doc>
+                <eqn>{GET_XLS_CONSTANTS('Exogenous_values.xlsm',_'hubs',_'B10')}</eqn>
+                <units>Month</units>
+            </aux>
+            <stock name="Hubs under planning">
+                <doc>	Number of hubs under planning in the system.</doc>
+                <inflow>planning_hubs</inflow>
+                <outflow>building_hubs</outflow>
+                <eqn>0</eqn>
+                <units>Hub</units>
+            </stock>
+            <stock name="Funds">
+                <doc>	Stock that represents the funds available for building hubs.</doc>
+                <inflow>adding_funds_from_private_sector</inflow>
+                <inflow>adding_funds_from_public_sector</inflow>
+                <outflow>using_funds</outflow>
+                <eqn>0</eqn>
+                <units>$</units>
+            </stock>
+            <aux name="BUILDING COST OF HUB">
+                <doc>	Exogenous variable that represents the cost of building one hub.</doc>
+                <eqn>{GET_XLS_CONSTANTS(_'Exogenous_values.xlsm'_,_'hubs'_,_'B1'_)}</eqn>
+                <units>$/Hub</units>
+            </aux>
+            <aux name="ONE HUB">
+                <doc>	Variable representing one hub in the system.</doc>
+                <eqn>1</eqn>
+                <units>Hub</units>
+            </aux>
+            <aux name="utilization rate of hubs">
+                <doc>	The utilization rate represents how full the hub is (i.e., how much demand goes through the hubs compared with the overall capacity of the hubs system). It is therefore calculated as a division between the demand that goes through the hub and the total hub system capacity. An IF THEN ELSE structure is needed because otherwise at time 0, when the total hub system capacity is 0, there is a division by 0 error.</doc>
+                <eqn>( IF total_hub_system_capacity = 0 THEN 1 ELSE Total_utilized_capacity/total_hub_system_capacity )</eqn>
+                <units>Dmnl</units>
+            </aux>
+            <aux name="MINIMUM UTILIZATION RATE">
+                <doc>	Exogenous value that represents the minimum utilization rate of the hub system. The utilization rate represents how full the hub is (i.e., how much demand goes through the hubs compared with the overall capacity of the hubs system). This minimum value is used to trigger the addition of funds to the system. When this minimum value is reached, the public sector can justify the addition of hubs.</doc>
+                <eqn>{GET_XLS_CONSTANTS('Exogenous_values.xlsm','hubs','B3')}</eqn>
+                <units>Dmnl</units>
+            </aux>
+            <aux name="total hub system capacity">
+                <doc>	Total hub system capacity, accounting for all of the hubs in the system.</doc>
+                <eqn>Hubs*SINGLE_HUB_CAPACITY</eqn>
+                <units>Box/Month</units>
+            </aux>
+            <stock name="Total available hub capacity">
+                <doc>	This stock represents the total available hub capacity. This increases when a hub is added to the system, and decreases when the companies start using the hub for their deliveries.</doc>
+                <inflow>adding_hub_capacity</inflow>
+                <outflow>using_hub_capacity</outflow>
+                <eqn>0</eqn>
+                <units>Box/Month</units>
+            </stock>
+            <aux name="share of demand that goes through the hub">
+                <doc>	This variable represents the share of the demand that goes through the hub compared with the total demand.</doc>
+                <eqn>Total_utilized_capacity/TOTAL_DEMAND</eqn>
+                <units>Dmnl</units>
+            </aux>
+            <flow name="adding funds from private sector">
+                <doc>	Rate at which the private sector decides to add funds. It depends on the minimum utilization rate, on the monetary value and on the private sector funds variable.</doc>
+                <eqn>( IF (utilization_rate_of_hubs &gt; MINIMUM_UTILIZATION_RATE and monetary_value/maximum_monetary_value &lt; 0.9) and PRIVATE_SECTOR_FUNDS_ON_OFF = 1 THEN monetary_value*PERCENTAGE_OF_PROFIT_FOR_HUB_FUNDS*Company_adopters ELSE 0 )</eqn>
+                <units>$/Month</units>
+            </flow>
+            <aux name="PRIVATE SECTOR FUNDS ON OFF">
+                <doc>	On-off variable that regulates the private funds.</doc>
+                <eqn>{GET_XLS_CONSTANTS('Exogenous_values.xlsm',_'hubs',_'B8')}</eqn>
+                <units>Dmnl</units>
+            </aux>
+            <aux name="gap of total utilized capacity">
+                <doc>	Variable that calculates the gap between the goal of total utilized capacity and the total utilized capacity.</doc>
+                <eqn>goal_of_total_utilized_capacity-Total_utilized_capacity</eqn>
+                <units>Box/Month</units>
+            </aux>
+            <aux name="ADJUSTMENT TIME FOR TOTAL UTILIZED CAPACITY">
+                <doc>	The average time, in months, that the companies that are on board in the hub system take to acknowledge the presence of a new hub and utilise it for their deliveries.</doc>
+                <eqn>{GET_XLS_CONSTANTS('Exogenous_values.xlsm',_'hubs',_'B4')}</eqn>
+                <units>Month</units>
+            </aux>
+            <aux name="goal of total utilized capacity">
+                <doc>	This variable represents the ideal goal of the utilized capacity. It is measured by multiplying the total demand by the share of companies that use the hub. This is assuming that all companies satisfy an equal share of the demand.</doc>
+                <eqn>TOTAL_DEMAND*share_of_companies_that_use_the_hub</eqn>
+                <units>Box/Month</units>
+            </aux>
+            <stock name="Total utilized capacity">
+                <doc>	This is a stock representing the total capacity in the hub system that is utilized by the companies that are onboard.</doc>
+                <inflow>using_hub_capacity</inflow>
+                <eqn>0</eqn>
+                <units>Box/Month</units>
+            </stock>
+            <flow name="using hub capacity">
+                <doc>	Outflow from the available hub capacity. It represents the act of companies of using the hub capacity for their deliveries. It is calculated by using the gap of total utilized capacity, but it also accounts for the limited availability in hub capacity (therefore it needs an IF THEN ELSE structure).</doc>
+                <eqn>( IF gap_of_total_utilized_capacity &lt; Total_available_hub_capacity THEN gap_of_total_utilized_capacity/ADJUSTMENT_TIME_FOR_TOTAL_UTILIZED_CAPACITY ELSE Total_available_hub_capacity/ADJUSTMENT_TIME_FOR_TOTAL_UTILIZED_CAPACITY )</eqn>
+                <units>Box/(Month*Month)</units>
+            </flow>
+            <aux name="TOTAL DEMAND">
+                <doc>	Exogenous value for the total demand of goods.</doc>
+                <eqn>{GET_XLS_CONSTANTS(_'Exogenous_values.xlsm'_,_'hubs'_,_'B5'_)}</eqn>
+                <units>Box/Month</units>
+            </aux>
+            <aux name="PERCENTAGE OF PROFIT FOR HUB FUNDS">
+                <doc>	Exogenous value that represents the percentage of profit that the private sector decides to reinvest in hubs.</doc>
+                <eqn>{GET_XLS_CONSTANTS('Exogenous_values.xlsm',_'hubs','B9')}</eqn>
+                <units>Dmnl</units>
+            </aux>
+            <flow name="adding funds from public sector">
+                <doc>	This variable accounts for the process of adding funds from the public sector to the system. Every time step, if the hubs utilization rate is higher than the minimum utilization rate, then a certain amount of funds is added. If the utilization rate is low, no funds are added (in this way, if the infrastructure is unutilized, no extra infrastructure is built). The exact amount depends on the gap of CO2 emissions and on the gap of vehicle km. In this way, the larger the gap(s), the higher the amount of funds that go into the system. Moreover, there is also a check that when all of the demand already goes through the hub system, we don't need to have more funds.</doc>
+                <eqn>( IF utilization_rate_of_hubs &lt; MINIMUM_UTILIZATION_RATE or PUBLIC_SECTOR_FUNDS_ON_OFF = 0 or share_of_demand_that_goes_through_the_hub &gt; 0.99 THEN 0 ELSE MAXIMUM_FUNDS_PER_UNIT_OF_TIME*(gap_of_CO2_emissions+gap_of_vehicle_km) )</eqn>
+                <units>$/Month</units>
+            </flow>
+            <flow name="using funds">
+                <doc>	Flow that represents the usage of funds in the system to build hubs.</doc>
+                <eqn>BUILDING_COST_OF_HUB*planning_hubs</eqn>
+                <units>$/Month</units>
+            </flow>
+            <aux name="PUBLIC SECTOR FUNDS ON OFF">
+                <doc>	On-off variable that regulates the public funds.</doc>
+                <eqn>{GET_XLS_CONSTANTS('Exogenous_values.xlsm',_'hubs',_'B7')}</eqn>
+                <units>Dmnl</units>
+            </aux>
+            <aux name="MAXIMUM FUNDS PER UNIT OF TIME">
+                <doc>	This is the maximum amount of funds per month that the public sector is willing to put into the system.</doc>
+                <eqn>{GET_XLS_CONSTANTS(_'Exogenous_values.xlsm'_,_'hubs'_,_'B2'_)}</eqn>
+                <units>$/Month</units>
+            </aux>
+            <aux name="share of companies that use the hub" access="input"/>
+            <aux name="monetary value" access="input"/>
+            <aux name="maximum monetary value" access="input"/>
+            <stock name="Company adopters" access="input"/>
+            <aux name="gap of CO2 emissions" access="input"/>
+            <aux name="gap of vehicle km" access="input"/>
+        </variables>
+        <views>
+            <view>
+                <stock name="Funds" x="424" y="280"/>
+                <flow name="adding_funds_from_public_sector" x="324" y="268">
+                    <pts>
+                        <pt x="252" y="268"/>
+                        <pt x="424" y="268"/>
+                    </pts>
+                </flow>
+                <flow name="using_funds" x="520" y="280">
+                    <pts>
+                        <pt x="424" y="280"/>
+                        <pt x="592" y="280"/>
+                    </pts>
+                </flow>
+                <stock name="Hubs_under_planning" x="732" y="436"/>
+                <flow name="planning_hubs" x="604" y="436">
+                    <pts>
+                        <pt x="507" y="436"/>
+                        <pt x="732" y="436"/>
+                    </pts>
+                </flow>
+                <connector uid="76" angle="-62.495367998585124">
+                    <from>Funds</from>
+                    <to>planning_hubs</to>
+                </connector>
+                <connector uid="77" angle="87.161783329027529">
+                    <from>planning_hubs</from>
+                    <to>using_funds</to>
+                </connector>
+                <aux name="BUILDING_COST_OF_HUB" x="659" y="331"/>
+                <connector uid="79" angle="238.2457653403776">
+                    <from>BUILDING_COST_OF_HUB</from>
+                    <to>planning_hubs</to>
+                </connector>
+                <connector uid="80" angle="-193.83478963826695">
+                    <from>BUILDING_COST_OF_HUB</from>
+                    <to>using_funds</to>
+                </connector>
+                <aux name="MAXIMUM_FUNDS_PER_UNIT_OF_TIME" x="216" y="388"/>
+                <connector uid="82" angle="43.612260997312148">
+                    <from>MAXIMUM_FUNDS_PER_UNIT_OF_TIME</from>
+                    <to>adding_funds_from_public_sector</to>
+                </connector>
+                <aux name="ONE_HUB" x="608" y="563"/>
+                <connector uid="84" angle="91.818680726231932">
+                    <from>ONE_HUB</from>
+                    <to>planning_hubs</to>
+                </connector>
+                <aux name="gap_of_CO2_emissions" x="412" y="367"/>
+                <connector uid="86" angle="138.17959601396745">
+                    <from>gap_of_CO2_emissions</from>
+                    <to>adding_funds_from_public_sector</to>
+                </connector>
+                <aux name="MINIMUM_UTILIZATION_RATE" x="240" y="139"/>
+                <stock name="Total_available_hub_capacity" x="796" y="635"/>
+                <stock name="Total_utilized_capacity" x="1012" y="635"/>
+                <flow name="using_hub_capacity" x="899" y="635">
+                    <pts>
+                        <pt x="796" y="635"/>
+                        <pt x="1012" y="635"/>
+                    </pts>
+                </flow>
+                <flow name="adding_hub_capacity" x="688" y="647">
+                    <pts>
+                        <pt x="603" y="647"/>
+                        <pt x="796" y="647"/>
+                    </pts>
+                </flow>
+                <aux name="TOTAL_DEMAND" x="1227" y="635"/>
+                <aux name="total_hub_system_capacity" x="972" y="532"/>
+                <aux name="SINGLE_HUB_CAPACITY" x="759" y="559"/>
+                <aux name="share_of_demand_that_goes_through_the_hub" x="1230" y="564"/>
+                <connector uid="104" angle="-5.7703010978712683">
+                    <from>SINGLE_HUB_CAPACITY</from>
+                    <to>total_hub_system_capacity</to>
+                </connector>
+                <connector uid="105" angle="88.726253621518936">
+                    <from>TOTAL_DEMAND</from>
+                    <to>share_of_demand_that_goes_through_the_hub</to>
+                </connector>
+                <aux name="utilization_rate_of_hubs" x="1083" y="515"/>
+                <connector uid="107" angle="62.359912062635487">
+                    <from>total_hub_system_capacity</from>
+                    <to>utilization_rate_of_hubs</to>
+                </connector>
+                <connector uid="108" angle="198.75247378552575">
+                    <from>SINGLE_HUB_CAPACITY</from>
+                    <to>adding_hub_capacity</to>
+                </connector>
+                <aux name="ADJUSTMENT_TIME_FOR_TOTAL_UTILIZED_CAPACITY" x="939" y="587"/>
+                <connector uid="110" angle="-12.287446096840654">
+                    <from>Total_utilized_capacity</from>
+                    <to>share_of_demand_that_goes_through_the_hub</to>
+                </connector>
+                <connector uid="111" angle="-114.65589874408164">
+                    <from>ADJUSTMENT_TIME_FOR_TOTAL_UTILIZED_CAPACITY</from>
+                    <to>using_hub_capacity</to>
+                </connector>
+                <connector uid="112" angle="23.029509741450781">
+                    <from>Total_utilized_capacity</from>
+                    <to>utilization_rate_of_hubs</to>
+                </connector>
+                <alias x="307" y="208" uid="113">
+                    <of>utilization_rate_of_hubs</of>
+                </alias>
+                <aux name="share_of_companies_that_use_the_hub" x="1235" y="755"/>
+                <aux name="goal_of_total_utilized_capacity" x="1119" y="707"/>
+                <connector uid="116" angle="-144.82527704214851">
+                    <from>TOTAL_DEMAND</from>
+                    <to>goal_of_total_utilized_capacity</to>
+                </connector>
+                <connector uid="117" angle="-201.19571021064678">
+                    <from>share_of_companies_that_use_the_hub</from>
+                    <to>goal_of_total_utilized_capacity</to>
+                </connector>
+                <aux name="gap_of_total_utilized_capacity" x="1000" y="743"/>
+                <connector uid="119" angle="-118.16833124175845">
+                    <from>goal_of_total_utilized_capacity</from>
+                    <to>gap_of_total_utilized_capacity</to>
+                </connector>
+                <connector uid="120" angle="-83.062803076441526">
+                    <from>Total_available_hub_capacity</from>
+                    <to>using_hub_capacity</to>
+                </connector>
+                <connector uid="121" angle="-156.15123242288212">
+                    <from>gap_of_total_utilized_capacity</from>
+                    <to>using_hub_capacity</to>
+                </connector>
+                <connector uid="122" angle="-53.187802011904367">
+                    <from>Total_utilized_capacity</from>
+                    <to>gap_of_total_utilized_capacity</to>
+                </connector>
+                <flow name="adding_funds_from_private_sector" x="420" y="208">
+                    <pts>
+                        <pt x="420" y="160"/>
+                        <pt x="420" y="280"/>
+                    </pts>
+                </flow>
+                <aux name="monetary_value" x="659" y="203"/>
+                <connector uid="129" angle="179.77526237003255">
+                    <from>monetary_value</from>
+                    <to>adding_funds_from_private_sector</to>
+                </connector>
+                <aux name="PERCENTAGE_OF_PROFIT_FOR_HUB_FUNDS" x="672" y="256"/>
+                <connector uid="131" angle="166.50426671920417">
+                    <from>PERCENTAGE_OF_PROFIT_FOR_HUB_FUNDS</from>
+                    <to>adding_funds_from_private_sector</to>
+                </connector>
+                <aux name="PRIVATE_SECTOR_FUNDS_ON_OFF" x="444" y="100"/>
+                <aux name="PUBLIC_SECTOR_FUNDS_ON_OFF" x="144" y="316"/>
+                <connector uid="134" angle="-75.840144220768366">
+                    <from>PRIVATE_SECTOR_FUNDS_ON_OFF</from>
+                    <to>adding_funds_from_private_sector</to>
+                </connector>
+                <aux name="gap_of_vehicle_km" x="328" y="400"/>
+                <connector uid="136" angle="-267.64271485046481">
+                    <from>gap_of_vehicle_km</from>
+                    <to>adding_funds_from_public_sector</to>
+                </connector>
+                <alias x="163" y="244" uid="137">
+                    <of>share_of_demand_that_goes_through_the_hub</of>
+                </alias>
+                <connector uid="138" angle="-12.874602063931462">
+                    <from>
+                        <alias uid="137"/>
+                    </from>
+                    <to>adding_funds_from_public_sector</to>
+                </connector>
+                <connector uid="139" angle="243.19304608987142">
+                    <from>
+                        <alias uid="113"/>
+                    </from>
+                    <to>adding_funds_from_public_sector</to>
+                </connector>
+                <connector uid="140" angle="266.57806462227541">
+                    <from>MINIMUM_UTILIZATION_RATE</from>
+                    <to>adding_funds_from_public_sector</to>
+                </connector>
+                <connector uid="141" angle="8.0955773106773989">
+                    <from>PUBLIC_SECTOR_FUNDS_ON_OFF</from>
+                    <to>adding_funds_from_public_sector</to>
+                </connector>
+                <aux name="maximum_monetary_value" x="636" y="148"/>
+                <connector uid="143" angle="196.61465069786996">
+                    <from>maximum_monetary_value</from>
+                    <to>adding_funds_from_private_sector</to>
+                </connector>
+                <connector uid="144" angle="-6.4054848925543979">
+                    <from>MINIMUM_UTILIZATION_RATE</from>
+                    <to>adding_funds_from_private_sector</to>
+                </connector>
+                <connector uid="145" angle="17.302682505560171">
+                    <from>
+                        <alias uid="113"/>
+                    </from>
+                    <to>adding_funds_from_private_sector</to>
+                </connector>
+                <connector uid="146" angle="201.92348843654531">
+                    <from>MINIMUM_UTILIZATION_RATE</from>
+                    <to>planning_hubs</to>
+                </connector>
+                <connector uid="147" angle="231.28243322475311">
+                    <from>
+                        <alias uid="113"/>
+                    </from>
+                    <to>planning_hubs</to>
+                </connector>
+                <stock name="Company_adopters" x="564" y="139"/>
+                <connector uid="149" angle="214.45334456268603">
+                    <from>Company_adopters</from>
+                    <to>adding_funds_from_private_sector</to>
+                </connector>
+                <aux name="ADJUSTMENT_TIME_FOR_ADDING_HUBS" x="912" y="337"/>
+                <connector uid="155" angle="9.2515730688871969">
+                    <from>DT</from>
+                    <to>planning_hubs</to>
+                </connector>
+                <stock name="Hubs" x="938" y="436"/>
+                <connector uid="157" angle="-84.064447718759624">
+                    <from>Hubs</from>
+                    <to>total_hub_system_capacity</to>
+                </connector>
+                <flow name="building_hubs" x="835" y="435">
+                    <pts>
+                        <pt x="732" y="435"/>
+                        <pt x="938" y="435"/>
+                    </pts>
+                </flow>
+                <connector uid="175" angle="191.94080239286649">
+                    <from>building_hubs</from>
+                    <to>adding_hub_capacity</to>
+                </connector>
+                <connector uid="176" angle="227.24249666293062">
+                    <from>ADJUSTMENT_TIME_FOR_ADDING_HUBS</from>
+                    <to>building_hubs</to>
+                </connector>
+                <connector uid="177" angle="67.530928154388562">
+                    <from>planning_hubs</from>
+                    <to>building_hubs</to>
+                </connector>
+            </view>
+        </views>
+    </model>
+    <model name="cost">
+        <variables>
+            <aux name="cost of using the hub system">
+                <doc>	This cost represents the cost that each company has to pay, monthly, to be part and use the hub system. There is a IF THEN ELSE function, because if the number of companies on board is smaller than one (which practically means that no company is onboard), the cost, instead of going up to more than the total operation cost of one hub, stays at that value. Otherwise, if there is at least a company on board, the cost is shared between the number of companies that is onboard.</doc>
+                <eqn>( IF share_of_companies_that_use_the_hub*TOTAL_NUMBER_OF_COMPANIES &lt; 1 THEN TOTAL_OPERATION_COST_OF_ONE_HUB*Hubs/ONE_COMPANY ELSE TOTAL_OPERATION_COST_OF_ONE_HUB*Hubs/(share_of_companies_that_use_the_hub*TOTAL_NUMBER_OF_COMPANIES) )</eqn>
+                <units>$/(Month*company)</units>
+            </aux>
+            <aux name="TOTAL OPERATION COST OF ONE HUB">
+                <doc>	Exogenous value representing the total monthly operational cost of one hub. This is supposedly payed by the companies that are using the hub system.</doc>
+                <eqn>{GET_XLS_CONSTANTS('Exogenous_values.xlsm',_'cost'_,_'B1'_)}</eqn>
+                <units>$/(Month*Hub)</units>
+            </aux>
+            <aux name="ONE COMPANY">
+                <doc>	Variable that is only used in the cost of using the hub system variable.</doc>
+                <eqn>1</eqn>
+                <units>company</units>
+            </aux>
+            <aux name="time related cost without hubs">
+                <doc>	Cost per box that is attributable to the time of the delivery, for the boxes that do not go through the hub system.</doc>
+                <eqn>COST_PER_HOUR*INITIAL_DELIVERY_TIME</eqn>
+                <units>$/Box</units>
+            </aux>
+            <aux name="COST PER HOUR">
+                <doc>	Cost per hour of delivery. Exogenous value.</doc>
+                <eqn>{GET_XLS_CONSTANTS('Exogenous_values.xlsm','cost','B7')}</eqn>
+                <units>$/Hour</units>
+            </aux>
+            <aux name="monetary value">
+                <doc>	Monetary value that the companies would have in joining the hubs system, compared with not joining the hub system and carrying out their deliveries by themselves. This value can be negative if the cost of using the hubs is higher than the benefit from routing and consolidation efficiency. Also the extra cost of due to potential higher handling costs for the boxes that go through the hub system.</doc>
+                <eqn>cost_benefit_from_routing_and_consolidation_efficiency+cost_benefit_from_shorter_delivery_time-cost_of_using_the_hub_system-extra_cost_for_demand_that_goes_through_the_hub_system</eqn>
+                <units>$/(Month*company)</units>
+            </aux>
+            <aux name="cost benefit from routing and consolidation efficiency">
+                <doc>	This is the cost benefit that the company has by joining the hub in terms of routing and consolidation efficiency. It compares the cost without hubs and the cost with hubs.</doc>
+                <eqn>(transport_operation_cost_per_box_without_hubs-transport_operation_cost_per_box_with_hubs)/TOTAL_NUMBER_OF_COMPANIES*TOTAL_DEMAND</eqn>
+                <units>$/(Month*company)</units>
+            </aux>
+            <aux name="cost benefit from shorter delivery time">
+                <doc>	The benefit is calculated comparing the time-related cost of the boxes that do not go throught the hub system with the time-related cost of the boxes that go through the hub system. This has to be multiplied by the demand per company to obtain an average value per month per company.</doc>
+                <eqn>(time_related_cost_without_hubs-time_related_cost_with_hubs)*TOTAL_DEMAND/TOTAL_NUMBER_OF_COMPANIES</eqn>
+                <units>$/(Month*company)</units>
+            </aux>
+            <aux name="extra cost for demand that goes through the hub system">
+                <doc>	Total cost per company per month due to the higher handling cost for the boxes that go throguh the hub system. This considers also the potential extra delivery time due to transhipment and the barrier of branding.</doc>
+                <eqn>EXTRA_HANDLING_COST_PER_BOX*share_of_demand_that_goes_through_the_hub*TOTAL_DEMAND/Company_adopters</eqn>
+                <units>$/(company*Month)</units>
+            </aux>
+            <aux name="time related cost with hubs">
+                <doc>	Cost per box that is attributable to the time of the delivery, for the boxes that go through the hub system.</doc>
+                <eqn>Delivery_time*COST_PER_HOUR</eqn>
+                <units>$/Box</units>
+            </aux>
+            <aux name="maximum monetary value">
+                <doc>	This variable calculates the maximum monetary value that the companies would be able to get from the most optimal use of the hubs. This variable is mainly used to calculate the effect of the monetary value on the decision of joining the hubs system.</doc>
+                <eqn>(transport_operation_cost_per_box_without_hubs-(MINIMUM_KM_REQUIRED_PER_BOX*COST_PER_KM+COST_PER_VEHICLE*MINIMUM_NUMBER_OF_VEHICLES_REQUIRED_PER_BOX+COST_PER_HOUR*MINIMUM_DELIVERY_TIME))*TOTAL_DEMAND/TOTAL_NUMBER_OF_COMPANIES</eqn>
+                <units>$/(Month*company)</units>
+            </aux>
+            <aux name="transport operation cost per box without hubs">
+                <doc>	The operation cost without hubs is the cost of deliveries when they do not go through the hub system. It is calculated by taking the km required to satisfy the demand without hubs times the cost per km summed with the number of vehicles required to satisfy the demand without hubs times the cost per vehicle. This cost is fixed and does not change throughout the simulation.</doc>
+                <eqn>km_required_per_box_without_hubs*COST_PER_KM+number_of_vehicles_required_per_box_without_hubs*COST_PER_VEHICLE</eqn>
+                <units>$/Box</units>
+            </aux>
+            <aux name="MINIMUM KM REQUIRED PER BOX">
+                <doc>	Exogenous value that represents the ideal minimum number of km required to satisfy the demand for every box.</doc>
+                <eqn>{GET_XLS_CONSTANTS('Exogenous_values.xlsm','cost','B3')}</eqn>
+                <units>km/Box</units>
+            </aux>
+            <aux name="COST PER KM">
+                <doc>	Exogenous values representing the cost per km (including fuel costs)</doc>
+                <eqn>{GET_XLS_CONSTANTS('Exogenous_values.xlsm','cost','B5')}</eqn>
+                <units>$/km</units>
+            </aux>
+            <aux name="COST PER VEHICLE">
+                <doc>	Exogenous values representing the (operational) cost per vehicle (including drivers costs).</doc>
+                <eqn>{GET_XLS_CONSTANTS('Exogenous_values.xlsm','cost','B4')}</eqn>
+                <units>$/vehicle</units>
+            </aux>
+            <aux name="MINIMUM NUMBER OF VEHICLES REQUIRED PER BOX">
+                <doc>	Exogenous value that represents the ideal minimum number of vehicles required to satisfy the demand per box.</doc>
+                <eqn>{GET_XLS_CONSTANTS('Exogenous_values.xlsm','cost','B2')}</eqn>
+                <units>vehicle/Box</units>
+            </aux>
+            <aux name="EXTRA HANDLING COST PER BOX">
+                <doc>	Input variable that measures the extra per box cost due to the fact that the boxes need to be handled in a different way when going through the hub system. This considers also the potential extra delivery time due to transhipment and the barrier of branding.</doc>
+                <eqn>{GET_XLS_CONSTANTS('Exogenous_values.xlsm','cost','B6')}</eqn>
+                <units>$/Box</units>
+            </aux>
+            <aux name="km required per box without hubs">
+                <doc>	This variable calculates the km required to satisfy the demand without using the hubs. It does so by dividing the MINIMUM KM REQUIRED TO SATISFY THE DEMAND by the INITIAL ROUTING EFFICIENCY</doc>
+                <eqn>MINIMUM_KM_REQUIRED_PER_BOX/INITIAL_ROUTING_EFFICIENCY</eqn>
+                <units>km/Box</units>
+            </aux>
+            <aux name="number of vehicles required per box without hubs">
+                <doc>	This variable calculates the number of vehicles required to satisfy the demand without using the hubs. It does so by dividing the MINIMUM NUMBER OF VEHICLES REQUIRED TO SATISFY THE DEMAND by the INITIAL FILL RATE</doc>
+                <eqn>MINIMUM_NUMBER_OF_VEHICLES_REQUIRED_PER_BOX/INITIAL_FILL_RATE</eqn>
+                <units>vehicle/Box</units>
+            </aux>
+            <aux name="km required per box with hubs">
+                <doc>	Km that are required to satisfy the demand that goes through the hub. These are calculated by dividing the minimum by the routing efficiency (which is improved only if you use the hubs system)</doc>
+                <eqn>MINIMUM_KM_REQUIRED_PER_BOX/Routing_efficiency</eqn>
+                <units>km/Box</units>
+            </aux>
+            <aux name="number of vehicles required per box with hubs">
+                <doc>	Vehicles that are required to satisfy the demand that goes through the hub. These are calculated by dividing the minimum by the fill rate (which is improved only if you use the hubs system)</doc>
+                <eqn>MINIMUM_NUMBER_OF_VEHICLES_REQUIRED_PER_BOX/Fill_rate</eqn>
+                <units>vehicle/Box</units>
+            </aux>
+            <aux name="transport operation cost per box with hubs">
+                <doc>	The operation cost with hubs is the cost of deliveries when they go through the hub system. It is calculated by multiplying the number of vehicles times the cost per vehicle and summing with the cost per km multiplied by the km. This cost is calculated per demand unit.</doc>
+                <eqn>number_of_vehicles_required_per_box_with_hubs*COST_PER_VEHICLE+COST_PER_KM*km_required_per_box_with_hubs</eqn>
+                <units>$/Box</units>
+            </aux>
+            <stock name="Hubs" access="input"/>
+            <aux name="share of companies that use the hub" access="input"/>
+            <aux name="TOTAL NUMBER OF COMPANIES" access="input"/>
+            <aux name="INITIAL DELIVERY TIME" access="input"/>
+            <aux name="MINIMUM DELIVERY TIME" access="input"/>
+            <stock name="Delivery time" access="input"/>
+            <aux name="share of demand that goes through the hub" access="input"/>
+            <stock name="Company adopters" access="input"/>
+            <aux name="INITIAL ROUTING EFFICIENCY" access="input"/>
+            <aux name="INITIAL FILL RATE" access="input"/>
+            <stock name="Routing efficiency" access="input"/>
+            <stock name="Fill rate" access="input"/>
+            <aux name="TOTAL DEMAND" access="input"/>
+        </variables>
+        <views>
+            <view>
+                <aux name="cost_of_using_the_hub_system" x="312" y="543"/>
+                <aux name="monetary_value" x="519" y="544"/>
+                <aux name="share_of_companies_that_use_the_hub" x="112" y="537"/>
+                <connector uid="207" angle="-5.8039747816304299">
+                    <from>share_of_companies_that_use_the_hub</from>
+                    <to>cost_of_using_the_hub_system</to>
+                </connector>
+                <aux name="TOTAL_OPERATION_COST_OF_ONE_HUB" x="100" y="664"/>
+                <connector uid="209" angle="29.302296086628246">
+                    <from>TOTAL_OPERATION_COST_OF_ONE_HUB</from>
+                    <to>cost_of_using_the_hub_system</to>
+                </connector>
+                <aux name="transport_operation_cost_per_box_without_hubs" x="636" y="373"/>
+                <aux name="transport_operation_cost_per_box_with_hubs" x="440" y="425"/>
+                <aux name="TOTAL_NUMBER_OF_COMPANIES" x="555" y="636"/>
+                <connector uid="213" angle="-170.99327130570504">
+                    <from>TOTAL_NUMBER_OF_COMPANIES</from>
+                    <to>cost_of_using_the_hub_system</to>
+                </connector>
+                <aux name="ONE_COMPANY" x="159" y="477"/>
+                <connector uid="215" angle="-22.175860700562893">
+                    <from>ONE_COMPANY</from>
+                    <to>cost_of_using_the_hub_system</to>
+                </connector>
+                <aux name="number_of_vehicles_required_per_box_with_hubs" x="372" y="261"/>
+                <aux name="km_required_per_box_with_hubs" x="235" y="312"/>
+                <aux name="COST_PER_VEHICLE" x="490" y="292"/>
+                <aux name="COST_PER_KM" x="492" y="344"/>
+                <aux name="MINIMUM_NUMBER_OF_VEHICLES_REQUIRED_PER_BOX" x="514" y="165"/>
+                <aux name="MINIMUM_KM_REQUIRED_PER_BOX" x="676" y="152"/>
+                <connector uid="222" angle="22.026018169832241">
+                    <from>COST_PER_KM</from>
+                    <to>transport_operation_cost_per_box_without_hubs</to>
+                </connector>
+                <connector uid="223" angle="-13.534507579202426">
+                    <from>COST_PER_VEHICLE</from>
+                    <to>transport_operation_cost_per_box_without_hubs</to>
+                </connector>
+                <aux name="TOTAL_DEMAND" x="756" y="412"/>
+                <connector uid="225" angle="203.34684232613324">
+                    <from>COST_PER_KM</from>
+                    <to>transport_operation_cost_per_box_with_hubs</to>
+                </connector>
+                <connector uid="226" angle="204.78230509631874">
+                    <from>COST_PER_VEHICLE</from>
+                    <to>transport_operation_cost_per_box_with_hubs</to>
+                </connector>
+                <connector uid="227" angle="258.4415460495062">
+                    <from>number_of_vehicles_required_per_box_with_hubs</from>
+                    <to>transport_operation_cost_per_box_with_hubs</to>
+                </connector>
+                <connector uid="228" angle="0.23937517758716353">
+                    <from>cost_of_using_the_hub_system</from>
+                    <to>monetary_value</to>
+                </connector>
+                <aux name="cost_benefit_from_routing_and_consolidation_efficiency" x="651" y="483"/>
+                <connector uid="230" angle="-14.606432785495485">
+                    <from>transport_operation_cost_per_box_with_hubs</from>
+                    <to>cost_benefit_from_routing_and_consolidation_efficiency</to>
+                </connector>
+                <connector uid="231" angle="-84.473268878417883">
+                    <from>transport_operation_cost_per_box_without_hubs</from>
+                    <to>cost_benefit_from_routing_and_consolidation_efficiency</to>
+                </connector>
+                <connector uid="232" angle="-145.06135966285382">
+                    <from>TOTAL_DEMAND</from>
+                    <to>cost_benefit_from_routing_and_consolidation_efficiency</to>
+                </connector>
+                <connector uid="233" angle="59.569491193112299">
+                    <from>TOTAL_NUMBER_OF_COMPANIES</from>
+                    <to>cost_benefit_from_routing_and_consolidation_efficiency</to>
+                </connector>
+                <connector uid="234" angle="-153.59986364933695">
+                    <from>cost_benefit_from_routing_and_consolidation_efficiency</from>
+                    <to>monetary_value</to>
+                </connector>
+                <connector uid="235" angle="133.10632822793275">
+                    <from>MINIMUM_KM_REQUIRED_PER_BOX</from>
+                    <to>km_required_per_box_with_hubs</to>
+                </connector>
+                <connector uid="236" angle="183.90936083498582">
+                    <from>MINIMUM_NUMBER_OF_VEHICLES_REQUIRED_PER_BOX</from>
+                    <to>number_of_vehicles_required_per_box_with_hubs</to>
+                </connector>
+                <aux name="INITIAL_FILL_RATE" x="471" y="225"/>
+                <aux name="INITIAL_ROUTING_EFFICIENCY" x="927" y="213"/>
+                <stock name="Fill_rate" x="307" y="201"/>
+                <stock name="Routing_efficiency" x="120" y="345"/>
+                <connector uid="241" angle="-54.414853830691499">
+                    <from>km_required_per_box_with_hubs</from>
+                    <to>transport_operation_cost_per_box_with_hubs</to>
+                </connector>
+                <connector uid="242" angle="-43.763794460883418">
+                    <from>Fill_rate</from>
+                    <to>number_of_vehicles_required_per_box_with_hubs</to>
+                </connector>
+                <connector uid="243" angle="18.281627149473664">
+                    <from>Routing_efficiency</from>
+                    <to>km_required_per_box_with_hubs</to>
+                </connector>
+                <aux name="maximum_monetary_value" x="928" y="453"/>
+                <alias x="988" y="597" uid="245">
+                    <of>COST_PER_KM</of>
+                </alias>
+                <alias x="1036" y="521" uid="246">
+                    <of>COST_PER_VEHICLE</of>
+                </alias>
+                <alias x="1080" y="447" uid="247">
+                    <of>MINIMUM_NUMBER_OF_VEHICLES_REQUIRED_PER_BOX</of>
+                </alias>
+                <alias x="862" y="555" uid="248">
+                    <of>MINIMUM_KM_REQUIRED_PER_BOX</of>
+                </alias>
+                <connector uid="249" angle="18.519647873764512">
+                    <from>transport_operation_cost_per_box_without_hubs</from>
+                    <to>maximum_monetary_value</to>
+                </connector>
+                <connector uid="250" angle="180.19180099956861">
+                    <from>
+                        <alias uid="247"/>
+                    </from>
+                    <to>maximum_monetary_value</to>
+                </connector>
+                <connector uid="251" angle="-209.34895999726749">
+                    <from>
+                        <alias uid="246"/>
+                    </from>
+                    <to>maximum_monetary_value</to>
+                </connector>
+                <connector uid="252" angle="-246.69762330478676">
+                    <from>
+                        <alias uid="245"/>
+                    </from>
+                    <to>maximum_monetary_value</to>
+                </connector>
+                <connector uid="253" angle="58.779441394908531">
+                    <from>
+                        <alias uid="248"/>
+                    </from>
+                    <to>maximum_monetary_value</to>
+                </connector>
+                <connector uid="254" angle="-11.979871762502867">
+                    <from>TOTAL_DEMAND</from>
+                    <to>maximum_monetary_value</to>
+                </connector>
+                <connector uid="255" angle="26.718346944977753">
+                    <from>TOTAL_NUMBER_OF_COMPANIES</from>
+                    <to>maximum_monetary_value</to>
+                </connector>
+                <aux name="number_of_vehicles_required_per_box_without_hubs" x="616" y="260"/>
+                <aux name="km_required_per_box_without_hubs" x="775" y="280"/>
+                <connector uid="258" angle="-11.419172615545335">
+                    <from>INITIAL_FILL_RATE</from>
+                    <to>number_of_vehicles_required_per_box_without_hubs</to>
+                </connector>
+                <connector uid="259" angle="-43.072596811989143">
+                    <from>MINIMUM_NUMBER_OF_VEHICLES_REQUIRED_PER_BOX</from>
+                    <to>number_of_vehicles_required_per_box_without_hubs</to>
+                </connector>
+                <connector uid="260" angle="-52.737379806231417">
+                    <from>MINIMUM_KM_REQUIRED_PER_BOX</from>
+                    <to>km_required_per_box_without_hubs</to>
+                </connector>
+                <connector uid="261" angle="-156.17902512371495">
+                    <from>INITIAL_ROUTING_EFFICIENCY</from>
+                    <to>km_required_per_box_without_hubs</to>
+                </connector>
+                <connector uid="262" angle="-82.63484277136115">
+                    <from>number_of_vehicles_required_per_box_without_hubs</from>
+                    <to>transport_operation_cost_per_box_without_hubs</to>
+                </connector>
+                <connector uid="263" angle="-144.03174946997726">
+                    <from>km_required_per_box_without_hubs</from>
+                    <to>transport_operation_cost_per_box_without_hubs</to>
+                </connector>
+                <aux name="extra_cost_for_demand_that_goes_through_the_hub_system" x="400" y="700"/>
+                <aux name="EXTRA_HANDLING_COST_PER_BOX" x="544" y="744"/>
+                <aux name="share_of_demand_that_goes_through_the_hub" x="258" y="765"/>
+                <alias x="423" y="769" uid="267">
+                    <of>TOTAL_DEMAND</of>
+                </alias>
+                <connector uid="268" angle="132.35850875096099">
+                    <from>EXTRA_HANDLING_COST_PER_BOX</from>
+                    <to>extra_cost_for_demand_that_goes_through_the_hub_system</to>
+                </connector>
+                <connector uid="269" angle="104.28511353194007">
+                    <from>
+                        <alias uid="267"/>
+                    </from>
+                    <to>extra_cost_for_demand_that_goes_through_the_hub_system</to>
+                </connector>
+                <connector uid="270" angle="25.543976584103774">
+                    <from>share_of_demand_that_goes_through_the_hub</from>
+                    <to>extra_cost_for_demand_that_goes_through_the_hub_system</to>
+                </connector>
+                <connector uid="271" angle="52.418754454882574">
+                    <from>extra_cost_for_demand_that_goes_through_the_hub_system</from>
+                    <to>monetary_value</to>
+                </connector>
+                <stock name="Company_adopters" x="220" y="701"/>
+                <connector uid="273" angle="1.1863580611970121">
+                    <from>Company_adopters</from>
+                    <to>extra_cost_for_demand_that_goes_through_the_hub_system</to>
+                </connector>
+                <aux name="COST_PER_HOUR" x="1043" y="765"/>
+                <aux name="cost_benefit_from_shorter_delivery_time" x="747" y="653"/>
+                <connector uid="276" angle="-186.65161091099677">
+                    <from>cost_benefit_from_shorter_delivery_time</from>
+                    <to>monetary_value</to>
+                </connector>
+                <aux name="time_related_cost_with_hubs" x="771" y="759"/>
+                <aux name="time_related_cost_without_hubs" x="888" y="701"/>
+                <aux name="INITIAL_DELIVERY_TIME" x="930" y="636"/>
+                <stock name="Delivery_time" x="712" y="836"/>
+                <connector uid="281" angle="-198.99610941908622">
+                    <from>COST_PER_HOUR</from>
+                    <to>time_related_cost_without_hubs</to>
+                </connector>
+                <connector uid="282" angle="-122.63450130201301">
+                    <from>INITIAL_DELIVERY_TIME</from>
+                    <to>time_related_cost_without_hubs</to>
+                </connector>
+                <connector uid="283" angle="-179.79079296353638">
+                    <from>COST_PER_HOUR</from>
+                    <to>time_related_cost_with_hubs</to>
+                </connector>
+                <connector uid="284" angle="50.991287440531302">
+                    <from>Delivery_time</from>
+                    <to>time_related_cost_with_hubs</to>
+                </connector>
+                <connector uid="285" angle="-256.49585728122406">
+                    <from>time_related_cost_with_hubs</from>
+                    <to>cost_benefit_from_shorter_delivery_time</to>
+                </connector>
+                <connector uid="286" angle="160.85299943991026">
+                    <from>time_related_cost_without_hubs</from>
+                    <to>cost_benefit_from_shorter_delivery_time</to>
+                </connector>
+                <connector uid="287" angle="267.11766914218538">
+                    <from>TOTAL_DEMAND</from>
+                    <to>cost_benefit_from_shorter_delivery_time</to>
+                </connector>
+                <connector uid="288" angle="-7.9158080794337309">
+                    <from>TOTAL_NUMBER_OF_COMPANIES</from>
+                    <to>cost_benefit_from_shorter_delivery_time</to>
+                </connector>
+                <connector uid="289" angle="78.364562155834307">
+                    <from>COST_PER_HOUR</from>
+                    <to>maximum_monetary_value</to>
+                </connector>
+                <aux name="MINIMUM_DELIVERY_TIME" x="1016" y="372"/>
+                <connector uid="291" angle="-136.01220335197752">
+                    <from>MINIMUM_DELIVERY_TIME</from>
+                    <to>maximum_monetary_value</to>
+                </connector>
+                <alias x="290" y="556" width="45" height="35" uid="296">
+                    <of>Hubs_under_planning</of>
+                </alias>
+                <stock name="Hubs" x="278" y="628"/>
+                <connector uid="298" angle="70.185606294122749">
+                    <from>Hubs</from>
+                    <to>cost_of_using_the_hub_system</to>
+                </connector>
+            </view>
+        </views>
+    </model>
+    <model name="goals">
+        <variables>
+            <aux name="EMISSIONS OF ENVIRONMENTALLY FRIENDLY VEHICLE TYPES">
+                <doc>	Exogenous value that represents the emissions associated with 1km transport via an environmentally friendly vehicle.</doc>
+                <eqn>{GET_XLS_CONSTANTS('Exogenous_values.xlsm',_'goals',_'B2'_)}</eqn>
+                <units>CO2/km</units>
+            </aux>
+            <aux name="EMISSIONS OF DIESEL TRUCKS">
+                <doc>	Exogenous value that represents the emissions associated with 1km transport via a diesel truck.</doc>
+                <eqn>{GET_XLS_CONSTANTS('Exogenous_values.xlsm',_'goals',_'B1'_)}</eqn>
+                <units>CO2/km</units>
+            </aux>
+            <aux name="gap of CO2 emissions">
+                <doc>	Gap between the emissions of the system and the goal of emissions. This is used to determine how much funds the public sector adds to the system. An IF THEN ELSE structure is needed because it could happen in the system that a lower value is reached, and this cannot trigger "negative" funds. Also, the on off variable is included to be able to control the effectiveness of the gap.</doc>
+                <eqn>( IF (emissions-GOAL_OF_CO2_EMISSIONS)/emissions &lt; 0 or GOAL_OF_CO2_EMISSIONS_ON_OFF = 0 THEN 0 ELSE (emissions-GOAL_OF_CO2_EMISSIONS)/emissions )</eqn>
+                <units>Dmnl</units>
+            </aux>
+            <aux name="gap of vehicle km">
+                <doc>	Gap between the vehicle km of the system and the goal of vehicle km in the city. This is used to determin how much funds the public sector adds to the system. An IF THEN ELSE FUNCTION is needed because it could happen in the system that a lower value is reached, and this cannot trigger "negative" funds. Also, the on off variable is included to be able to control the effectiveness of the gap.</doc>
+                <eqn>( IF (vehicle_km-GOAL_OF_VEHICLE_KM)/vehicle_km &lt; 0 or GOAL_OF_VEHICLE_KM_ON_OFF = 0 THEN 0 ELSE (vehicle_km-GOAL_OF_VEHICLE_KM)/vehicle_km )</eqn>
+                <units>Dmnl</units>
+            </aux>
+            <aux name="GOAL OF VEHICLE KM ON OFF">
+                <doc>	On-off variable that controls if congestion drives the public sector to put funds based on the vehicle km goal.</doc>
+                <eqn>{GET_XLS_CONSTANTS('Exogenous_values.xlsm',_'goals',_'B6')}</eqn>
+                <units>Dmnl</units>
+            </aux>
+            <aux name="emissions">
+                <doc>	The operational emissions are calculated as follows: 1) emissions coming from the environmentally friendly deliveries, assuming that the whole demand that goes through the hub is carred out through those vehicles, according to their emission value that is exogenous, knowing how many km are required to satisfy the demand with hubs; 2) emissions coming from diesel trucks, assuming that the rest of the demand is carried out by those vehicles, according to the emission value that is exogenous, knowing how many km are required to satisfy the demand with hubs.</doc>
+                <eqn>EMISSIONS_OF_ENVIRONMENTALLY_FRIENDLY_VEHICLE_TYPES*km_required_per_box_with_hubs*share_of_demand_that_goes_through_the_hub*TOTAL_DEMAND+EMISSIONS_OF_DIESEL_TRUCKS*km_required_per_box_without_hubs*(1-share_of_demand_that_goes_through_the_hub)*TOTAL_DEMAND</eqn>
+                <units>CO2/Month</units>
+            </aux>
+            <aux name="GOAL OF CO2 EMISSIONS">
+                <doc>	Exogenous value that represents the goal of CO2 emissions for this system.</doc>
+                <eqn>{GET_XLS_CONSTANTS('Exogenous_values.xlsm',_'goals',_'B3'_)}</eqn>
+                <units>CO2/Month</units>
+            </aux>
+            <aux name="GOAL OF CO2 EMISSIONS ON OFF">
+                <doc>	On-off variable that controls if air pollution / climate change drives the public sector to put funds based on the CO2 emissions goal.</doc>
+                <eqn>{GET_XLS_CONSTANTS('Exogenous_values.xlsm',_'goals',_'B5')}</eqn>
+                <units>Dmnl</units>
+            </aux>
+            <aux name="vehicle km">
+                <doc>	The number of vehicle km is calculated similarly to the emissions: 1) vehicle * km required to satisfy the demand that does not go through the hubs; 2) vehicle * knm required to satisfy the demand that does go through the hubs.</doc>
+                <eqn>(number_of_vehicles_required_per_box_without_hubs*(1-share_of_demand_that_goes_through_the_hub)+number_of_vehicles_required_per_box_with_hubs*share_of_demand_that_goes_through_the_hub)*TOTAL_DEMAND*(km_required_per_box_without_hubs*(1-share_of_demand_that_goes_through_the_hub)+km_required_per_box_with_hubs*share_of_demand_that_goes_through_the_hub)*TOTAL_DEMAND</eqn>
+                <units>vehicle*km/(Month*Month)</units>
+            </aux>
+            <aux name="GOAL OF VEHICLE KM">
+                <doc>	Goal set by the public sector that drives the model to build more hubs.</doc>
+                <eqn>{GET_XLS_CONSTANTS_('Exogenous_values.xlsm','goals','B4')}</eqn>
+                <units>vehicle*km/(Month*Month)</units>
+            </aux>
+            <aux name="share of demand that goes through the hub" access="input"/>
+            <aux name="km required per box without hubs" access="input"/>
+            <aux name="number of vehicles required per box without hubs" access="input"/>
+            <aux name="km required per box with hubs" access="input"/>
+            <aux name="number of vehicles required per box with hubs" access="input"/>
+            <aux name="TOTAL DEMAND" access="input"/>
+        </variables>
+        <views>
+            <view>
+                <aux name="EMISSIONS_OF_DIESEL_TRUCKS" x="272" y="133"/>
+                <aux name="EMISSIONS_OF_ENVIRONMENTALLY_FRIENDLY_VEHICLE_TYPES" x="169" y="204"/>
+                <aux name="emissions" x="364" y="224"/>
+                <connector uid="328" angle="-46.57600135343543">
+                    <from>EMISSIONS_OF_DIESEL_TRUCKS</from>
+                    <to>emissions</to>
+                </connector>
+                <connector uid="329" angle="-4.2507162396104547">
+                    <from>EMISSIONS_OF_ENVIRONMENTALLY_FRIENDLY_VEHICLE_TYPES</from>
+                    <to>emissions</to>
+                </connector>
+                <aux name="GOAL_OF_CO2_EMISSIONS" x="265" y="461"/>
+                <aux name="gap_of_CO2_emissions" x="260" y="320"/>
+                <connector uid="332" angle="-136.82242206099545">
+                    <from>emissions</from>
+                    <to>gap_of_CO2_emissions</to>
+                </connector>
+                <connector uid="333" angle="-267.01232365627652">
+                    <from>GOAL_OF_CO2_EMISSIONS</from>
+                    <to>gap_of_CO2_emissions</to>
+                </connector>
+                <aux name="share_of_demand_that_goes_through_the_hub" x="580" y="193"/>
+                <connector uid="335" angle="-169.81357336653318">
+                    <from>share_of_demand_that_goes_through_the_hub</from>
+                    <to>emissions</to>
+                </connector>
+                <aux name="km_required_per_box_with_hubs" x="573" y="100"/>
+                <aux name="km_required_per_box_without_hubs" x="473" y="388"/>
+                <connector uid="338" angle="-147.57200329723401">
+                    <from>km_required_per_box_with_hubs</from>
+                    <to>emissions</to>
+                </connector>
+                <connector uid="339" angle="121.82961473321298">
+                    <from>km_required_per_box_without_hubs</from>
+                    <to>emissions</to>
+                </connector>
+                <aux name="TOTAL_DEMAND" x="537" y="265"/>
+                <connector uid="341" angle="166.55111571800114">
+                    <from>TOTAL_DEMAND</from>
+                    <to>emissions</to>
+                </connector>
+                <aux name="vehicle_km" x="742" y="280"/>
+                <connector uid="343" angle="22.016815201201268">
+                    <from>km_required_per_box_without_hubs</from>
+                    <to>vehicle_km</to>
+                </connector>
+                <connector uid="344" angle="-2.8000489970431062">
+                    <from>TOTAL_DEMAND</from>
+                    <to>vehicle_km</to>
+                </connector>
+                <connector uid="345" angle="-29.726460460074506">
+                    <from>share_of_demand_that_goes_through_the_hub</from>
+                    <to>vehicle_km</to>
+                </connector>
+                <connector uid="346" angle="-46.342231955244515">
+                    <from>km_required_per_box_with_hubs</from>
+                    <to>vehicle_km</to>
+                </connector>
+                <aux name="number_of_vehicles_required_per_box_with_hubs" x="860" y="177"/>
+                <aux name="number_of_vehicles_required_per_box_without_hubs" x="877" y="312"/>
+                <connector uid="349" angle="220.98599004488926">
+                    <from>number_of_vehicles_required_per_box_with_hubs</from>
+                    <to>vehicle_km</to>
+                </connector>
+                <connector uid="350" angle="166.11157146287019">
+                    <from>number_of_vehicles_required_per_box_without_hubs</from>
+                    <to>vehicle_km</to>
+                </connector>
+                <aux name="GOAL_OF_VEHICLE_KM" x="908" y="452"/>
+                <aux name="gap_of_vehicle_km" x="712" y="380"/>
+                <connector uid="353" angle="-199.68631213133261">
+                    <from>GOAL_OF_VEHICLE_KM</from>
+                    <to>gap_of_vehicle_km</to>
+                </connector>
+                <connector uid="354" angle="-105.63675885133618">
+                    <from>vehicle_km</from>
+                    <to>gap_of_vehicle_km</to>
+                </connector>
+                <aux name="GOAL_OF_CO2_EMISSIONS_ON_OFF" x="100" y="377"/>
+                <aux name="GOAL_OF_VEHICLE_KM_ON_OFF" x="694" y="461"/>
+                <connector uid="357" angle="20.610180463309604">
+                    <from>GOAL_OF_CO2_EMISSIONS_ON_OFF</from>
+                    <to>gap_of_CO2_emissions</to>
+                </connector>
+                <connector uid="358" angle="79.868220820908249">
+                    <from>GOAL_OF_VEHICLE_KM_ON_OFF</from>
+                    <to>gap_of_vehicle_km</to>
+                </connector>
+            </view>
+        </views>
+    </model>
+    <model name="Play around view">
+        <variables/>
+        <views>
+            <view>
+                <alias x="161" y="256" uid="387">
+                    <of>TOTAL_NUMBER_OF_COMPANIES</of>
+                </alias>
+                <alias x="277" y="259" uid="388">
+                    <of>COMPANY_CONTACT_RATE</of>
+                </alias>
+                <alias x="156" y="292" uid="389">
+                    <of>INITIAL_COMPANY_ADOPTION_FRACTION</of>
+                </alias>
+                <alias x="281" y="295" uid="390">
+                    <of>INITIAL_PUSH_TIME</of>
+                </alias>
+                <alias x="221" y="343" uid="391">
+                    <of>AVERAGE_DELAY_TIME_IN_DROPPING_OUT</of>
+                </alias>
+                <alias x="225" y="616" uid="392">
+                    <of>INITIAL_ROUTING_EFFICIENCY</of>
+                </alias>
+                <alias x="148" y="420" uid="393">
+                    <of>EMISSIONS_OF_DIESEL_TRUCKS</of>
+                </alias>
+                <alias x="292" y="420" uid="394">
+                    <of>EMISSIONS_OF_ENVIRONMENTALLY_FRIENDLY_VEHICLE_TYPES</of>
+                </alias>
+                <alias x="282" y="463" uid="395">
+                    <of>GOAL_OF_CO2_EMISSIONS</of>
+                </alias>
+                <alias x="268" y="115" uid="396">
+                    <of>BUILDING_COST_OF_HUB</of>
+                </alias>
+                <alias x="1037" y="103" uid="397">
+                    <of>TOTAL_OPERATION_COST_OF_ONE_HUB</of>
+                </alias>
+                <alias x="413" y="144" uid="398">
+                    <of>MAXIMUM_FUNDS_PER_UNIT_OF_TIME</of>
+                </alias>
+                <alias x="557" y="103" uid="399">
+                    <of>MINIMUM_UTILIZATION_RATE</of>
+                </alias>
+                <alias x="268" y="148" uid="400">
+                    <of>SINGLE_HUB_CAPACITY</of>
+                </alias>
+                <alias x="553" y="144" uid="401">
+                    <of>ADJUSTMENT_TIME_FOR_TOTAL_UTILIZED_CAPACITY</of>
+                </alias>
+                <alias x="685" y="103" uid="402">
+                    <of>TOTAL_DEMAND</of>
+                </alias>
+                <alias x="149" y="115" uid="404">
+                    <of>PUBLIC_SECTOR_FUNDS_ON_OFF</of>
+                </alias>
+                <alias x="145" y="151" uid="405">
+                    <of>PRIVATE_SECTOR_FUNDS_ON_OFF</of>
+                </alias>
+                <alias x="1168" y="103" uid="406">
+                    <of>MINIMUM_KM_REQUIRED_PER_BOX</of>
+                </alias>
+                <alias x="1169" y="160" uid="407">
+                    <of>MINIMUM_NUMBER_OF_VEHICLES_REQUIRED_PER_BOX</of>
+                </alias>
+                <alias x="1296" y="115" uid="408">
+                    <of>COST_PER_KM</of>
+                </alias>
+                <alias x="1296" y="156" uid="409">
+                    <of>COST_PER_VEHICLE</of>
+                </alias>
+                <alias x="100" y="611" uid="410">
+                    <of>MAXIMUM_ROUTING_EFFICIENCY</of>
+                </alias>
+                <alias x="217" y="664" uid="411">
+                    <of>INITIAL_FILL_RATE</of>
+                </alias>
+                <alias x="114" y="664" uid="412">
+                    <of>MAXIMUM_FILL_RATE</of>
+                </alias>
+                <alias x="286" y="511" uid="413">
+                    <of>GOAL_OF_VEHICLE_KM</of>
+                </alias>
+                <alias x="406" y="108" uid="415">
+                    <of>PERCENTAGE_OF_PROFIT_FOR_HUB_FUNDS</of>
+                </alias>
+                <alias x="149" y="460" uid="416">
+                    <of>GOAL_OF_CO2_EMISSIONS_ON_OFF</of>
+                </alias>
+                <alias x="149" y="511" uid="417">
+                    <of>GOAL_OF_VEHICLE_KM_ON_OFF</of>
+                </alias>
+                <alias x="1408" y="100" uid="419">
+                    <of>EXTRA_HANDLING_COST_PER_BOX</of>
+                </alias>
+                <alias x="116" y="720" uid="421">
+                    <of>MINIMUM_DELIVERY_TIME</of>
+                </alias>
+                <alias x="222" y="716" uid="422">
+                    <of>INITIAL_DELIVERY_TIME</of>
+                </alias>
+                <alias x="693" y="145" uid="423">
+                    <of>ADJUSTMENT_TIME_FOR_ADDING_HUBS</of>
+                </alias>
+                <alias x="1406" y="148" uid="424">
+                    <of>COST_PER_HOUR</of>
+                </alias>
+                <alias x="358" y="613" uid="425">
+                    <of>MULTIPLIER_FOR_EFFECT_OF_USING_HUB_CAPACITY_ON_INCREASE_IN_ROUTING_EFFICIENCY</of>
+                </alias>
+                <alias x="353" y="668" uid="426">
+                    <of>MULTIPLIER_FOR_EFFECT_OF_USING_HUB_CAPACITY_ON_INCREASE_IN_FILL_RATE</of>
+                </alias>
+                <alias x="358" y="721" uid="427">
+                    <of>MULTIPLIER_FOR_EFFECT_OF_USING_HUB_CAPACITY_ON_DECREASE_IN_DELIVERY_TIME</of>
+                </alias>
+            </view>
+        </views>
+    </model>
+    <model name="Efficiencies">
+        <variables>
+            <aux name="effect of using hub capacity on increase in fill rate">
+                <doc>	This variable calculates the effect of the increase / decrease in using hub capacity on the increase in fill rate.</doc>
+                <eqn>using_hub_capacity/TOTAL_DEMAND*MULTIPLIER_FOR_EFFECT_OF_USING_HUB_CAPACITY_ON_INCREASE_IN_FILL_RATE</eqn>
+                <units>Dmnl/Month</units>
+            </aux>
+            <aux name="effect of using hub capacity on increase in routing efficiency">
+                <doc>	This variable measures the effect that the fact that the capacity of the hub is being used has on the increase in routing efficiency. It is divided by the total demand, which gives a 1/Month unit variable, and it is multiplied by a factor to account for a bigger change.</doc>
+                <eqn>using_hub_capacity/TOTAL_DEMAND*MULTIPLIER_FOR_EFFECT_OF_USING_HUB_CAPACITY_ON_INCREASE_IN_ROUTING_EFFICIENCY</eqn>
+                <units>1/Month</units>
+            </aux>
+            <aux name="MULTIPLIER FOR EFFECT OF USING HUB CAPACITY ON INCREASE IN ROUTING EFFICIENCY">
+                <doc>	This constant is measuring how much does the increase in using hub capacity affect the increase in routing efficiency.</doc>
+                <eqn>{GET_XLS_CONSTANTS('Exogenous_values.xlsm','efficiencies','B7')}</eqn>
+                <units>Dmnl</units>
+            </aux>
+            <aux name="MULTIPLIER FOR EFFECT OF USING HUB CAPACITY ON DECREASE IN DELIVERY TIME">
+                <doc>	This constant is measuring how much does the increase in using hub capacity affect the decrease in delivery time.</doc>
+                <eqn>{GET_XLS_CONSTANTS('Exogenous_values.xlsm','efficiencies','B9')}</eqn>
+                <units>1</units>
+            </aux>
+            <aux name="effect of using hub capacity on decrease in delivery time">
+                <doc>	This variable calculates the effect of the increase / decrease in using hub capacity on the decrease in delivery time.</doc>
+                <eqn>using_hub_capacity/TOTAL_DEMAND*MULTIPLIER_FOR_EFFECT_OF_USING_HUB_CAPACITY_ON_DECREASE_IN_DELIVERY_TIME</eqn>
+                <units>1/Month</units>
+            </aux>
+            <aux name="INITIAL DELIVERY TIME">
+                <doc>	Initial delivery time. Exogenous value.</doc>
+                <eqn>{GET_XLS_CONSTANTS('Exogenous_values.xlsm','efficiencies','B6')}</eqn>
+                <units>Hour/Box</units>
+            </aux>
+            <stock name="Potential for improving the delivery time">
+                <doc>	This stock represents the potential for improving delivery time. The initial value is calculated by subtracting the minimum delivery time to the intial delivery time.</doc>
+                <eqn>INITIAL_DELIVERY_TIME-MINIMUM_DELIVERY_TIME</eqn>
+                <units>Hour/Box</units>
+            </stock>
+            <flow name="decrease in delivery time">
+                <doc>	Flow that simulates the changes in delivery time, depending on the effect of using the hub capacity on delivery time. Of course this is limited by the potential for improving the delivery time.</doc>
+                <eqn>Potential_for_improving_the_delivery_time*effect_of_using_hub_capacity_on_decrease_in_delivery_time</eqn>
+                <units>Hour/(Box*Month)</units>
+            </flow>
+            <aux name="MINIMUM DELIVERY TIME">
+                <doc>	Minimum delivery time. Exogenous value.</doc>
+                <eqn>{GET_XLS_CONSTANTS('Exogenous_values.xlsm','efficiencies','B5')}</eqn>
+                <units>Hour/Box</units>
+            </aux>
+            <stock name="Delivery time">
+                <doc>	Stock variable to account for the changes in delivery time.</doc>
+                <outflow>decrease_in_delivery_time</outflow>
+                <eqn>INITIAL_DELIVERY_TIME</eqn>
+                <units>Hour/Box</units>
+            </stock>
+            <aux name="INITIAL ROUTING EFFICIENCY">
+                <doc>	Exogenous ariable that represents the initial routing efficiency of the overall system. It also represents the routing efficiency of the goods that do not go through the hub.</doc>
+                <eqn>{GET_XLS_CONSTANTS('Exogenous_values.xlsm',_'efficiencies'_,_'B1'_)}</eqn>
+                <units>Dmnl</units>
+            </aux>
+            <aux name="INITIAL FILL RATE">
+                <doc>	Initial value for fill rate. Exogenous value.</doc>
+                <eqn>{GET_XLS_CONSTANTS('Exogenous_values.xlsm','efficiencies','B3')}</eqn>
+                <units>Dmnl</units>
+            </aux>
+            <stock name="Routing efficiency">
+                <doc>	Stock variable to account for the changes in routing efficiency.</doc>
+                <inflow>increase_in_routing_efficiency</inflow>
+                <eqn>INITIAL_ROUTING_EFFICIENCY</eqn>
+                <units>Dmnl</units>
+            </stock>
+            <stock name="Fill rate">
+                <doc>	Stock that monitors the change in fill rate (at the start of the delivery trip from the hub).</doc>
+                <inflow>increase_in_fill_rate</inflow>
+                <eqn>INITIAL_FILL_RATE</eqn>
+                <units>Dmnl</units>
+            </stock>
+            <stock name="Potential for improving routing efficiency">
+                <doc>	This stock represents the potential for improving routing efficiency. The initial value is calculated by subtracting the initial routing efficiency to the maximum value.</doc>
+                <outflow>increase_in_routing_efficiency</outflow>
+                <eqn>MAXIMUM_ROUTING_EFFICIENCY-INITIAL_ROUTING_EFFICIENCY</eqn>
+                <units>Dmnl</units>
+            </stock>
+            <flow name="increase in routing efficiency">
+                <doc>	This is the rate at which the routing efficiency increases over time. Depends on the effect of using hub capacity and on the potential for improving routing efficiency.</doc>
+                <eqn>Potential_for_improving_routing_efficiency*effect_of_using_hub_capacity_on_increase_in_routing_efficiency</eqn>
+                <units>Dmnl/Month</units>
+            </flow>
+            <aux name="MAXIMUM ROUTING EFFICIENCY">
+                <doc>	Maximum value for the routing efficiency. Exogenous value.</doc>
+                <eqn>{GET_XLS_CONSTANTS('Exogenous_values.xlsm','efficiencies','B2')}</eqn>
+                <units>Dmnl</units>
+            </aux>
+            <flow name="increase in fill rate">
+                <doc>	Rate at which the fill rate increases or decreases. Depends on the effect of using hub capacity and on the potential for improving fill rate.</doc>
+                <eqn>effect_of_using_hub_capacity_on_increase_in_fill_rate*Potential_for_improving_fill_rate</eqn>
+                <units>Dmnl/Month</units>
+            </flow>
+            <stock name="Potential for improving fill rate">
+                <doc>	This stock represents the potential for improving fill rate. The initial value is calculated by subtracting the initial fill rate to the maximum value.</doc>
+                <outflow>increase_in_fill_rate</outflow>
+                <eqn>MAXIMUM_FILL_RATE-INITIAL_FILL_RATE</eqn>
+                <units>Dmnl</units>
+            </stock>
+            <aux name="MAXIMUM FILL RATE">
+                <doc>	Maximum value for the fill rate. Exogenous value.</doc>
+                <eqn>{GET_XLS_CONSTANTS('Exogenous_values.xlsm','efficiencies','B4')}</eqn>
+                <units>Dmnl</units>
+            </aux>
+            <aux name="MULTIPLIER FOR EFFECT OF USING HUB CAPACITY ON INCREASE IN FILL RATE">
+                <doc>	This constant is measuring how much does the increase in using hub capacity affect the increase in fill rate.</doc>
+                <eqn>{GET_XLS_CONSTANTS('Exogenous_values.xlsm','efficiencies','B8')}</eqn>
+                <units>1</units>
+            </aux>
+            <aux name="using hub capacity" access="input"/>
+            <aux name="TOTAL DEMAND" access="input"/>
+        </variables>
+        <views>
+            <view>
+                <stock name="Routing_efficiency" x="507" y="191" width="80" height="56"/>
+                <aux name="INITIAL_ROUTING_EFFICIENCY" x="373" y="100"/>
+                <flow name="increase_in_routing_efficiency" x="388" y="223">
+                    <pts>
+                        <pt x="247" y="223"/>
+                        <pt x="547" y="223"/>
+                    </pts>
+                </flow>
+                <stock name="Potential_for_improving_routing_efficiency" x="200" y="198" width="94" height="50"/>
+                <connector uid="462" angle="-75.539797819234053">
+                    <from>Potential_for_improving_routing_efficiency</from>
+                    <to>increase_in_routing_efficiency</to>
+                </connector>
+                <flow name="using_hub_capacity" x="571" y="363">
+                    <pts>
+                        <pt x="421" y="363"/>
+                        <pt x="596" y="363"/>
+                    </pts>
+                </flow>
+                <aux name="effect_of_using_hub_capacity_on_increase_in_routing_efficiency" x="427" y="327"/>
+                <connector uid="466" angle="146.18553116311637">
+                    <from>using_hub_capacity</from>
+                    <to>effect_of_using_hub_capacity_on_increase_in_routing_efficiency</to>
+                </connector>
+                <connector uid="467" angle="110.86234300241044">
+                    <from>effect_of_using_hub_capacity_on_increase_in_routing_efficiency</from>
+                    <to>increase_in_routing_efficiency</to>
+                </connector>
+                <aux name="TOTAL_DEMAND" x="640" y="328"/>
+                <connector uid="469" angle="174.54851969795016">
+                    <from>TOTAL_DEMAND</from>
+                    <to>effect_of_using_hub_capacity_on_increase_in_routing_efficiency</to>
+                </connector>
+                <aux name="INITIAL_FILL_RATE" x="487" y="655"/>
+                <stock name="Potential_for_improving_fill_rate" x="359" y="519" width="96" height="50"/>
+                <aux name="MAXIMUM_ROUTING_EFFICIENCY" x="100" y="244"/>
+                <aux name="MAXIMUM_FILL_RATE" x="268" y="535"/>
+                <stock name="Fill_rate" x="659" y="536"/>
+                <flow name="increase_in_fill_rate" x="544" y="536">
+                    <pts>
+                        <pt x="407" y="536"/>
+                        <pt x="659" y="536"/>
+                    </pts>
+                </flow>
+                <aux name="effect_of_using_hub_capacity_on_increase_in_fill_rate" x="541" y="455"/>
+                <connector uid="483" angle="-105.55983880170753">
+                    <from>using_hub_capacity</from>
+                    <to>effect_of_using_hub_capacity_on_increase_in_fill_rate</to>
+                </connector>
+                <connector uid="484" angle="-115.189131314265">
+                    <from>TOTAL_DEMAND</from>
+                    <to>effect_of_using_hub_capacity_on_increase_in_fill_rate</to>
+                </connector>
+                <connector uid="485" angle="-83.967473608886976">
+                    <from>effect_of_using_hub_capacity_on_increase_in_fill_rate</from>
+                    <to>increase_in_fill_rate</to>
+                </connector>
+                <connector uid="486" angle="-64.310768699641187">
+                    <from>Potential_for_improving_fill_rate</from>
+                    <to>increase_in_fill_rate</to>
+                </connector>
+                <stock name="Potential_for_improving_the_delivery_time" x="770" y="273" width="90" height="62"/>
+                <stock name="Delivery_time" x="1072" y="304"/>
+                <aux name="INITIAL_DELIVERY_TIME" x="964" y="148"/>
+                <aux name="MINIMUM_DELIVERY_TIME" x="727" y="219"/>
+                <aux name="effect_of_using_hub_capacity_on_decrease_in_delivery_time" x="805" y="419"/>
+                <connector uid="496" angle="-13.978949805219159">
+                    <from>using_hub_capacity</from>
+                    <to>effect_of_using_hub_capacity_on_decrease_in_delivery_time</to>
+                </connector>
+                <connector uid="497" angle="-28.596028596264105">
+                    <from>TOTAL_DEMAND</from>
+                    <to>effect_of_using_hub_capacity_on_decrease_in_delivery_time</to>
+                </connector>
+                <flow name="decrease_in_delivery_time" x="943" y="304">
+                    <pts>
+                        <pt x="1072" y="304"/>
+                        <pt x="815" y="304"/>
+                    </pts>
+                </flow>
+                <connector uid="502" angle="-25.468175923107381">
+                    <from>effect_of_using_hub_capacity_on_decrease_in_delivery_time</from>
+                    <to>decrease_in_delivery_time</to>
+                </connector>
+                <connector uid="503" angle="-84.458218838628056">
+                    <from>Potential_for_improving_the_delivery_time</from>
+                    <to>decrease_in_delivery_time</to>
+                </connector>
+                <aux name="MULTIPLIER_FOR_EFFECT_OF_USING_HUB_CAPACITY_ON_INCREASE_IN_ROUTING_EFFICIENCY" x="280" y="391"/>
+                <connector uid="506" angle="22.099427272860652">
+                    <from>MULTIPLIER_FOR_EFFECT_OF_USING_HUB_CAPACITY_ON_INCREASE_IN_ROUTING_EFFICIENCY</from>
+                    <to>effect_of_using_hub_capacity_on_increase_in_routing_efficiency</to>
+                </connector>
+                <aux name="MULTIPLIER_FOR_EFFECT_OF_USING_HUB_CAPACITY_ON_DECREASE_IN_DELIVERY_TIME" x="1011" y="447"/>
+                <aux name="MULTIPLIER_FOR_EFFECT_OF_USING_HUB_CAPACITY_ON_INCREASE_IN_FILL_RATE" x="829" y="516"/>
+                <connector uid="509" angle="167.10328752089544">
+                    <from>MULTIPLIER_FOR_EFFECT_OF_USING_HUB_CAPACITY_ON_INCREASE_IN_FILL_RATE</from>
+                    <to>effect_of_using_hub_capacity_on_increase_in_fill_rate</to>
+                </connector>
+                <connector uid="510" angle="170.15712406639574">
+                    <from>MULTIPLIER_FOR_EFFECT_OF_USING_HUB_CAPACITY_ON_DECREASE_IN_DELIVERY_TIME</from>
+                    <to>effect_of_using_hub_capacity_on_decrease_in_delivery_time</to>
+                </connector>
+            </view>
+        </views>
+    </model>
+</xmile>

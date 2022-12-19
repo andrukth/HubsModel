@@ -47,14 +47,14 @@ adding hub capacity=
 	|
 
 MULTIPLIER FOR EFFECT OF USING HUB CAPACITY ON INCREASE IN FILL RATE=
-	GET XLS CONSTANTS('Exogenous values.xlsm','efficiencies','B8')
+	5
 	~	Dmnl [1,10,0.1]
 	~	This constant is measuring how much does the increase in using hub \
 		capacity affect the increase in fill rate.
 	|
 
 MULTIPLIER FOR EFFECT OF USING HUB CAPACITY ON INCREASE IN ROUTING EFFICIENCY=
-	GET XLS CONSTANTS('Exogenous values.xlsm','efficiencies','B7')
+	5
 	~	Dmnl [1,10,0.1]
 	~	This constant is measuring how much does the increase in using hub \
 		capacity affect the increase in routing efficiency.
@@ -97,7 +97,7 @@ TIME STEP OF SCRAPPING=
 	~		|
 
 MULTIPLIER FOR EFFECT OF USING HUB CAPACITY ON DECREASE IN DELIVERY TIME=
-	GET XLS CONSTANTS('Exogenous values.xlsm','efficiencies','B9')
+	5
 	~	Dmnl [1,10,0.1]
 	~	This constant is measuring how much does the increase in using hub \
 		capacity affect the decrease in delivery time.
@@ -600,7 +600,7 @@ ONE COMPANY=
 	|
 
 AVERAGE DELAY TIME IN DROPPING OUT=
-	1
+	GET XLS CONSTANTS('Exogenous values.xlsm', 'company' , 'B5' )
 	~	Month [1,60,1]
 	~	This is the average time, in months, that companies take to understand \
 		that the monetary value of joining the hubs is actually negative, and \
@@ -773,7 +773,7 @@ Company adopters= INTEG (
 	|
 
 COMPANY CONTACT RATE=
-	1
+	GET XLS CONSTANTS('Exogenous values.xlsm', 'company' , 'B2' )
 	~	Dmnl/Month [0,0.5,0.01]
 	~	Exogenous variable that represents the contact rate, which is the \
 		frequency with which adopters and potential adopters come in contact with \
@@ -788,7 +788,7 @@ Company potential adopters= INTEG (
 	|
 
 TOTAL NUMBER OF COMPANIES=
-	1
+	GET XLS CONSTANTS('Exogenous values.xlsm', 'company' , 'B1' )
 	~	company [10,1000,1]
 	~	Exogenous variable that represents the total number of companies in the \
 		system.
@@ -1282,7 +1282,7 @@ $192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|72,7
 1:Montecarlo.vdfx
 1:Scenario 1.vdfx
 4:Time
-5:INITIAL COMPANY ADOPTION FRACTION
+5:INITIAL PUSH TIME
 9:Montecarlo
 19:90,0
 24:0

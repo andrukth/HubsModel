@@ -1,0 +1,1310 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xmile version="1.0" xmlns="http://docs.oasis-open.org/xmile/ns/XMILE/v1.0" xmlns:isee="http://iseesystems.com/XMILE">
+	<header>
+		<smile version="1.0" namespace="std, isee"/>
+		<name>Stella model</name>
+		<uuid>eed773d1-f4f7-4725-8d05-452b96d4f2dc</uuid>
+		<vendor>isee systems, inc.</vendor>
+		<product version="3.2" isee:build_number="2856" isee:saved_by_v1="true" lang="en">Stella Architect</product>
+	</header>
+	<sim_specs isee:sim_duration="1.5" isee:run_prefix="Run" isee:simulation_delay="0.0025" isee:restore_on_start="false" method="Euler" time_units="Months" isee:instantaneous_flows="false" isee:ignore_module_errors="false" isee:loop_scores="true" isee:loop_exhaustive_allowed="1000">
+		<start>0</start>
+		<stop>600</stop>
+		<dt>1</dt>
+	</sim_specs>
+	<isee:prefs saved_runs="11" keep="false" show_module_prefix="true" live_update_on_drag="true" show_restore_buttons="false" layer="model" isee:design="Deluxe Prev-Next Blue Green Pastel" isee:design_custom="false" interface_scale_ui="true" interface_max_page_width="10000" interface_max_page_height="10000" interface_min_page_width="0" interface_min_page_height="0" rerun_on_structure_change="false" rifp="true"/>
+	<isee:multiplayer_settings include_chat="true" allow_observers="false" advance_time_increment="1" max_advance_time_in_ms="0" model_stops_when_players_drop="false" observer_start_page="home_page" enabled="false"/>
+	<isee:time_formats default_format="Builtin">
+		<isee:time_format name="Builtin" type="adaptive"/>
+	</isee:time_formats>
+	<default_format/>
+	<isee:sensi_specs_list active_index="0">
+		<isee:sensi_specs name="Sensitivity" method="grid">
+			<isee:variable type="normal" mean="55000" std_dev="18000" min="10000" max="100000" seed="12345" name="MAXIMUM_FUNDS_PER_TIME_UNIT" num_samples="20"/>
+		</isee:sensi_specs>
+	</isee:sensi_specs_list>
+	<isee:optimizer_specs_list active_index="0">
+		<isee:optimizer_specs name="Optimization" method="Powell" use_additional_starts_file="false" additional_starts="0" report_interval="1" confidence_range="0"/>
+	</isee:optimizer_specs_list>
+	<isee:payoff_specs_list>
+		<isee:payoff_specs name="Payoff"/>
+	</isee:payoff_specs_list>
+	<model_units>
+		<unit name="$">
+			<eqn/>
+			<alias>dollar</alias>
+			<alias>dollars</alias>
+		</unit>
+		<unit name="Kilometers">
+			<eqn/>
+			<alias>km</alias>
+			<alias>kilometer</alias>
+		</unit>
+		<unit name="Months">
+			<eqn/>
+			<alias>mo</alias>
+			<alias>month</alias>
+		</unit>
+		<unit name="Minutes">
+			<eqn/>
+			<alias>min</alias>
+			<alias>minute</alias>
+		</unit>
+		<unit name="Dimensionless">
+			<eqn>1</eqn>
+			<alias>dmnl</alias>
+			<alias>unitless</alias>
+		</unit>
+		<unit name="kilowatt hours per day">
+			<eqn>kWh/day</eqn>
+		</unit>
+		<unit name="kilowatts">
+			<eqn>kW</eqn>
+			<alias>kilowatt</alias>
+		</unit>
+	</model_units>
+	<model>
+		<variables>
+			<stock name="Company potential adopters">
+				<eqn>TOTAL_NUMBER_OF_COMPANIES-1</eqn>
+				<outflow>company_adoption_rate</outflow>
+				<non_negative/>
+				<units>company</units>
+			</stock>
+			<stock name="Company adopters">
+				<eqn>1</eqn>
+				<inflow>company_adoption_rate</inflow>
+				<non_negative/>
+				<units>company</units>
+			</stock>
+			<flow name="company adoption rate">
+				<eqn>IF (company_adoption_fraction&gt;0) THEN 
+Company_potential_adopters*company_adoption_fraction*COMPANY_CONTACT_RATE*(Company_adopters/TOTAL_NUMBER_OF_COMPANIES) ELSE -Company_adopters/AVERAGE_DELAY_IN_DROPPING_OUT</eqn>
+				<units>company/Months</units>
+			</flow>
+			<aux name="COMPANY CONTACT RATE">
+				<eqn>0.1</eqn>
+				<units>1/Months</units>
+			</aux>
+			<aux name="TOTAL NUMBER\nOF COMPANIES">
+				<eqn>50</eqn>
+				<units>company</units>
+			</aux>
+			<aux name="AVERAGE DELAY IN DROPPING OUT">
+				<eqn>36</eqn>
+				<units>Months</units>
+			</aux>
+			<aux name="company adoption fraction">
+				<eqn>IF TIME&lt;INITIAL_PUSH_TIME
+THEN INITIAL_ADOPTION_FRACTION
+ELSE IF (effect_of_monetary_value_on_company_adoption_fraction&gt;=0) THEN effect_of_monetary_value_on_company_adoption_fraction ELSE 0</eqn>
+				<units>dmnl</units>
+			</aux>
+			<aux name="effect of monetary value on\ncompany adoption fraction">
+				<eqn>monetary_value/maximum_monetary_value</eqn>
+				<gf type="extrapolate">
+					<xscale min="0" max="1000"/>
+					<yscale min="0" max="1"/>
+					<ypts>0,0.01135,0.02778,0.05157,0.08601,0.1359,0.2081,0.3126,0.4639,0.6829,1</ypts>
+				</gf>
+				<units>dmnl</units>
+			</aux>
+			<aux name="monetary value">
+				<eqn>(transport_operation_cost_per_box_without_hubs-transport_operation_cost_per_box_with_hubs-EXTRA_COST_PER_BOX_GOING_THROUGH_THE_HUB)*TOTAL_DEMAND*share_of_company_adopters/Company_adopters-cost_of_using_the_hub_system_per_company</eqn>
+				<units>$/company/month</units>
+			</aux>
+			<stock name="Hubs" isee:display_name="HUBS MODEL">
+				<eqn>0</eqn>
+				<inflow>building_hubs</inflow>
+				<outflow>scrapping_hubs</outflow>
+				<units>Hub</units>
+			</stock>
+			<stock name="Hubs under planning" isee:display_name="HUBS MODEL">
+				<eqn>0</eqn>
+				<inflow>planning_hubs</inflow>
+				<outflow>building_hubs</outflow>
+				<units>Hub</units>
+			</stock>
+			<flow name="building hubs" isee:display_name="HUBS MODEL">
+				<eqn>DELAY(planning_hubs, ADJUSTMENT_TIME_FOR_BUILDING_HUBS, 0)</eqn>
+				<non_negative/>
+				<units>Hub/Month</units>
+			</flow>
+			<flow name="planning hubs" isee:display_name="HUBS MODEL">
+				<eqn>IF (Funds&gt;=BUILDING_COST_OF_ONE_HUB*ONE_HUB)
+THEN ONE_HUB/DT
+ELSE 0</eqn>
+				<non_negative/>
+				<units>Hub/Month</units>
+			</flow>
+			<flow name="scrapping hubs" isee:display_name="HUBS MODEL">
+				<eqn>0</eqn>
+				<non_negative/>
+				<units>Hub/Month</units>
+			</flow>
+			<aux name="ADJUSTMENT TIME\nFOR BUILDING HUBS" isee:display_name="HUBS MODEL">
+				<eqn>24</eqn>
+				<units>Months</units>
+			</aux>
+			<group name="Hubs sector" run="true">
+				<entity name="Hubs"/>
+				<entity name="Hubs_under_planning"/>
+				<entity name="ONE_HUB"/>
+				<entity name="scrapping_hubs"/>
+				<entity name="BUILDING_COST_OF_ONE_HUB"/>
+				<entity name="planning_hubs"/>
+				<entity name="building_hubs"/>
+				<entity name="ADJUSTMENT_TIME_FOR_BUILDING_HUBS"/>
+				<entity name="TOTAL_OPERATION_COST_OF_ONE_HUB"/>
+				<entity name="cost_of_using_the_hub_system_per_company"/>
+			</group>
+			<stock name="Funds">
+				<eqn>0</eqn>
+				<inflow>adding_funds_from_public_sector</inflow>
+				<outflow>using_funds_to_build_hubs</outflow>
+				<units>$</units>
+			</stock>
+			<flow name="adding funds from public sector">
+				<eqn>IF utilization_rate&lt;MINIMUM_UTILIZATION_RATE
+THEN 0
+ELSE
+MAXIMUM_FUNDS_PER_TIME_UNIT*(gap_of_emissions+gap_of_vehicle_km)</eqn>
+				<non_negative/>
+				<units>$/Month</units>
+			</flow>
+			<flow name="using funds to build hubs">
+				<eqn>BUILDING_COST_OF_ONE_HUB*planning_hubs</eqn>
+				<non_negative/>
+				<units>$/Month</units>
+			</flow>
+			<aux name="BUILDING COST\nOF ONE HUB">
+				<eqn>100000</eqn>
+				<units>$/Hub</units>
+			</aux>
+			<aux name="MAXIMUM FUNDS PER TIME UNIT">
+				<eqn>10000</eqn>
+				<units>$/Month</units>
+			</aux>
+			<group name="Funds sector" run="true">
+				<entity name="MINIMUM_UTILIZATION_RATE"/>
+				<entity name="using_funds_to_build_hubs"/>
+				<entity name="adding_funds_from_public_sector"/>
+				<entity name="MAXIMUM_FUNDS_PER_TIME_UNIT"/>
+				<entity name="Funds"/>
+			</group>
+			<aux name="ONE\nHUB">
+				<eqn>1</eqn>
+				<units>Hub</units>
+			</aux>
+			<stock name="Available hub capacity">
+				<eqn>0</eqn>
+				<inflow>adding_hub_capacity</inflow>
+				<outflow>using_hub_capacity</outflow>
+				<non_negative/>
+				<units>Box/month</units>
+			</stock>
+			<stock name="Utilized hub capacity">
+				<eqn>0</eqn>
+				<inflow>using_hub_capacity</inflow>
+				<non_negative/>
+				<units>Box/month</units>
+			</stock>
+			<flow name="using hub capacity">
+				<eqn>gap_of_utilized_hub_capacity/ADJUSTMENT_TIME_FOR_USING_HUB_CAPACITY</eqn>
+				<units>Box/month/Months</units>
+			</flow>
+			<flow name="adding hub capacity">
+				<eqn>building_hubs*ONE_HUB_CAPACITY</eqn>
+				<non_negative/>
+				<units>Box/month/Months</units>
+			</flow>
+			<aux name="ADJUSTMENT TIME FOR\nUSING HUB CAPACITY">
+				<eqn>24</eqn>
+				<units>month</units>
+			</aux>
+			<aux name="ONE HUB\nCAPACITY">
+				<eqn>300000</eqn>
+				<units>Box/Hub/month</units>
+			</aux>
+			<aux name="total hub capacity">
+				<eqn>ONE_HUB_CAPACITY*Hubs</eqn>
+				<units>Box/month</units>
+			</aux>
+			<aux name="utilization rate">
+				<eqn>IF total_hub_capacity=0
+THEN 1
+ELSE Utilized_hub_capacity/total_hub_capacity</eqn>
+				<units>dmnl</units>
+			</aux>
+			<group name="Capacity sector" run="false">
+				<entity name="using_hub_capacity"/>
+				<entity name="Utilized_hub_capacity"/>
+				<entity name="total_hub_capacity"/>
+				<entity name="adding_hub_capacity"/>
+				<entity name="ADJUSTMENT_TIME_FOR_USING_HUB_CAPACITY"/>
+				<entity name="utilization_rate"/>
+				<entity name="goal_of_utilized_hub_capacity"/>
+				<entity name="TOTAL_DEMAND"/>
+				<entity name="Available_hub_capacity"/>
+				<entity name="gap_of_utilized_hub_capacity"/>
+				<entity name="ONE_HUB_CAPACITY"/>
+			</group>
+			<aux name="share of company\nadopters">
+				<eqn>Company_adopters/TOTAL_NUMBER_OF_COMPANIES</eqn>
+				<units>dmnl</units>
+			</aux>
+			<aux name="TOTAL DEMAND">
+				<eqn>3.34*10^6</eqn>
+				<units>Box/month</units>
+			</aux>
+			<aux name="goal of utilized\nhub capacity">
+				<eqn>TOTAL_DEMAND*share_of_company_adopters</eqn>
+				<units>Box/month</units>
+			</aux>
+			<aux name="gap of utilized\nhub capacity">
+				<eqn>goal_of_utilized_hub_capacity-Utilized_hub_capacity</eqn>
+				<units>Box/month</units>
+			</aux>
+			<aux name="EMISSION OF\nDIESEL TRUCKS">
+				<eqn>100</eqn>
+				<units>CO2/vehicle/km</units>
+			</aux>
+			<aux name="EMISSIONS OF\nELECTRIC VEHICLES">
+				<eqn>1</eqn>
+				<units>CO2/vehicle/km</units>
+			</aux>
+			<aux name="emissions">
+				<eqn>vehicle_km_required_for_demand_with_hubs*EMISSIONS_OF_ELECTRIC_VEHICLES+vehicle_km_required_for_demand_without_hubs*EMISSION_OF_DIESEL_TRUCKS</eqn>
+				<units>CO2/month</units>
+			</aux>
+			<aux name="GOAL OF EMISSIONS">
+				<eqn>3*10^8</eqn>
+				<units>CO2/month</units>
+			</aux>
+			<aux name="gap of emissions">
+				<eqn>(emissions-GOAL_OF_EMISSIONS)/GOAL_OF_EMISSIONS</eqn>
+				<units>dmnl</units>
+			</aux>
+			<aux name="MINIMUM KM\nPER BOX">
+				<eqn>1</eqn>
+				<units>km/box</units>
+			</aux>
+			<aux name="MINIMUM VEHICLE\nPER BOX">
+				<eqn>1</eqn>
+				<units>vehicle/box</units>
+			</aux>
+			<aux name="COST PER KM">
+				<eqn>50</eqn>
+				<units>$/km</units>
+			</aux>
+			<aux name="COST PER VEHICLE">
+				<eqn>50</eqn>
+				<units>$/vehicle</units>
+			</aux>
+			<aux name="vehicles required\nper box\nwithout hubs">
+				<eqn>MINIMUM_VEHICLE_PER_BOX/INITIAL_FILL_RATE</eqn>
+				<units>vehicle/box</units>
+			</aux>
+			<aux name="km required\nper box\nwithout hubs">
+				<eqn>MINIMUM_KM_PER_BOX/INITIAL_ROUTING_EFFICIENCY</eqn>
+				<units>km/box</units>
+			</aux>
+			<aux name="km required\nper box\nwith hubs">
+				<eqn>MINIMUM_KM_PER_BOX/Routing_efficiency</eqn>
+				<units>km/box</units>
+			</aux>
+			<aux name="vehicles required\nper box\nwith hubs">
+				<eqn>MINIMUM_VEHICLE_PER_BOX/Fill_rate</eqn>
+				<units>vehicle/box</units>
+			</aux>
+			<stock name="Potential for improving\nrouting efficiency">
+				<eqn>MAXIMUM_ROUTING_EFFICIENCY-INITIAL_ROUTING_EFFICIENCY</eqn>
+				<outflow>increasing_routing_efficieny</outflow>
+				<units>dmnl</units>
+			</stock>
+			<flow name="increasing routing\nefficieny">
+				<eqn>Potential_for_improving_routing_efficiency*effect_of_using_hub_capacity_on_increasing_routing_efficiency</eqn>
+				<units>1/Months</units>
+			</flow>
+			<stock name="Routing efficiency">
+				<eqn>INITIAL_ROUTING_EFFICIENCY</eqn>
+				<inflow>increasing_routing_efficieny</inflow>
+				<units>dmnl</units>
+			</stock>
+			<aux name="INITIAL ROUTING\nEFFICIENCY">
+				<eqn>0.7</eqn>
+				<units>dmnl</units>
+			</aux>
+			<aux name="MAXIMUM ROUTING\nEFFICIENCY">
+				<eqn>0.9</eqn>
+				<units>dmnl</units>
+			</aux>
+			<stock name="Potential for improving\ndelivery time">
+				<eqn>INITIAL_DELIVERY_TIME-MINIMUM_DELIVERY_TIME</eqn>
+				<outflow>decreasing_delivery_time</outflow>
+				<units>min/box</units>
+			</stock>
+			<flow name="decreasing delivery\ntime">
+				<eqn>Potential_for_improving_delivery_time*effect_of_using_hub_capacity_on_increasing_delivery_time</eqn>
+				<units>min/box/Months</units>
+			</flow>
+			<stock name="Delivery time">
+				<eqn>INITIAL_DELIVERY_TIME</eqn>
+				<inflow>decreasing_delivery_time</inflow>
+				<units>min/box</units>
+			</stock>
+			<aux name="INITIAL DELIVERY\nTIME">
+				<eqn>300</eqn>
+				<units>min/box</units>
+			</aux>
+			<aux name="MINIMUM DELIVERY\nTIME">
+				<eqn>180</eqn>
+				<units>min/box</units>
+			</aux>
+			<stock name="Potential for improving\nfill rate">
+				<eqn>MAXIMUM_FILL_RATE-INITIAL_FILL_RATE</eqn>
+				<outflow>increasing_fill_rate</outflow>
+				<units>dmnl</units>
+			</stock>
+			<flow name="increasing fill\nrate">
+				<eqn>effect_of_using_hub_capacity_on_increasing_fill_rate*Potential_for_improving_fill_rate</eqn>
+				<units>1/Months</units>
+			</flow>
+			<stock name="Fill rate">
+				<eqn>INITIAL_FILL_RATE</eqn>
+				<inflow>increasing_fill_rate</inflow>
+				<units>dmnl</units>
+			</stock>
+			<aux name="INITIAL FILL\nRATE">
+				<eqn>0.6</eqn>
+				<units>dmnl</units>
+			</aux>
+			<aux name="MAXIMUM FILL\nRATE">
+				<eqn>0.8</eqn>
+				<units>dmnl</units>
+			</aux>
+			<aux name="effect of using\nhub capacity\non increasing\nrouting efficiency">
+				<eqn>using_hub_capacity/TOTAL_DEMAND*MULTIPLIER_FOR_EFFECT_OF_USING_HUB_CAPACITY_ON_INCREASE_IN_ROUTING_EFFICIENCY</eqn>
+				<units>1/Month</units>
+			</aux>
+			<aux name="effect of using\nhub capacity\non increasing\ndelivery time">
+				<eqn>using_hub_capacity/TOTAL_DEMAND*MULTIPLIER_FOR_EFFECT_OF_USING_HUB_CAPACITY_ON_DECREASE_IN_DELIVERY_TIME</eqn>
+				<units>1/Month</units>
+			</aux>
+			<aux name="effect of using\nhub capacity\non increasing\nfill rate">
+				<eqn>using_hub_capacity/TOTAL_DEMAND*MULTIPLIER_FOR_EFFECT_OF_USING_HUB_CAPACITY_ON_INCREASE_IN_FILL_RATE</eqn>
+				<units>1/Month</units>
+			</aux>
+			<aux name="MULTIPLIER FOR EFFECT\nOF USING HUB CAPACITY\nON INCREASE IN ROUTING\nEFFICIENCY">
+				<eqn>10</eqn>
+				<units>dmnl</units>
+			</aux>
+			<aux name="MULTIPLIER FOR EFFECT\nOF USING HUB CAPACITY\nON DECREASE IN DELIVERY\nTIME">
+				<eqn>10</eqn>
+				<units>dmnl</units>
+			</aux>
+			<aux name="MULTIPLIER FOR EFFECT\nOF USING HUB CAPACITY\nON INCREASE IN FILL\nRATE">
+				<eqn>10</eqn>
+				<units>dmnl</units>
+			</aux>
+			<group name="Efficiencies sector" run="false">
+				<entity name="Potential_for_improving_routing_efficiency"/>
+				<entity name="Potential_for_improving_fill_rate"/>
+				<entity name="MULTIPLIER_FOR_EFFECT_OF_USING_HUB_CAPACITY_ON_DECREASE_IN_DELIVERY_TIME"/>
+				<entity name="effect_of_using_hub_capacity_on_increasing_routing_efficiency"/>
+				<entity name="Routing_efficiency"/>
+				<entity name="increasing_routing_efficieny"/>
+				<entity name="effect_of_using_hub_capacity_on_increasing_delivery_time"/>
+				<entity name="MULTIPLIER_FOR_EFFECT_OF_USING_HUB_CAPACITY_ON_INCREASE_IN_ROUTING_EFFICIENCY"/>
+				<entity name="effect_of_using_hub_capacity_on_increasing_fill_rate"/>
+				<entity name="Potential_for_improving_delivery_time"/>
+				<entity name="increasing_fill_rate"/>
+				<entity name="Delivery_time"/>
+				<entity name="decreasing_delivery_time"/>
+				<entity name="MINIMUM_DELIVERY_TIME"/>
+				<entity name="MULTIPLIER_FOR_EFFECT_OF_USING_HUB_CAPACITY_ON_INCREASE_IN_FILL_RATE"/>
+				<entity name="Fill_rate"/>
+				<entity name="MAXIMUM_ROUTING_EFFICIENCY"/>
+				<entity name="MAXIMUM_FILL_RATE"/>
+			</group>
+			<aux name="transport operation\ncost per box\nwithout hubs">
+				<eqn>km_required_per_box_without_hubs*COST_PER_KM+vehicles_required_per_box_without_hubs*COST_PER_VEHICLE+INITIAL_DELIVERY_TIME*COST_PER_MINUTE</eqn>
+				<units>$/box</units>
+			</aux>
+			<aux name="COST PER MINUTE">
+				<eqn>4</eqn>
+				<units>$/min</units>
+			</aux>
+			<aux name="transport operation\ncost per box\nwith hubs">
+				<eqn>COST_PER_KM*km_required_per_box_with_hubs+COST_PER_VEHICLE*vehicles_required_per_box_with_hubs+COST_PER_MINUTE*Delivery_time</eqn>
+				<units>$/box</units>
+			</aux>
+			<group name="Operational costs sector" run="false">
+				<entity name="vehicles_required_per_box_without_hubs"/>
+				<entity name="INITIAL_DELIVERY_TIME"/>
+				<entity name="COST_PER_KM"/>
+				<entity name="INITIAL_FILL_RATE"/>
+				<entity name="INITIAL_ROUTING_EFFICIENCY"/>
+				<entity name="transport_operation_cost_per_box_without_hubs"/>
+				<entity name="MINIMUM_VEHICLE_PER_BOX"/>
+				<entity name="COST_PER_VEHICLE"/>
+				<entity name="transport_operation_cost_per_box_with_hubs"/>
+				<entity name="maximum_monetary_value"/>
+				<entity name="km_required_per_box_with_hubs"/>
+				<entity name="MINIMUM_KM_PER_BOX"/>
+				<entity name="COST_PER_MINUTE"/>
+				<entity name="km_required_per_box_without_hubs"/>
+				<entity name="vehicles_required_per_box_with_hubs"/>
+			</group>
+			<aux name="TOTAL OPERATION\nCOST OF ONE HUB">
+				<eqn>100</eqn>
+				<units>$/hub/month</units>
+			</aux>
+			<aux name="cost of using\nthe hub system\nper company">
+				<eqn>Hubs*TOTAL_OPERATION_COST_OF_ONE_HUB/Company_adopters</eqn>
+				<units>$/company/month</units>
+			</aux>
+			<aux name="maximum monetary\nvalue">
+				<eqn>(MINIMUM_DELIVERY_TIME*COST_PER_MINUTE+MINIMUM_KM_PER_BOX*COST_PER_KM+COST_PER_VEHICLE*MINIMUM_VEHICLE_PER_BOX)*TOTAL_DEMAND/TOTAL_NUMBER_OF_COMPANIES</eqn>
+				<units>$/company/month</units>
+			</aux>
+			<aux name="EXTRA COST PER BOX\nGOING THROUGH THE HUB">
+				<eqn>1</eqn>
+				<units>$/box</units>
+			</aux>
+			<aux name="vehicle km">
+				<eqn>vehicle_km_required_for_demand_with_hubs+vehicle_km_required_for_demand_without_hubs</eqn>
+				<units>vehicle*km/month</units>
+			</aux>
+			<aux name="GOAL OF VEHICLE KM">
+				<eqn>2*10^13</eqn>
+				<units>vehicle*km/month</units>
+			</aux>
+			<aux name="gap of vehicle km">
+				<eqn>(vehicle_km-GOAL_OF_VEHICLE_KM)/GOAL_OF_VEHICLE_KM</eqn>
+				<units>dmnl</units>
+			</aux>
+			<aux name="vehicle km required\nfor demand with hubs">
+				<eqn>km_required_per_box_with_hubs*vehicles_required_per_box_with_hubs*Utilized_hub_capacity</eqn>
+				<units>vehicle*km/month</units>
+			</aux>
+			<aux name="vehicle km required\nfor demand without hubs">
+				<eqn>km_required_per_box_without_hubs*vehicles_required_per_box_without_hubs*(TOTAL_DEMAND-Utilized_hub_capacity)</eqn>
+				<units>vehicle*km/month</units>
+			</aux>
+			<group name="Goals sector" run="false">
+				<entity name="vehicle_km_required_for_demand_with_hubs"/>
+				<entity name="vehicle_km_required_for_demand_without_hubs"/>
+				<entity name="gap_of_vehicle_km"/>
+				<entity name="vehicle_km"/>
+				<entity name="gap_of_emissions"/>
+				<entity name="emissions"/>
+				<entity name="EMISSIONS_OF_ELECTRIC_VEHICLES"/>
+				<entity name="GOAL_OF_EMISSIONS"/>
+				<entity name="GOAL_OF_VEHICLE_KM"/>
+				<entity name="EMISSION_OF_DIESEL_TRUCKS"/>
+			</group>
+			<group name="Company sector" run="false">
+				<entity name="Company_potential_adopters"/>
+				<entity name="company_adoption_rate"/>
+				<entity name="COMPANY_CONTACT_RATE"/>
+				<entity name="TOTAL_NUMBER_OF_COMPANIES"/>
+				<entity name="AVERAGE_DELAY_IN_DROPPING_OUT"/>
+				<entity name="company_adoption_fraction"/>
+				<entity name="share_of_company_adopters"/>
+				<entity name="Company_adopters"/>
+				<entity name="effect_of_monetary_value_on_company_adoption_fraction"/>
+				<entity name="INITIAL_ADOPTION_FRACTION"/>
+				<entity name="INITIAL_PUSH_TIME"/>
+				<entity name="monetary_value"/>
+				<entity name="EXTRA_COST_PER_BOX_GOING_THROUGH_THE_HUB"/>
+			</group>
+			<aux name="MINIMUM UTILIZATION\nRATE">
+				<eqn>0.9</eqn>
+				<units>dmnl</units>
+			</aux>
+			<aux name="INITIAL ADOPTION\nFRACTION">
+				<eqn>0.5</eqn>
+				<units>dmnl</units>
+			</aux>
+			<aux name="INITIAL PUSH TIME">
+				<eqn>24</eqn>
+				<units>month</units>
+			</aux>
+		</variables>
+		<views>
+			<style color="black" background="white" font_style="normal" font_weight="normal" text_decoration="none" text_align="center" vertical_text_align="center" font_color="black" font_family="Arial" font_size="10pt" padding="2" border_color="black" border_width="thin" border_style="none">
+				<text_box color="black" background="white" text_align="left" vertical_text_align="top" font_size="12pt"/>
+				<isee:loop_indicator color="black" background="white" text_align="left" vertical_text_align="top" font_size="12pt"/>
+				<numeric_display color="white" background="white" font_size="12pt" border_width="thin" border_style="solid" isee:transparent="false" isee:show_divider="true" isee:show_bounding_box="true" label_side="left"/>
+				<graph color="black" background="white" font_size="12pt" axis_color="#666666" grid_color="#C8C8C8" isee:graph_area_color="white" legend_position="bottom" isee:transparent="false" isee:hide_border="false" axis_title_font_style="normal" axis_title_font_weight="normal" axis_title_text_decoration="none" axis_title_text_align="center" axis_title_vertical_text_align="center" axis_title_font_color="black" axis_title_font_family="Arial" axis_title_font_size="12pt" axis_title_text_padding="2" axis_title_text_border_color="black" axis_title_text_border_width="thin" axis_title_text_border_style="none" axis_label_font_style="normal" axis_label_font_weight="normal" axis_label_text_decoration="none" axis_label_text_align="center" axis_label_vertical_text_align="center" axis_label_font_color="black" axis_label_font_family="Arial" axis_label_font_size="9pt" axis_label_text_padding="2" axis_label_text_border_color="black" axis_label_text_border_width="thin" axis_label_text_border_style="none">
+					<isee:series_styles>
+						<isee:series_style color="blue" thickness="1"/>
+						<isee:series_style color="red" thickness="1" pen_style="dot_dashed"/>
+						<isee:series_style color="fuchsia" thickness="1" pen_style="dotted"/>
+						<isee:series_style color="#008F44" thickness="1" pen_style="dashed"/>
+						<isee:series_style color="#FF7F00" thickness="1"/>
+						<isee:series_style color="#7F00FF" thickness="1" pen_style="dot_dashed"/>
+						<isee:series_style color="#0CA0FF" thickness="1" pen_style="dotted"/>
+						<isee:series_style color="lime" thickness="1" pen_style="dashed"/>
+						<isee:series_style color="#FF007F" thickness="1"/>
+						<isee:series_style color="aqua" thickness="1" pen_style="dot_dashed"/>
+						<isee:series_style color="#F586FF" thickness="1" pen_style="dotted"/>
+						<isee:series_style color="black" thickness="1" pen_style="dashed"/>
+						<isee:series_style color="#C8C8C8" thickness="1"/>
+					</isee:series_styles>
+				</graph>
+				<table color="black" background="#E0E0E0" text_align="right" font_size="12pt" orientation="vertical" wrap_text="false" isee:auto_fit="true" isee:use_alternate_row_colors="false" isee:unlimited_table_length="false" blank_column_width="80" column_width="160" interval="1" report_balances="beginning" report_flows="summed" header_font_style="normal" header_font_weight="normal" header_text_decoration="none" header_text_align="center" header_vertical_text_align="center" header_font_color="black" header_font_family="Arial" header_font_size="12pt" header_text_padding="2" header_text_border_color="black" header_text_border_width="thin" header_text_border_style="none"/>
+				<button color="black" background="#E0E0E0" font_size="12pt" border_width="thin" border_style="solid" transparent="false" corner_radius="0" isee:flat="false" icon_side="top" isee:highlight_on_hover="false" isee:highlight_color="#959595"/>
+				<isee:annotation color="black" background="#E0E0E0" font_size="12pt" border_width="thin" border_style="solid" transparent="false" corner_radius="0" isee:flat="false" icon_side="top" isee:highlight_on_hover="false" isee:highlight_color="#959595" popup_corner_radius="0" popup_background_color="#FFFECF"/>
+				<slider color="#66CC66" background="#E0E0E0" font_size="12pt" num_ticks="3" label_side="top" wrap_title="true" vertical="false" isee:fancy_appearance="false" isee:show_hover_tip="when_deciding" input_expands="true" input_width="100"/>
+				<isee:dual_slider color="#66CC66" background="silver" font_size="12pt" num_ticks="3" label_side="top" wrap_title="true" isee:show_hover_tip="when_deciding" input_expands="true" input_width="100"/>
+				<isee:sim_speed_slider color="black" background="white"/>
+				<isee:time_slider color="#E95F74" background="silver"/>
+				<isee:pie_input color="black" background="white" font_size="12pt" legend_position="bottom" isee:transparent="false"/>
+				<knob color="#66CC66" background="#E0E0E0" font_size="12pt" label_side="bottom" wrap_title="true"/>
+				<numeric_input color="black" background="#E0E0E0" font_size="12pt" label_side="left" wrap_title="true" input_expands="false" input_width="100"/>
+				<switch color="black" background="#E0E0E0" font_size="12pt" label_side="top" wrap_title="true" isee:appearance="switch" isee:on_color="green"/>
+				<options color="black" background="white" appearance="radio-buttons" arrangement="vertical"/>
+				<graphical_input color="black" background="#E0E0E0" font_size="12pt" isee:show_hover_tip="true"/>
+				<group_input color="black" background="#E0E0E0" font_size="12pt"/>
+				<lamp color="black" background="white" font_size="9pt"/>
+				<gauge color="black" background="white" font_size="9pt" needle_color="#F09F72" bar_color="#EEEEEE" bar_progress_color="black" appearance="radial" num_major_ticks="11" num_minor_ticks="11" show_numeric_value="true"/>
+				<isee:spatial_map color="black" background="white" font_size="12pt"/>
+				<isee:animation_object color="black" background="white" font_size="12pt"/>
+				<isee:navigation_widget color="black" background="white" text_align="left" vertical_text_align="top" font_size="12pt" padding="6 8" border_color="#999999" border_width="thin" border_style="solid" item_spacing="6" appearance="tabs" corner_radius="4" selected_item_color="black" selected_item_background="white" item_background="#DDDDDD" transparent_bg="false"/>
+				<isee:shape color="black" background="white" text_align="left" vertical_text_align="top" font_size="12pt" border_width="thin" border_style="solid" opacity="1" transparent_background="true" corner_radius="1"/>
+				<isee:selector color="black" background="white" text_align="left" vertical_text_align="top" font_size="12pt"/>
+				<isee:iframe color="black" background="white" text_align="left" vertical_text_align="top" font_size="12pt" border_width="thin" border_style="solid"/>
+				<isee:financial_table color="black" background="#E0E0E0" text_align="right" font_size="12pt" hide_border="false" auto_fit="true" first_column_width="250" other_column_width="100" header_font_style="normal" header_font_weight="bold" header_text_decoration="none" header_text_align="center" header_vertical_text_align="center" header_font_color="black" header_font_family="Arial" header_font_size="14pt" header_text_padding="2" header_text_border_color="black" header_text_border_width="thin" header_text_border_style="none"/>
+			</style>
+			<view isee:show_pages="false" background="white" page_width="826" page_height="579" isee:page_cols="4" isee:page_rows="2" zoom="120" isee:popup_graphs_are_comparative="false" isee:enable_non_negative_highlights="false" type="stock_flow">
+				<style color="black" background="white" font_style="normal" font_weight="normal" text_decoration="none" text_align="center" vertical_text_align="center" font_color="black" font_family="Arial" font_size="10pt" padding="2" border_color="black" border_width="thin" border_style="none">
+					<stock color="blue" background="white" font_color="blue" font_size="9pt" label_side="top">
+						<shape type="rectangle" width="45" height="35"/>
+					</stock>
+					<flow color="blue" background="white" font_color="blue" font_size="9pt" label_side="bottom">
+						<shape type="circle" radius="18"/>
+					</flow>
+					<isee:placeholder color="#228B22" background="white" font_color="#228B22" font_size="9pt" label_side="bottom"/>
+					<module color="blue" background="white" font_color="blue" font_size="9pt" label_side="top">
+						<shape type="rectangle" width="55" height="45"/>
+					</module>
+					<aux color="blue" background="white" font_color="blue" font_size="9pt" label_side="bottom">
+						<shape type="circle" radius="18"/>
+					</aux>
+					<group color="red" background="white" font_color="red" font_size="9pt"/>
+					<connector color="#FF007F" background="white" font_color="#FF007F" font_size="9pt" isee:thickness="1"/>
+					<text_box color="black" background="white" text_align="left" vertical_text_align="top" font_size="12pt"/>
+					<isee:loop_indicator color="black" background="white" text_align="left" vertical_text_align="top" font_size="12pt"/>
+					<numeric_display color="white" background="white" font_size="12pt" border_width="thin" border_style="solid" isee:transparent="false" isee:show_divider="true" isee:show_bounding_box="true" label_side="left"/>
+					<graph color="black" background="white" font_size="12pt" axis_color="#666666" grid_color="#C8C8C8" isee:graph_area_color="white" legend_position="bottom" isee:transparent="false" isee:hide_border="false" axis_title_font_style="normal" axis_title_font_weight="normal" axis_title_text_decoration="none" axis_title_text_align="center" axis_title_vertical_text_align="center" axis_title_font_color="black" axis_title_font_family="Arial" axis_title_font_size="12pt" axis_title_text_padding="2" axis_title_text_border_color="black" axis_title_text_border_width="thin" axis_title_text_border_style="none" axis_label_font_style="normal" axis_label_font_weight="normal" axis_label_text_decoration="none" axis_label_text_align="center" axis_label_vertical_text_align="center" axis_label_font_color="black" axis_label_font_family="Arial" axis_label_font_size="9pt" axis_label_text_padding="2" axis_label_text_border_color="black" axis_label_text_border_width="thin" axis_label_text_border_style="none">
+						<isee:series_styles>
+							<isee:series_style color="blue" thickness="1"/>
+							<isee:series_style color="red" thickness="1" pen_style="dot_dashed"/>
+							<isee:series_style color="fuchsia" thickness="1" pen_style="dotted"/>
+							<isee:series_style color="#008F44" thickness="1" pen_style="dashed"/>
+							<isee:series_style color="#FF7F00" thickness="1"/>
+							<isee:series_style color="#7F00FF" thickness="1" pen_style="dot_dashed"/>
+							<isee:series_style color="#0CA0FF" thickness="1" pen_style="dotted"/>
+							<isee:series_style color="lime" thickness="1" pen_style="dashed"/>
+							<isee:series_style color="#FF007F" thickness="1"/>
+							<isee:series_style color="aqua" thickness="1" pen_style="dot_dashed"/>
+							<isee:series_style color="#F586FF" thickness="1" pen_style="dotted"/>
+							<isee:series_style color="black" thickness="1" pen_style="dashed"/>
+							<isee:series_style color="#C8C8C8" thickness="1"/>
+						</isee:series_styles>
+					</graph>
+					<table color="black" background="#E0E0E0" text_align="right" font_size="12pt" orientation="vertical" wrap_text="false" isee:auto_fit="true" isee:use_alternate_row_colors="false" isee:unlimited_table_length="false" blank_column_width="80" column_width="160" interval="1" report_balances="beginning" report_flows="summed" header_font_style="normal" header_font_weight="normal" header_text_decoration="none" header_text_align="center" header_vertical_text_align="center" header_font_color="black" header_font_family="Arial" header_font_size="12pt" header_text_padding="2" header_text_border_color="black" header_text_border_width="thin" header_text_border_style="none"/>
+				</style>
+				<stock font_size="11pt" x="103.333" y="143.111" name="Company potential adopters"/>
+				<stock font_size="11pt" x="398.167" y="132.944" width="61.6667" height="32.2222" name="Company adopters"/>
+				<flow font_size="11pt" x="262" y="145.111" name="company adoption rate">
+					<pts>
+						<pt x="125.833" y="145.111"/>
+						<pt x="398.167" y="145.111"/>
+					</pts>
+				</flow>
+				<aux font_size="11pt" x="257.944" y="72.3333" width="18.3333" height="18.3333" name="COMPANY CONTACT RATE"/>
+				<connector uid="1" angle="265.406">
+					<from>COMPANY_CONTACT_RATE</from>
+					<to>company_adoption_rate</to>
+				</connector>
+				<aux font_size="11pt" x="104.167" y="46.3889" width="18" height="18" name="TOTAL NUMBER\nOF COMPANIES"/>
+				<aux font_size="11pt" x="208.778" y="240.444" width="18" height="18" name="AVERAGE DELAY IN DROPPING OUT"/>
+				<aux font_size="11pt" x="351.222" y="231.444" name="company adoption fraction"/>
+				<connector uid="4" angle="135.943">
+					<from>company_adoption_fraction</from>
+					<to>company_adoption_rate</to>
+				</connector>
+				<aux font_size="11pt" x="418.833" y="298.444" name="effect of monetary value on\ncompany adoption fraction"/>
+				<connector uid="7" angle="196.228">
+					<from>effect_of_monetary_value_on_company_adoption_fraction</from>
+					<to>company_adoption_fraction</to>
+				</connector>
+				<connector uid="8" angle="333.217">
+					<from>Company_potential_adopters</from>
+					<to>company_adoption_rate</to>
+				</connector>
+				<connector uid="9" angle="144.09">
+					<from>Company_adopters</from>
+					<to>company_adoption_rate</to>
+				</connector>
+				<connector uid="10" angle="315.95">
+					<from>TOTAL_NUMBER_OF_COMPANIES</from>
+					<to>company_adoption_rate</to>
+				</connector>
+				<connector uid="11" angle="67.0301">
+					<from>AVERAGE_DELAY_IN_DROPPING_OUT</from>
+					<to>company_adoption_rate</to>
+				</connector>
+				<aux font_size="11pt" x="314.167" y="532.833" name="monetary value"/>
+				<connector uid="17" angle="51.7111">
+					<from>monetary_value</from>
+					<to>effect_of_monetary_value_on_company_adoption_fraction</to>
+				</connector>
+				<stock font_size="11pt" x="1167" y="186.5" name="Hubs"/>
+				<stock font_size="11pt" x="945.333" y="186.5" name="Hubs under planning"/>
+				<flow font_size="11pt" x="1050.17" y="186.5" name="building hubs">
+					<pts>
+						<pt x="967.833" y="186.5"/>
+						<pt x="1144.5" y="186.5"/>
+					</pts>
+				</flow>
+				<flow font_size="11pt" x="849.083" y="186.5" name="planning hubs">
+					<pts>
+						<pt x="775.333" y="186.5"/>
+						<pt x="922.833" y="186.5"/>
+					</pts>
+				</flow>
+				<flow font_size="11pt" x="1272.09" y="186.5" name="scrapping hubs">
+					<pts>
+						<pt x="1189.5" y="186.5"/>
+						<pt x="1378.67" y="186.5"/>
+					</pts>
+				</flow>
+				<aux font_size="11pt" x="1038.17" y="231.444" name="ADJUSTMENT TIME\nFOR BUILDING HUBS"/>
+				<connector uid="18" angle="75.055">
+					<from>ADJUSTMENT_TIME_FOR_BUILDING_HUBS</from>
+					<to>building_hubs</to>
+				</connector>
+				<connector uid="19" angle="61.0428">
+					<from>planning_hubs</from>
+					<to>building_hubs</to>
+				</connector>
+				<group locked="true" font_size="11pt" x="723" y="30.6111" width="709" height="258.833" name="Hubs sector">
+					<item uid="101"/>
+				</group>
+				<stock font_size="11pt" x="848.333" y="428.833" name="Funds"/>
+				<flow font_size="11pt" x="758.25" y="433.833" name="adding funds from public sector">
+					<pts>
+						<pt x="690.667" y="433.833"/>
+						<pt x="825.833" y="433.833"/>
+					</pts>
+				</flow>
+				<flow font_size="11pt" x="939.752" y="434.833" name="using funds to build hubs">
+					<pts>
+						<pt x="870.833" y="434.833"/>
+						<pt x="1032.67" y="434.833"/>
+					</pts>
+				</flow>
+				<connector uid="21" angle="153.178">
+					<from>Funds</from>
+					<to>planning_hubs</to>
+				</connector>
+				<aux font_size="11pt" x="867.667" y="240.444" width="18" height="18" name="BUILDING COST\nOF ONE HUB"/>
+				<connector uid="23" angle="113.665">
+					<from>BUILDING_COST_OF_ONE_HUB</from>
+					<to>planning_hubs</to>
+				</connector>
+				<aux font_size="11pt" x="767.667" y="524.833" name="MAXIMUM FUNDS PER TIME UNIT"/>
+				<connector uid="28" angle="50.1944">
+					<from>MAXIMUM_FUNDS_PER_TIME_UNIT</from>
+					<to>adding_funds_from_public_sector</to>
+				</connector>
+				<connector uid="29" angle="345.851">
+					<from>planning_hubs</from>
+					<to>using_funds_to_build_hubs</to>
+				</connector>
+				<connector uid="30" angle="288.793">
+					<from>BUILDING_COST_OF_ONE_HUB</from>
+					<to>using_funds_to_build_hubs</to>
+				</connector>
+				<group locked="true" font_size="11pt" x="649.667" y="364" width="417" height="204" name="Funds sector">
+					<item uid="147"/>
+				</group>
+				<aux font_size="11pt" x="808.25" y="138.055" name="ONE\nHUB"/>
+				<connector uid="35" angle="310.127">
+					<from>ONE_HUB</from>
+					<to>planning_hubs</to>
+				</connector>
+				<stock font_size="11pt" x="1293.92" y="436.333" name="Available hub capacity"/>
+				<stock font_size="11pt" x="1500.83" y="436.333" name="Utilized hub capacity"/>
+				<flow font_size="11pt" x="1397.38" y="436.333" name="using hub capacity">
+					<pts>
+						<pt x="1316.42" y="436.333"/>
+						<pt x="1478.33" y="436.333"/>
+					</pts>
+				</flow>
+				<flow font_size="11pt" x="1206.13" y="439.833" name="adding hub capacity">
+					<pts>
+						<pt x="1140.83" y="439.833"/>
+						<pt x="1271.42" y="439.833"/>
+					</pts>
+				</flow>
+				<aux font_size="11pt" x="1316.42" y="490" width="19.1667" height="19.1667" name="ADJUSTMENT TIME FOR\nUSING HUB CAPACITY"/>
+				<connector uid="41" angle="41.5477">
+					<from>ADJUSTMENT_TIME_FOR_USING_HUB_CAPACITY</from>
+					<to>using_hub_capacity</to>
+				</connector>
+				<connector uid="42" angle="301.618">
+					<from>building_hubs</from>
+					<to>adding_hub_capacity</to>
+				</connector>
+				<aux font_size="11pt" x="1227.5" y="359.833" name="ONE HUB\nCAPACITY"/>
+				<connector uid="43" angle="255.041">
+					<from>ONE_HUB_CAPACITY</from>
+					<to>adding_hub_capacity</to>
+				</connector>
+				<aux font_size="11pt" x="1325.42" y="350.166" name="total hub capacity"/>
+				<connector uid="44" angle="314.067">
+					<from>Hubs</from>
+					<to>total_hub_capacity</to>
+				</connector>
+				<connector uid="45" angle="333.435">
+					<from>ONE_HUB_CAPACITY</from>
+					<to>total_hub_capacity</to>
+				</connector>
+				<aux font_size="11pt" x="1425.83" y="350.166" name="utilization rate"/>
+				<connector uid="46" angle="18.6433">
+					<from>total_hub_capacity</from>
+					<to>utilization_rate</to>
+				</connector>
+				<connector uid="47" angle="119.605">
+					<from>Utilized_hub_capacity</from>
+					<to>utilization_rate</to>
+				</connector>
+				<group locked="true" font_size="11pt" x="1116.83" y="319.166" width="476.667" height="268.167" name="Capacity sector"/>
+				<aux font_size="11pt" x="365.833" y="45.3889" name="share of company\nadopters"/>
+				<connector uid="48" angle="18.5206">
+					<from>TOTAL_NUMBER_OF_COMPANIES</from>
+					<to>share_of_company_adopters</to>
+				</connector>
+				<connector uid="49" angle="73.945">
+					<from>Company_adopters</from>
+					<to>share_of_company_adopters</to>
+				</connector>
+				<aux font_size="11pt" x="1373.38" y="552.917" name="TOTAL DEMAND"/>
+				<aux font_size="11pt" x="1458.33" y="539.25" name="goal of utilized\nhub capacity"/>
+				<aux font_size="11pt" x="1458.33" y="481" name="gap of utilized\nhub capacity"/>
+				<connector uid="51" angle="9.13937">
+					<from>TOTAL_DEMAND</from>
+					<to>goal_of_utilized_hub_capacity</to>
+				</connector>
+				<connector uid="52" angle="81.3144">
+					<from>
+						<alias uid="50"/>
+					</from>
+					<to>goal_of_utilized_hub_capacity</to>
+				</connector>
+				<connector uid="53" angle="98.5099">
+					<from>goal_of_utilized_hub_capacity</from>
+					<to>gap_of_utilized_hub_capacity</to>
+				</connector>
+				<connector uid="54" angle="264.549">
+					<from>Utilized_hub_capacity</from>
+					<to>gap_of_utilized_hub_capacity</to>
+				</connector>
+				<connector uid="55" angle="161.32">
+					<from>gap_of_utilized_hub_capacity</from>
+					<to>using_hub_capacity</to>
+				</connector>
+				<aux font_size="11pt" x="822.5" y="690.834" name="EMISSION OF\nDIESEL TRUCKS"/>
+				<aux font_size="11pt" x="789.167" y="759.166" name="EMISSIONS OF\nELECTRIC VEHICLES"/>
+				<aux font_size="11pt" x="889.167" y="771.333" name="emissions"/>
+				<aux font_size="11pt" x="1042.33" y="654.834" name="GOAL OF EMISSIONS"/>
+				<aux font_size="11pt" x="980.833" y="731.666" name="gap of emissions"/>
+				<connector uid="56" angle="231.325">
+					<from>GOAL_OF_EMISSIONS</from>
+					<to>gap_of_emissions</to>
+				</connector>
+				<connector uid="57" angle="23.3995">
+					<from>emissions</from>
+					<to>gap_of_emissions</to>
+				</connector>
+				<connector uid="58" angle="339.677">
+					<from>EMISSION_OF_DIESEL_TRUCKS</from>
+					<to>emissions</to>
+				</connector>
+				<connector uid="59" angle="316.364">
+					<from>EMISSIONS_OF_ELECTRIC_VEHICLES</from>
+					<to>emissions</to>
+				</connector>
+				<aux font_size="11pt" x="1922.44" y="299" name="MINIMUM KM\nPER BOX"/>
+				<aux font_size="11pt" x="2279.83" y="42.3327" width="16.3333" height="16.3333" name="MINIMUM VEHICLE\nPER BOX"/>
+				<aux font_size="11pt" x="2173.17" y="138" name="COST PER KM"/>
+				<aux font_size="11pt" x="2187.67" y="159.166" width="17.5" height="17.5" name="COST PER VEHICLE"/>
+				<aux font_size="11pt" x="2057.67" y="113.5" name="vehicles required\nper box\nwithout hubs"/>
+				<aux font_size="11pt" x="1857.17" y="193.166" name="km required\nper box\nwithout hubs"/>
+				<aux font_size="11pt" x="2345.17" y="275.167" name="km required\nper box\nwith hubs"/>
+				<aux font_size="11pt" x="2532.83" y="113.5" name="vehicles required\nper box\nwith hubs"/>
+				<stock font_size="11pt" x="1730.83" y="568.333" name="Potential for improving\nrouting efficiency"/>
+				<flow font_size="11pt" x="1830" y="563.333" name="increasing routing\nefficieny">
+					<pts>
+						<pt x="1753.33" y="563.333"/>
+						<pt x="1906.67" y="563.333"/>
+					</pts>
+				</flow>
+				<stock font_size="11pt" x="1929.17" y="563.333" name="Routing efficiency"/>
+				<aux font_size="11pt" x="1778" y="175.166" name="INITIAL ROUTING\nEFFICIENCY"/>
+				<aux font_size="11pt" x="1815" y="484.333" name="MAXIMUM ROUTING\nEFFICIENCY"/>
+				<connector uid="60" angle="283.241">
+					<from>Potential_for_improving_routing_efficiency</from>
+					<to>increasing_routing_efficieny</to>
+				</connector>
+				<stock font_size="11pt" x="2463.33" y="586.667" name="Potential for improving\ndelivery time"/>
+				<flow font_size="11pt" x="2562.5" y="581.667" name="decreasing delivery\ntime">
+					<pts>
+						<pt x="2485.83" y="581.667"/>
+						<pt x="2639.17" y="581.667"/>
+					</pts>
+				</flow>
+				<stock font_size="11pt" x="2661.67" y="581.667" name="Delivery time"/>
+				<aux font_size="11pt" x="1964.17" y="240.833" name="INITIAL DELIVERY\nTIME"/>
+				<aux font_size="11pt" x="2507.5" y="498.333" name="MINIMUM DELIVERY\nTIME"/>
+				<connector uid="61" angle="283.241">
+					<from>Potential_for_improving_delivery_time</from>
+					<to>decreasing_delivery_time</to>
+				</connector>
+				<stock font_size="11pt" x="2081.33" y="579.834" name="Potential for improving\nfill rate"/>
+				<flow font_size="11pt" x="2180.5" y="574.834" name="increasing fill\nrate">
+					<pts>
+						<pt x="2103.83" y="574.834"/>
+						<pt x="2257.17" y="574.834"/>
+					</pts>
+				</flow>
+				<stock font_size="11pt" x="2279.67" y="574.834" name="Fill rate"/>
+				<aux font_size="11pt" x="2011.67" y="67.666" name="INITIAL FILL\nRATE"/>
+				<aux font_size="11pt" x="2184.83" y="502.333" name="MAXIMUM FILL\nRATE"/>
+				<connector uid="62" angle="283.241">
+					<from>Potential_for_improving_fill_rate</from>
+					<to>increasing_fill_rate</to>
+				</connector>
+				<aux font_size="11pt" x="1880" y="668.333" name="effect of using\nhub capacity\non increasing\nrouting efficiency"/>
+				<connector uid="63" angle="115.463">
+					<from>effect_of_using_hub_capacity_on_increasing_routing_efficiency</from>
+					<to>increasing_routing_efficieny</to>
+				</connector>
+				<aux font_size="11pt" x="2529.83" y="678.499" name="effect of using\nhub capacity\non increasing\ndelivery time"/>
+				<aux font_size="11pt" x="2220.83" y="666.667" name="effect of using\nhub capacity\non increasing\nfill rate"/>
+				<connector uid="64" angle="44.9978">
+					<from>effect_of_using_hub_capacity_on_increasing_delivery_time</from>
+					<to>decreasing_delivery_time</to>
+				</connector>
+				<connector uid="65" angle="113.709">
+					<from>effect_of_using_hub_capacity_on_increasing_fill_rate</from>
+					<to>increasing_fill_rate</to>
+				</connector>
+				<connector uid="66" angle="158.199">
+					<from>
+						<alias uid="67"/>
+					</from>
+					<to>effect_of_using_hub_capacity_on_increasing_routing_efficiency</to>
+				</connector>
+				<connector uid="68" angle="10.6197">
+					<from>
+						<alias uid="67"/>
+					</from>
+					<to>effect_of_using_hub_capacity_on_increasing_delivery_time</to>
+				</connector>
+				<connector uid="69" angle="14.0362">
+					<from>
+						<alias uid="67"/>
+					</from>
+					<to>effect_of_using_hub_capacity_on_increasing_fill_rate</to>
+				</connector>
+				<connector uid="71" angle="341.095">
+					<from>
+						<alias uid="70"/>
+					</from>
+					<to>effect_of_using_hub_capacity_on_increasing_fill_rate</to>
+				</connector>
+				<connector uid="72" angle="332.765">
+					<from>
+						<alias uid="70"/>
+					</from>
+					<to>effect_of_using_hub_capacity_on_increasing_delivery_time</to>
+				</connector>
+				<connector uid="73" angle="194.744">
+					<from>
+						<alias uid="70"/>
+					</from>
+					<to>effect_of_using_hub_capacity_on_increasing_routing_efficiency</to>
+				</connector>
+				<aux font_size="11pt" x="1752.5" y="678.499" name="MULTIPLIER FOR EFFECT\nOF USING HUB CAPACITY\nON INCREASE IN ROUTING\nEFFICIENCY"/>
+				<aux font_size="11pt" x="2661.66" y="660.499" name="MULTIPLIER FOR EFFECT\nOF USING HUB CAPACITY\nON DECREASE IN DELIVERY\nTIME"/>
+				<aux font_size="11pt" x="2334.16" y="659.833" width="17.1667" height="17.1667" name="MULTIPLIER FOR EFFECT\nOF USING HUB CAPACITY\nON INCREASE IN FILL\nRATE"/>
+				<connector uid="74" angle="4.55886">
+					<from>MULTIPLIER_FOR_EFFECT_OF_USING_HUB_CAPACITY_ON_INCREASE_IN_ROUTING_EFFICIENCY</from>
+					<to>effect_of_using_hub_capacity_on_increasing_routing_efficiency</to>
+				</connector>
+				<connector uid="76" angle="179.178">
+					<from>MULTIPLIER_FOR_EFFECT_OF_USING_HUB_CAPACITY_ON_INCREASE_IN_FILL_RATE</from>
+					<to>effect_of_using_hub_capacity_on_increasing_fill_rate</to>
+				</connector>
+				<group locked="true" font_size="11pt" x="1674" y="462.833" width="1081.67" height="328.167" name="Efficiencies sector">
+					<item uid="67"/>
+					<item uid="70"/>
+				</group>
+				<connector uid="77" angle="347.191">
+					<from>INITIAL_ROUTING_EFFICIENCY</from>
+					<to>km_required_per_box_without_hubs</to>
+				</connector>
+				<aux font_size="11pt" x="2024" y="203.333" name="transport operation\ncost per box\nwithout hubs"/>
+				<connector uid="78" angle="174.88">
+					<from>MINIMUM_KM_PER_BOX</from>
+					<to>km_required_per_box_without_hubs</to>
+				</connector>
+				<connector uid="79" angle="255.851">
+					<from>INITIAL_FILL_RATE</from>
+					<to>vehicles_required_per_box_without_hubs</to>
+				</connector>
+				<connector uid="80" angle="182.165">
+					<from>MINIMUM_VEHICLE_PER_BOX</from>
+					<to>vehicles_required_per_box_without_hubs</to>
+				</connector>
+				<connector uid="81" angle="356.513">
+					<from>km_required_per_box_without_hubs</from>
+					<to>transport_operation_cost_per_box_without_hubs</to>
+				</connector>
+				<connector uid="82" angle="249.454">
+					<from>vehicles_required_per_box_without_hubs</from>
+					<to>transport_operation_cost_per_box_without_hubs</to>
+				</connector>
+				<aux font_size="11pt" x="2209.17" y="217.167" name="COST PER MINUTE"/>
+				<connector uid="84" angle="64.1393">
+					<from>INITIAL_DELIVERY_TIME</from>
+					<to>transport_operation_cost_per_box_without_hubs</to>
+				</connector>
+				<connector uid="85" angle="203.653">
+					<from>COST_PER_KM</from>
+					<to>transport_operation_cost_per_box_without_hubs</to>
+				</connector>
+				<connector uid="86" angle="191.608">
+					<from>COST_PER_VEHICLE</from>
+					<to>transport_operation_cost_per_box_without_hubs</to>
+				</connector>
+				<connector uid="87" angle="175.728">
+					<from>COST_PER_MINUTE</from>
+					<to>transport_operation_cost_per_box_without_hubs</to>
+				</connector>
+				<connector uid="88" angle="347.674">
+					<from>MINIMUM_KM_PER_BOX</from>
+					<to>km_required_per_box_with_hubs</to>
+				</connector>
+				<connector uid="89" angle="2.38277">
+					<from>MINIMUM_VEHICLE_PER_BOX</from>
+					<to>vehicles_required_per_box_with_hubs</to>
+				</connector>
+				<connector uid="90" angle="34.7106">
+					<from>Routing_efficiency</from>
+					<to>km_required_per_box_with_hubs</to>
+				</connector>
+				<connector uid="91" angle="34.5745">
+					<from>Fill_rate</from>
+					<to>vehicles_required_per_box_with_hubs</to>
+				</connector>
+				<aux font_size="11pt" x="2357.5" y="161.667" name="transport operation\ncost per box\nwith hubs"/>
+				<connector uid="92" angle="358.386">
+					<from>COST_PER_KM</from>
+					<to>transport_operation_cost_per_box_with_hubs</to>
+				</connector>
+				<connector uid="93" angle="2.22171">
+					<from>COST_PER_VEHICLE</from>
+					<to>transport_operation_cost_per_box_with_hubs</to>
+				</connector>
+				<connector uid="94" angle="20.5137">
+					<from>COST_PER_MINUTE</from>
+					<to>transport_operation_cost_per_box_with_hubs</to>
+				</connector>
+				<connector uid="95" angle="83.7986">
+					<from>km_required_per_box_with_hubs</from>
+					<to>transport_operation_cost_per_box_with_hubs</to>
+				</connector>
+				<connector uid="96" angle="195.361">
+					<from>vehicles_required_per_box_with_hubs</from>
+					<to>transport_operation_cost_per_box_with_hubs</to>
+				</connector>
+				<connector uid="98" angle="125.913">
+					<from>Delivery_time</from>
+					<to>transport_operation_cost_per_box_with_hubs</to>
+				</connector>
+				<group locked="true" font_size="11pt" x="1700" y="26" width="960.833" height="368.166" name="Operational costs sector">
+					<item uid="110"/>
+					<item uid="109"/>
+				</group>
+				<aux font_size="11pt" x="1126.5" y="54.3333" width="18" height="18" name="TOTAL OPERATION\nCOST OF ONE HUB"/>
+				<aux font_size="11pt" x="1242.17" y="102.5" name="cost of using\nthe hub system\nper company"/>
+				<connector uid="99" angle="336.441">
+					<from>TOTAL_OPERATION_COST_OF_ONE_HUB</from>
+					<to>cost_of_using_the_hub_system_per_company</to>
+				</connector>
+				<connector uid="100" angle="47.4691">
+					<from>Hubs</from>
+					<to>cost_of_using_the_hub_system_per_company</to>
+				</connector>
+				<connector uid="102" angle="222.709">
+					<from>
+						<alias uid="101"/>
+					</from>
+					<to>cost_of_using_the_hub_system_per_company</to>
+				</connector>
+				<aux font_size="11pt" x="2130.33" y="269.667" name="maximum monetary\nvalue"/>
+				<connector uid="103" angle="148.773">
+					<from>MINIMUM_DELIVERY_TIME</from>
+					<to>maximum_monetary_value</to>
+				</connector>
+				<connector uid="104" angle="8.03169">
+					<from>MINIMUM_KM_PER_BOX</from>
+					<to>maximum_monetary_value</to>
+				</connector>
+				<connector uid="105" angle="286.99">
+					<from>MINIMUM_VEHICLE_PER_BOX</from>
+					<to>maximum_monetary_value</to>
+				</connector>
+				<connector uid="106" angle="213.661">
+					<from>COST_PER_MINUTE</from>
+					<to>maximum_monetary_value</to>
+				</connector>
+				<connector uid="107" angle="236.996">
+					<from>COST_PER_VEHICLE</from>
+					<to>maximum_monetary_value</to>
+				</connector>
+				<connector uid="108" angle="251.978">
+					<from>COST_PER_KM</from>
+					<to>maximum_monetary_value</to>
+				</connector>
+				<connector uid="111" angle="64.3191">
+					<from>
+						<alias uid="110"/>
+					</from>
+					<to>maximum_monetary_value</to>
+				</connector>
+				<connector uid="112" angle="96.3875">
+					<from>
+						<alias uid="109"/>
+					</from>
+					<to>maximum_monetary_value</to>
+				</connector>
+				<connector uid="113" angle="20.3206">
+					<from>
+						<alias uid="114"/>
+					</from>
+					<to>effect_of_monetary_value_on_company_adoption_fraction</to>
+				</connector>
+				<connector uid="115" angle="156.297">
+					<from>
+						<alias uid="116"/>
+					</from>
+					<to>monetary_value</to>
+				</connector>
+				<connector uid="117" angle="102.752">
+					<from>
+						<alias uid="118"/>
+					</from>
+					<to>monetary_value</to>
+				</connector>
+				<aux font_size="11pt" x="212.5" y="557.999" name="EXTRA COST PER BOX\nGOING THROUGH THE HUB"/>
+				<connector uid="121" angle="337.211">
+					<from>
+						<alias uid="120"/>
+					</from>
+					<to>monetary_value</to>
+				</connector>
+				<connector uid="122" angle="301.584">
+					<from>
+						<alias uid="123"/>
+					</from>
+					<to>monetary_value</to>
+				</connector>
+				<connector uid="124" angle="18.8047">
+					<from>EXTRA_COST_PER_BOX_GOING_THROUGH_THE_HUB</from>
+					<to>monetary_value</to>
+				</connector>
+				<connector uid="125" angle="354.164">
+					<from>share_of_company_adopters</from>
+					<to>monetary_value</to>
+				</connector>
+				<connector uid="126" angle="323.872">
+					<from>Company_adopters</from>
+					<to>monetary_value</to>
+				</connector>
+				<aux font_size="11pt" x="1060.33" y="795.833" name="vehicle km"/>
+				<aux font_size="11pt" x="1149.09" y="672.834" name="GOAL OF VEHICLE KM"/>
+				<aux font_size="11pt" x="1078.33" y="731.666" name="gap of vehicle km"/>
+				<connector uid="131" angle="219.744">
+					<from>GOAL_OF_VEHICLE_KM</from>
+					<to>gap_of_vehicle_km</to>
+				</connector>
+				<connector uid="132" angle="74.3302">
+					<from>vehicle_km</from>
+					<to>gap_of_vehicle_km</to>
+				</connector>
+				<aux font_size="11pt" x="957" y="860.833" name="vehicle km required\nfor demand with hubs"/>
+				<aux font_size="11pt" x="1114.17" y="865.833" name="vehicle km required\nfor demand without hubs"/>
+				<connector uid="133" angle="69.5901">
+					<from>
+						<alias uid="127"/>
+					</from>
+					<to>vehicle_km_required_for_demand_with_hubs</to>
+				</connector>
+				<connector uid="134" angle="78.7986">
+					<from>
+						<alias uid="129"/>
+					</from>
+					<to>vehicle_km_required_for_demand_with_hubs</to>
+				</connector>
+				<connector uid="135" angle="92.7263">
+					<from>
+						<alias uid="128"/>
+					</from>
+					<to>vehicle_km_required_for_demand_without_hubs</to>
+				</connector>
+				<connector uid="136" angle="112.714">
+					<from>
+						<alias uid="130"/>
+					</from>
+					<to>vehicle_km_required_for_demand_without_hubs</to>
+				</connector>
+				<connector uid="137" angle="32.1712">
+					<from>vehicle_km_required_for_demand_with_hubs</from>
+					<to>vehicle_km</to>
+				</connector>
+				<connector uid="138" angle="127.562">
+					<from>vehicle_km_required_for_demand_without_hubs</from>
+					<to>vehicle_km</to>
+				</connector>
+				<connector uid="139" angle="164.476">
+					<from>vehicle_km_required_for_demand_with_hubs</from>
+					<to>emissions</to>
+				</connector>
+				<connector uid="140" angle="176.906">
+					<from>vehicle_km_required_for_demand_without_hubs</from>
+					<to>emissions</to>
+				</connector>
+				<connector uid="141" angle="268.296">
+					<from>TOTAL_DEMAND</from>
+					<to>vehicle_km_required_for_demand_without_hubs</to>
+				</connector>
+				<connector uid="142" angle="309.086">
+					<from>Utilized_hub_capacity</from>
+					<to>vehicle_km_required_for_demand_without_hubs</to>
+				</connector>
+				<connector uid="143" angle="321.033">
+					<from>Utilized_hub_capacity</from>
+					<to>vehicle_km_required_for_demand_with_hubs</to>
+				</connector>
+				<connector uid="144" angle="172.913">
+					<from>MULTIPLIER_FOR_EFFECT_OF_USING_HUB_CAPACITY_ON_DECREASE_IN_DELIVERY_TIME</from>
+					<to>effect_of_using_hub_capacity_on_increasing_delivery_time</to>
+				</connector>
+				<connector uid="145" angle="126.772">
+					<from>gap_of_emissions</from>
+					<to>adding_funds_from_public_sector</to>
+				</connector>
+				<connector uid="146" angle="137.062">
+					<from>gap_of_vehicle_km</from>
+					<to>adding_funds_from_public_sector</to>
+				</connector>
+				<group locked="true" x="708.333" y="628.334" width="591.667" height="389.833" name="Goals sector">
+					<item uid="130"/>
+					<item uid="128"/>
+					<item uid="129"/>
+					<item uid="127"/>
+				</group>
+				<group locked="false" x="30.8333" y="24.5556" width="602.5" height="657.333" name="Company sector">
+					<item uid="114"/>
+					<item uid="118"/>
+					<item uid="120"/>
+					<item uid="123"/>
+					<item uid="116"/>
+				</group>
+				<connector uid="148" angle="140.711">
+					<from>
+						<alias uid="147"/>
+					</from>
+					<to>adding_funds_from_public_sector</to>
+				</connector>
+				<aux x="714" y="377.833" name="MINIMUM UTILIZATION\nRATE"/>
+				<connector uid="149" angle="308.315">
+					<from>MINIMUM_UTILIZATION_RATE</from>
+					<to>adding_funds_from_public_sector</to>
+				</connector>
+				<aux x="443.333" y="204.5" name="INITIAL ADOPTION\nFRACTION"/>
+				<aux x="443.333" y="254.167" name="INITIAL PUSH TIME"/>
+				<connector uid="150" angle="190.679">
+					<from>INITIAL_ADOPTION_FRACTION</from>
+					<to>company_adoption_fraction</to>
+				</connector>
+				<connector uid="151" angle="167.32">
+					<from>INITIAL_PUSH_TIME</from>
+					<to>company_adoption_fraction</to>
+				</connector>
+				<alias color="blue" background="white" font_style="italic" font_size="11pt" uid="50" x="1434.83" y="625.167" width="18" height="18">
+					<shape type="circle" radius="18"/>
+					<of>share_of_company_adopters</of>
+				</alias>
+				<alias font_style="italic" font_size="11pt" uid="67" x="2147.67" y="646.833" width="18" height="18">
+					<of>using_hub_capacity</of>
+				</alias>
+				<alias font_style="italic" font_size="11pt" uid="70" x="2110.5" y="704.333" width="18" height="18">
+					<of>TOTAL_DEMAND</of>
+				</alias>
+				<alias font_style="italic" font_size="11pt" uid="101" x="1274.17" y="61.3889" width="16.6667" height="17.2222">
+					<of>Company_adopters</of>
+				</alias>
+				<alias font_style="italic" font_size="11pt" uid="110" x="2033" y="335.167" width="18" height="18">
+					<of>TOTAL_DEMAND</of>
+				</alias>
+				<alias font_style="italic" font_size="11pt" uid="109" x="2129.67" y="335.167" width="18" height="18">
+					<of>TOTAL_NUMBER_OF_COMPANIES</of>
+				</alias>
+				<alias color="blue" background="white" font_style="italic" font_size="11pt" uid="114" x="292.667" y="332.833" width="18" height="18">
+					<shape type="circle" radius="18"/>
+					<of>maximum_monetary_value</of>
+				</alias>
+				<alias color="blue" background="white" font_style="italic" font_size="11pt" uid="116" x="395.167" y="555.167" width="18" height="18">
+					<shape type="circle" radius="18"/>
+					<of>transport_operation_cost_per_box_with_hubs</of>
+				</alias>
+				<alias color="blue" background="white" font_style="italic" font_size="11pt" uid="118" x="310.667" y="610.167" width="18" height="18">
+					<shape type="circle" radius="18"/>
+					<of>transport_operation_cost_per_box_without_hubs</of>
+				</alias>
+				<alias color="blue" background="white" font_style="italic" font_size="11pt" uid="120" x="181" y="471.666" width="18" height="18">
+					<shape type="circle" radius="18"/>
+					<of>cost_of_using_the_hub_system_per_company</of>
+				</alias>
+				<alias font_style="italic" font_size="11pt" uid="123" x="248.5" y="431.666" width="18" height="18">
+					<of>TOTAL_DEMAND</of>
+				</alias>
+				<alias font_style="italic" font_size="11pt" uid="127" x="872.667" y="897.667" width="18" height="18">
+					<of>km_required_per_box_with_hubs</of>
+				</alias>
+				<alias font_style="italic" font_size="11pt" uid="128" x="1093.5" y="922.667" width="18" height="18">
+					<of>km_required_per_box_without_hubs</of>
+				</alias>
+				<alias font_style="italic" font_size="11pt" uid="129" x="948" y="927.333" width="18" height="18">
+					<of>vehicles_required_per_box_with_hubs</of>
+				</alias>
+				<alias font_style="italic" font_size="11pt" uid="130" x="1159.33" y="909.333" width="18" height="18">
+					<of>vehicles_required_per_box_without_hubs</of>
+				</alias>
+				<alias font_style="italic" font_size="11pt" uid="147" x="888.5" y="499.333" width="18" height="18">
+					<of>utilization_rate</of>
+				</alias>
+			</view>
+		</views>
+	</model>
+</xmile>
+
