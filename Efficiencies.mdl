@@ -1,0 +1,191 @@
+{UTF-8}
+AVERAGE VAN CAPACITY=
+	30
+	~	Box/Van [10,50,1]
+	~		|
+
+delay fill rate=
+	36
+	~	Month
+	~		|
+
+delay routing efficiency=
+	36
+	~	Month
+	~		|
+
+Fill rate= INTEG (
+	improving fill rate,
+		FILL RATE CURRENT SYSTEM)
+	~	dmnl
+	~		|
+
+FILL RATE CURRENT SYSTEM=
+	0.6
+	~	dmnl
+	~		|
+
+improving fill rate=
+	Potential for improving fill rate/delay fill rate
+	~	1/Month
+	~		|
+
+improving routing efficiency=
+	Potential for improving routing efficiency/delay routing efficiency
+	~	1/Month
+	~		|
+
+MAXIMUM FILL RATE=
+	1
+	~	dmnl
+	~		|
+
+MAXIMUM ROUTING EFFICIENCY=
+	1
+	~	dmnl
+	~		|
+
+number of vans needed to satisfy the demand with hubs  = A FUNCTION OF( AVERAGE VAN CAPACITY\
+		,Fill rate,TOTAL DEMAND)
+	~	
+	~		|
+
+number of vans needed to satisfy the demand without hubs  = A FUNCTION OF( AVERAGE VAN CAPACITY\
+		,FILL RATE CURRENT SYSTEM,TOTAL DEMAND)
+	~	
+	~		|
+
+Potential for improving fill rate= INTEG (
+	-improving fill rate,
+		MAXIMUM FILL RATE-FILL RATE CURRENT SYSTEM)
+	~	dmnl
+	~		|
+
+Potential for improving routing efficiency= INTEG (
+	-improving routing efficiency,
+		MAXIMUM ROUTING EFFICIENCY-ROUTING EFFICIENCY CURRENT SYSTEM)
+	~	dmnl
+	~		|
+
+Routing efficiency= INTEG (
+	improving routing efficiency,
+		ROUTING EFFICIENCY CURRENT SYSTEM)
+	~	dmnl
+	~		|
+
+ROUTING EFFICIENCY CURRENT SYSTEM=
+	0.6
+	~	dmnl
+	~		|
+
+TOTAL DEMAND=
+	7e+06
+	~	Box/Month
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 100
+	~	Month
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Month
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP 
+	~	Month [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 1
+	~	Month [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|96,96,100,0
+10,1,Potential for improving fill rate,460,172,40,20,3,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,2,Fill rate,788,172,40,20,3,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,3,FILL RATE CURRENT SYSTEM,783,76,72,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,4,3,2,0,0,0,0,0,64,1,-1--1--1,,1|(784,116)|
+10,5,MAXIMUM FILL RATE,452,76,61,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,6,5,1,0,0,0,0,0,64,1,-1--1--1,,1|(456,116)|
+1,7,9,2,4,0,0,22,0,0,0,-1--1--1,,1|(688,172)|
+1,8,9,1,100,0,0,22,0,0,0,-1--1--1,,1|(557,172)|
+11,9,0,623,172,8,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,10,improving fill rate,623,189,56,11,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,11,Potential for improving routing efficiency,460,480,52,36,3,131,0,0,0,0,0,0,0,0,0,0,0,0
+10,12,Routing efficiency,801,477,40,20,3,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,13,15,12,4,0,0,22,0,0,0,-1--1--1,,1|(701,477)|
+1,14,15,11,100,0,0,22,0,0,0,-1--1--1,,1|(571,477)|
+11,15,0,636,477,8,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,16,improving routing efficiency,636,504,55,19,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,17,MAXIMUM ROUTING EFFICIENCY,461,629,48,28,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,18,ROUTING EFFICIENCY CURRENT SYSTEM,804,605,72,28,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,19,18,12,0,0,0,0,0,64,1,-1--1--1,,1|(801,543)|
+1,20,17,11,0,0,0,0,0,64,1,-1--1--1,,1|(460,564)|
+10,21,delay fill rate,631,73,40,11,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,22,delay routing efficiency,621,632,41,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,23,21,9,0,0,0,0,0,64,0,-1--1--1,,1|(627,117)|
+1,24,22,16,0,0,0,0,0,64,0,-1--1--1,,1|(627,576)|
+1,25,1,9,1,0,0,0,0,64,0,-1--1--1,,1|(561,128)|
+1,26,11,16,1,0,0,0,0,64,0,-1--1--1,,1|(556,561)|
+1,27,3,1,1,0,0,0,0,64,1,-1--1--1,,1|(624,32)|
+1,28,18,11,1,0,0,0,0,64,1,-1--1--1,,1|(648,672)|
+10,29,AVERAGE VAN CAPACITY,1061,211,60,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,30,number of vans needed to satisfy the demand with hubs,1028,324,91,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,31,number of vans needed to satisfy the demand without hubs,1124,105,84,28,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,32,29,30,0,0,0,0,0,64,0,-1--1--1,,1|(1045,260)|
+1,33,29,31,0,0,0,0,0,64,0,-1--1--1,,1|(1085,168)|
+1,34,2,30,0,0,0,0,0,64,0,-1--1--1,,1|(901,243)|
+1,35,3,31,1,0,0,0,0,64,0,-1--1--1,,1|(940,87)|
+10,36,TOTAL DEMAND,1292,235,36,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,37,36,31,0,0,0,0,0,64,0,-1--1--1,,1|(1219,180)|
+1,38,36,30,0,0,0,0,0,64,0,-1--1--1,,1|(1175,273)|
+///---\\\
+:L<%^E!@
+1:0202.vdfx
+1:Current.vdfx
+4:Time
+5:TOTAL DEMAND
+9:0202
+19:100,0
+24:0
+25:100
+26:100
+23:0
+15:0,0,0,0,0,0
+27:0,
+34:0,
+42:1
+72:0
+73:0
+35:Date
+36:YYYY-MM-DD
+37:2000
+38:1
+39:1
+40:2
+41:0
+95:0
+96:0
+77:0
+78:0
+93:0
+94:0
+92:0
+91:0
+90:0
+87:0
+75:
+43:
