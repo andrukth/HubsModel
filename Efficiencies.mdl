@@ -1,4 +1,61 @@
 {UTF-8}
+average route lenght with hubs=
+	MINUMUM ROUTE LENGHT/Routing efficiency with hubs
+	~	km/Van
+	~		|
+
+average route lenght without hubs=
+	MINUMUM ROUTE LENGHT/ROUTING EFFICIENCY CURRENT SYSTEM
+	~	km/Van
+	~		|
+
+number of vans needed to satisfy the demand with hubs=
+	TOTAL DEMAND/(Fill rate with hubs*AVERAGE VAN CAPACITY)
+	~	Van/Month
+	~		|
+
+delay delivery time=
+	36
+	~	Month
+	~		|
+
+MINUMUM ROUTE LENGHT=
+	10
+	~	km/Van
+	~		|
+
+DELIVERY TIME CURRENT SYSTEM=
+	20
+	~	h/Box
+	~		|
+
+Delivery time with hubs= INTEG (
+	improving delivery time,
+		DELIVERY TIME CURRENT SYSTEM)
+	~	h/Box
+	~		|
+
+MINIMUM DELIVERY TIME=
+	5
+	~	h/Box
+	~		|
+
+improving delivery time=
+	Potential for improving delivery time/delay delivery time
+	~	h/Box/Month
+	~		|
+
+number of vans needed to satisfy the demand without hubs=
+	TOTAL DEMAND/(FILL RATE CURRENT SYSTEM*AVERAGE VAN CAPACITY)
+	~	Van/Month
+	~		|
+
+Potential for improving delivery time= INTEG (
+	-improving delivery time,
+		-DELIVERY TIME CURRENT SYSTEM+MINIMUM DELIVERY TIME)
+	~	h/Box
+	~		|
+
 AVERAGE VAN CAPACITY=
 	30
 	~	Box/Van [10,50,1]
@@ -14,7 +71,7 @@ delay routing efficiency=
 	~	Month
 	~		|
 
-Fill rate= INTEG (
+Fill rate with hubs= INTEG (
 	improving fill rate,
 		FILL RATE CURRENT SYSTEM)
 	~	dmnl
@@ -45,16 +102,6 @@ MAXIMUM ROUTING EFFICIENCY=
 	~	dmnl
 	~		|
 
-number of vans needed to satisfy the demand with hubs  = A FUNCTION OF( AVERAGE VAN CAPACITY\
-		,Fill rate,TOTAL DEMAND)
-	~	
-	~		|
-
-number of vans needed to satisfy the demand without hubs  = A FUNCTION OF( AVERAGE VAN CAPACITY\
-		,FILL RATE CURRENT SYSTEM,TOTAL DEMAND)
-	~	
-	~		|
-
 Potential for improving fill rate= INTEG (
 	-improving fill rate,
 		MAXIMUM FILL RATE-FILL RATE CURRENT SYSTEM)
@@ -67,7 +114,7 @@ Potential for improving routing efficiency= INTEG (
 	~	dmnl
 	~		|
 
-Routing efficiency= INTEG (
+Routing efficiency with hubs= INTEG (
 	improving routing efficiency,
 		ROUTING EFFICIENCY CURRENT SYSTEM)
 	~	dmnl
@@ -100,7 +147,7 @@ INITIAL TIME  = 0
 	|
 
 SAVEPER  = 
-        TIME STEP 
+        TIME STEP
 	~	Month [0,?]
 	~	The frequency with which output is stored.
 	|
@@ -114,50 +161,73 @@ TIME STEP  = 1
 V300  Do not put anything below this section - it will be ignored
 *View 1
 $192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|96,96,100,0
-10,1,Potential for improving fill rate,460,172,40,20,3,3,0,0,0,0,0,0,0,0,0,0,0,0
-10,2,Fill rate,788,172,40,20,3,3,0,0,0,0,0,0,0,0,0,0,0,0
-10,3,FILL RATE CURRENT SYSTEM,783,76,72,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-1,4,3,2,0,0,0,0,0,64,1,-1--1--1,,1|(784,116)|
-10,5,MAXIMUM FILL RATE,452,76,61,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-1,6,5,1,0,0,0,0,0,64,1,-1--1--1,,1|(456,116)|
-1,7,9,2,4,0,0,22,0,0,0,-1--1--1,,1|(688,172)|
-1,8,9,1,100,0,0,22,0,0,0,-1--1--1,,1|(557,172)|
-11,9,0,623,172,8,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
-10,10,improving fill rate,623,189,56,11,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,11,Potential for improving routing efficiency,460,480,52,36,3,131,0,0,0,0,0,0,0,0,0,0,0,0
-10,12,Routing efficiency,801,477,40,20,3,3,0,0,0,0,0,0,0,0,0,0,0,0
-1,13,15,12,4,0,0,22,0,0,0,-1--1--1,,1|(701,477)|
-1,14,15,11,100,0,0,22,0,0,0,-1--1--1,,1|(571,477)|
-11,15,0,636,477,8,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
-10,16,improving routing efficiency,636,504,55,19,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
-10,17,MAXIMUM ROUTING EFFICIENCY,461,629,48,28,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-10,18,ROUTING EFFICIENCY CURRENT SYSTEM,804,605,72,28,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-1,19,18,12,0,0,0,0,0,64,1,-1--1--1,,1|(801,543)|
-1,20,17,11,0,0,0,0,0,64,1,-1--1--1,,1|(460,564)|
-10,21,delay fill rate,631,73,40,11,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-10,22,delay routing efficiency,621,632,41,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-1,23,21,9,0,0,0,0,0,64,0,-1--1--1,,1|(627,117)|
-1,24,22,16,0,0,0,0,0,64,0,-1--1--1,,1|(627,576)|
-1,25,1,9,1,0,0,0,0,64,0,-1--1--1,,1|(561,128)|
-1,26,11,16,1,0,0,0,0,64,0,-1--1--1,,1|(556,561)|
-1,27,3,1,1,0,0,0,0,64,1,-1--1--1,,1|(624,32)|
-1,28,18,11,1,0,0,0,0,64,1,-1--1--1,,1|(648,672)|
-10,29,AVERAGE VAN CAPACITY,1061,211,60,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-10,30,number of vans needed to satisfy the demand with hubs,1028,324,91,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-10,31,number of vans needed to satisfy the demand without hubs,1124,105,84,28,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-1,32,29,30,0,0,0,0,0,64,0,-1--1--1,,1|(1045,260)|
-1,33,29,31,0,0,0,0,0,64,0,-1--1--1,,1|(1085,168)|
-1,34,2,30,0,0,0,0,0,64,0,-1--1--1,,1|(901,243)|
-1,35,3,31,1,0,0,0,0,64,0,-1--1--1,,1|(940,87)|
-10,36,TOTAL DEMAND,1292,235,36,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
-1,37,36,31,0,0,0,0,0,64,0,-1--1--1,,1|(1219,180)|
-1,38,36,30,0,0,0,0,0,64,0,-1--1--1,,1|(1175,273)|
+10,1,Potential for improving fill rate,240,-235,40,20,3,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,2,Fill rate with hubs,568,-235,40,20,3,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,3,FILL RATE CURRENT SYSTEM,561,-331,72,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,4,3,2,0,0,0,0,0,64,1,-1--1--1,,1|(564,-288)|
+10,5,MAXIMUM FILL RATE,232,-331,61,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,6,5,1,0,0,0,0,0,64,1,-1--1--1,,1|(232,-288)|
+1,7,9,2,4,0,0,22,0,0,0,-1--1--1,,1|(467,-235)|
+1,8,9,1,100,0,0,22,0,0,0,-1--1--1,,1|(335,-235)|
+11,9,508,401,-235,8,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,10,improving fill rate,401,-216,56,11,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,11,Potential for improving routing efficiency,240,73,52,36,3,131,0,0,0,0,0,0,0,0,0,0,0,0
+10,12,Routing efficiency with hubs,579,71,40,28,3,131,0,0,0,0,0,0,0,0,0,0,0,0
+1,13,15,12,4,0,0,22,0,0,0,-1--1--1,,1|(480,72)|
+1,14,15,11,100,0,0,22,0,0,0,-1--1--1,,1|(348,72)|
+11,15,640,416,72,8,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,16,improving routing efficiency,416,97,55,19,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,17,MAXIMUM ROUTING EFFICIENCY,239,224,48,28,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,18,ROUTING EFFICIENCY CURRENT SYSTEM,580,196,72,28,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,19,18,12,0,0,0,0,0,64,1,-1--1--1,,1|(579,140)|
+1,20,17,11,0,0,0,0,0,64,1,-1--1--1,,1|(240,160)|
+10,21,delay fill rate,409,-332,40,11,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,22,delay routing efficiency,399,225,41,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,23,21,9,0,0,0,0,0,64,0,-1--1--1,,1|(405,-289)|
+1,24,22,16,0,0,0,0,0,64,0,-1--1--1,,1|(405,167)|
+1,25,1,9,1,0,0,0,0,64,0,-1--1--1,,1|(339,-279)|
+1,26,11,16,1,0,0,0,0,64,0,-1--1--1,,1|(336,156)|
+1,27,3,1,1,0,0,0,0,64,1,-1--1--1,,1|(404,-375)|
+1,28,18,11,1,0,0,0,0,64,1,-1--1--1,,1|(425,264)|
+10,29,AVERAGE VAN CAPACITY,839,-196,60,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,30,number of vans needed to satisfy the demand with hubs,808,-83,91,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,31,number of vans needed to satisfy the demand without hubs,904,-300,84,28,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,32,29,30,0,0,0,0,0,64,0,-1--1--1,,1|(824,-144)|
+1,33,29,31,0,0,0,0,0,64,0,-1--1--1,,1|(863,-236)|
+1,34,2,30,0,0,0,0,0,64,0,-1--1--1,,1|(680,-160)|
+1,35,3,31,1,0,0,0,0,64,0,-1--1--1,,1|(720,-317)|
+10,36,TOTAL DEMAND,1072,-172,36,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,37,36,31,0,0,0,0,0,64,0,-1--1--1,,1|(997,-228)|
+1,38,36,30,0,0,0,0,0,64,0,-1--1--1,,1|(956,-133)|
+10,39,MINUMUM ROUTE LENGHT,900,161,61,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,40,average route lenght without hubs,757,287,64,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,41,average route lenght with hubs,761,36,64,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,42,12,41,0,0,0,0,0,64,0,-1--1--1,,1|(651,57)|
+1,43,39,41,0,0,0,0,0,64,0,-1--1--1,,1|(836,103)|
+1,44,18,40,0,0,0,0,0,64,0,-1--1--1,,1|(672,244)|
+1,45,39,40,0,0,0,0,0,64,0,-1--1--1,,1|(832,219)|
+12,46,0,1100,-76,113,28,8,7,0,2,-1,0,0,0,-1--1--1,0-0-0,|0||128-0-0,0,0,0,0,0,0
+here I have to add the percentage of the demand that goes through the hub to calculate this ... 
+10,48,Potential for improving delivery time,249,567,44,28,3,131,0,0,0,0,0,0,0,0,0,0,0,0
+10,49,Delivery time with hubs,597,565,48,23,3,131,0,0,0,0,0,0,0,0,0,0,0,0
+1,51,53,49,4,0,0,22,0,0,0,-1--1--1,,1|(489,565)|
+1,52,53,48,100,0,0,22,0,0,0,-1--1--1,,1|(353,565)|
+11,53,0,424,565,8,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,54,improving delivery time,424,592,41,19,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,55,MINIMUM DELIVERY TIME,260,401,61,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,56,55,48,0,0,0,0,0,64,1,-1--1--1,,1|(253,472)|
+10,57,DELIVERY TIME CURRENT SYSTEM,604,401,72,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,58,57,49,0,0,0,0,0,64,1,-1--1--1,,1|(599,476)|
+1,59,57,48,1,0,0,0,0,64,1,-1--1--1,,1|(324,464)|
+10,60,delay delivery time,440,480,60,11,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,61,60,53,0,0,0,0,0,64,0,-1--1--1,,1|(432,520)|
+1,62,48,53,1,0,0,0,0,64,0,-1--1--1,,1|(355,520)|
 ///---\\\
 :L<%^E!@
 1:0202.vdfx
 1:Current.vdfx
 4:Time
-5:TOTAL DEMAND
+5:DELIVERY TIME CURRENT SYSTEM
 9:0202
 19:100,0
 24:0

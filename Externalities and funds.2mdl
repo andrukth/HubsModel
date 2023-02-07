@@ -1,0 +1,144 @@
+{UTF-8}
+CO2 emissions=
+	1000-STEP(100, 100)-STEP(100, 200)-STEP(100, 300)-STEP(100, 400)
+	~	CO2/Month
+	~		|
+
+CO2 emissions gap=
+	(CO2 emissions-CO2 EMISSIONS GOAL)/CO2 emissions
+	~	dmnl
+	~		|
+
+CO2 EMISSIONS GOAL=
+	100
+	~	CO2/Month
+	~		|
+
+Funds= INTEG (
+	private sector adds funds-using funds,
+		0)
+	~	SEK
+	~		|
+
+km travelled=
+	1000-STEP(100, 100)-STEP(100, 200)-STEP(100, 300)-STEP(100, 400)
+	~	km/Month
+	~		|
+
+km travelled gap=
+	(km travelled-KM TRAVELLED GOAL)/km travelled
+	~	dmnl
+	~		|
+
+KM TRAVELLED GOAL=
+	100
+	~	km/Month
+	~		|
+
+MAXIMUM FUNDS PER UNIT OF TIME=
+	1000
+	~	SEK/Month
+	~		|
+
+private sector adds funds=
+	MAXIMUM FUNDS PER UNIT OF TIME*km travelled gap*CO2 emissions gap
+	~	SEK/Month
+	~		|
+
+using funds=
+	10000*PULSE(100, 1)+10000*PULSE(200, 1)+10000*PULSE(300, 1)+10000*PULSE(400, 1)
+	~	SEK/Month
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 500
+	~	Month
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Month
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP 
+	~	Month [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 1
+	~	Month [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|96,96,100,0
+10,1,Funds,751,232,40,20,3,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,2,48,555,232,12,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,4,6,1,4,0,0,22,0,0,0,-1--1--1,,1|(673,232)|
+1,5,6,2,100,0,0,22,0,0,0,-1--1--1,,1|(596,232)|
+11,6,0,632,232,8,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,7,private sector adds funds,632,259,44,19,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,8,MAXIMUM FUNDS PER UNIT OF TIME,523,377,72,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,9,CO2 EMISSIONS GOAL,1124,321,63,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,10,KM TRAVELLED GOAL,920,505,64,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,11,km travelled,769,524,39,11,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,12,CO2 emissions,1063,415,48,11,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,13,CO2 emissions gap,957,348,49,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,14,km travelled gap,820,423,52,11,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,15,9,13,0,0,0,0,0,64,0,-1--1--1,,1|(1040,333)|
+1,16,12,13,0,0,0,0,0,64,0,-1--1--1,,1|(1024,388)|
+1,17,10,14,0,0,0,0,0,64,0,-1--1--1,,1|(869,464)|
+1,18,11,14,0,0,0,0,0,64,0,-1--1--1,,1|(792,480)|
+1,19,13,7,1,0,0,0,0,64,0,-1--1--1,,1|(745,332)|
+1,20,14,7,1,0,0,0,0,64,0,-1--1--1,,1|(728,371)|
+1,21,8,7,0,0,0,0,0,64,0,-1--1--1,,1|(571,323)|
+12,22,48,983,233,12,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,24,26,22,4,0,0,22,0,0,0,-1--1--1,,1|(932,231)|
+1,25,26,1,100,0,0,22,0,0,0,-1--1--1,,1|(833,231)|
+11,26,0,881,231,8,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,27,using funds,881,252,35,11,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+///---\\\
+:L<%^E!@
+1:0202.vdfx
+4:Time
+5:MAXIMUM FUNDS PER UNIT OF TIME
+9:0202
+19:100,0
+24:0
+25:500
+26:500
+23:0
+15:0,0,0,0,0,0
+27:0,
+34:0,
+42:1
+72:0
+73:0
+35:Date
+36:YYYY-MM-DD
+37:2000
+38:1
+39:1
+40:2
+41:0
+95:0
+96:0
+77:0
+78:0
+93:0
+94:0
+92:0
+91:0
+90:0
+87:0
+75:
+43:
