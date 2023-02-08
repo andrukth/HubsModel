@@ -202,7 +202,7 @@ MULTIPLIER FOR MONETARY VALUE=
 
 MONTHLY COST FOR ONE HUB=
 	10000
-	~	SEK/(Month*Hub) [1000,1000000,100]
+	~	SEK/(Month*Hub) [1000,1e+06,100]
 	~		|
 
 adding capacity=
@@ -474,7 +474,7 @@ ROUTING EFFICIENCY CURRENT SYSTEM=
 
 TOTAL DEMAND=
 	7e+06
-	~	Box/Month [1000000,10000000,10000]
+	~	Box/Month [1e+06,1e+07,10000]
 	~		|
 
 CO2 emissions gap=
@@ -502,7 +502,7 @@ km travelled gap=
 
 KM TRAVELLED GOAL=
 	2*10^6
-	~	km/Month [1000000,2000000,1000]
+	~	km/Month [1e+06,2e+06,1000]
 	~		|
 
 MAXIMUM FUNDS PER UNIT OF TIME=
@@ -516,7 +516,7 @@ MAXIMUM FUNDS PER UNIT OF TIME=
 		Simulation Control Parameters
 	|
 
-FINAL TIME  = 600
+FINAL TIME  = 480
 	~	Month
 	~	The final time for the simulation.
 	|
@@ -527,7 +527,7 @@ INITIAL TIME  = 0
 	|
 
 SAVEPER  = 
-        TIME STEP
+        TIME STEP 
 	~	Month [0,?]
 	~	The frequency with which output is stored.
 	|
@@ -911,8 +911,8 @@ Reinforcing - scale up effect
 9:0207
 19:90,0
 24:0
-25:600
-26:600
+25:480
+26:480
 23:0
 15:0,0,0,0,0,0
 27:0,

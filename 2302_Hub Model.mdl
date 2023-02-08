@@ -527,7 +527,7 @@ INITIAL TIME  = 0
 	|
 
 SAVEPER  = 
-        TIME STEP 
+        TIME STEP
 	~	Month [0,?]
 	~	The frequency with which output is stored.
 	|
@@ -907,13 +907,15 @@ Reinforcing - scale up effect
 :L<%^E!@
 1:0207.vdfx
 4:Time
-5:MAXIMUM FILL RATE
+5:share of demand going through the hub
 9:0207
 19:90,0
 24:0
 25:480
 26:480
 23:0
+18:2302_Hub Model.vsc
+20:2302_Hub Model.lst
 15:0,0,0,0,0,0
 27:0,
 34:0,
