@@ -1,4 +1,9 @@
 {UTF-8}
+share of demand going through the hub=
+	Utilized capacity/TOTAL DEMAND
+	~	dmnl
+	~		|
+
 km travelled using hubs=
 	LSP actual adopters*km travelled if LSP uses hubs
 	~	km/Month
@@ -15,7 +20,7 @@ km travelled not using hubs=
 	~		|
 
 time at which first hub is available=
-	IF THEN ELSE(time of hubs=0, 1, 0)
+	IF THEN ELSE( time of hubs>0, 1, 0)
 	~	
 	~		|
 
@@ -26,13 +31,12 @@ monthly cost for companies to join the scheme=
 	~		|
 
 time of hubs=SAMPLE IF TRUE(
-	Hubs>0, Time, 0)
+	Hubs>0, Time, :NA:)
 	~	
 	~		|
 
 planning hubs=
-	IF THEN ELSE(Funds>=COST OF ONE HUB*ONE HUB :AND: share of using capacity>=MINIMUM UTILIZED CAPACITY\
-		, ONE HUB/TIME STEP, 0)
+	IF THEN ELSE(Funds>=COST OF ONE HUB*ONE HUB, ONE HUB/TIME STEP, 0)
 	~	Hub/Month
 	~		|
 
@@ -243,7 +247,7 @@ Utilized capacity= INTEG (
 	~		|
 
 share of using capacity=
-	IF THEN ELSE( total capacity=0, 1, using capacity/total capacity)
+	IF THEN ELSE( total capacity=0, 0, using capacity/total capacity)
 	~	1/Month
 	~		|
 
@@ -505,7 +509,7 @@ KM TRAVELLED GOAL=
 	~		|
 
 MAXIMUM FUNDS PER UNIT OF TIME=
-	10000
+	1000
 	~	SEK/Month
 	~		|
 
@@ -605,9 +609,9 @@ Hubs
 1,61,60,58,0,0,0,0,0,128,0,-1--1--1,,1|(0,0)|
 10,62,time at which first hub is available,1043,216,56,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
 1,63,58,62,0,0,0,0,0,128,0,-1--1--1,,1|(0,0)|
-10,67,MINIMUM UTILIZED CAPACITY,400,464,46,28,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
-1,68,67,11,0,0,0,0,0,128,0,-1--1--1,,1|(0,0)|
-1,69,55,11,1,0,0,0,0,128,0,-1--1--1,,1|(860,769)|
+10,64,MINIMUM UTILIZED CAPACITY,400,464,46,28,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,65,64,11,0,0,0,0,0,128,0,-1--1--1,,1|(0,0)|
+1,66,55,11,1,0,0,0,0,128,0,-1--1--1,,1|(860,769)|
 \\\---/// Sketch information - do not modify anything except names
 V300  Do not put anything below this section - it will be ignored
 *LSP
@@ -745,6 +749,10 @@ Efficiencies
 1,85,83,81,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
 1,86,41,82,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
 1,87,48,81,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,88,Utilized capacity,1385,85,32,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,89,share of demand going through the hub,1409,223,72,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,90,32,89,0,0,0,0,0,128,0,-1--1--1,,1|(0,0)|
+1,91,88,89,0,0,0,0,0,128,0,-1--1--1,,1|(0,0)|
 \\\---/// Sketch information - do not modify anything except names
 V300  Do not put anything below this section - it will be ignored
 *Funds
@@ -922,11 +930,10 @@ Reinforcing - scale up effect
 :VAR total cost of LSP using hubs
 :L<%^E!@
 1:0207.vdfx
-1:0206.vdfx
 4:Time
-5:total cost of LSP using hubs
+5:TIME OF START PUSH
 9:0207
-19:100,4
+19:100,1
 24:0
 25:600
 26:600
