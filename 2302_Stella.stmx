@@ -1,0 +1,1915 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xmile version="1.0" xmlns="http://docs.oasis-open.org/xmile/ns/XMILE/v1.0" xmlns:isee="http://iseesystems.com/XMILE">
+	<header>
+		<smile version="1.0" namespace="std, isee"/>
+		<name>2302_Stella</name>
+		<uuid>74ef331b-9356-4542-a72e-be35992a871a</uuid>
+		<vendor>isee systems, inc.</vendor>
+		<product version="3.2.1" isee:build_number="2906" isee:saved_by_v1="true" lang="en">Stella Architect</product>
+	</header>
+	<sim_specs isee:sim_duration="0" isee:run_prefix="Run" isee:simulation_delay="0" isee:restore_on_start="false" method="Euler" time_units="Month" isee:instantaneous_flows="false" isee:ignore_module_errors="false" isee:loop_scores="false" isee:loop_exhaustive_allowed="1000">
+		<start>0</start>
+		<stop>480</stop>
+		<dt>1</dt>
+	</sim_specs>
+	<isee:prefs saved_runs="5" keep="false" show_module_prefix="true" live_update_on_drag="true" show_restore_buttons="false" layer="model" isee:design="" isee:design_custom="false" interface_max_page_width="10000" interface_max_page_height="10000" interface_min_page_width="0" interface_min_page_height="0" rerun_on_structure_change="false" rifp="false"/>
+	<isee:multiplayer_settings include_chat="true" allow_observers="false" advance_time_increment="1" max_advance_time_in_ms="0" model_stops_when_players_drop="false" observer_start_page="home_page" enabled="false"/>
+	<isee:time_formats default_format="Builtin">
+		<isee:time_format name="Builtin" type="adaptive"/>
+	</isee:time_formats>
+	<default_format/>
+	<data>
+		<import isee:overwrite="false" resource="r../input data.xlsx" type="Excel" worksheet="InputData"/>
+	</data>
+	<model_units>
+		<unit name="Dimensionless">
+			<eqn>1</eqn>
+			<alias>dmnl</alias>
+			<alias>unitless</alias>
+			<alias>fraction</alias>
+		</unit>
+		<unit name="Kilometers">
+			<eqn/>
+			<alias>km</alias>
+			<alias>kilometer</alias>
+		</unit>
+		<unit name="Swedish Kroners">
+			<eqn/>
+			<alias>SEK</alias>
+			<alias>swedish kroner</alias>
+		</unit>
+		<unit name="Months">
+			<eqn/>
+			<alias>mo</alias>
+			<alias>month</alias>
+		</unit>
+	</model_units>
+	<model>
+		<variables>
+			<aux name="COST OF ONE HUB">
+				<eqn>TIME</eqn>
+				<gf>
+					<yscale min="1" max="2"/>
+					<xpts>0,1</xpts>
+					<ypts>1,1</ypts>
+				</gf>
+				<units>SEK/Hub</units>
+			</aux>
+			<aux name="initial CO2 emissions">
+				<eqn>INIT(CO2_emissions)</eqn>
+				<units>CO2/Month</units>
+			</aux>
+			<aux name="AVERAGE DELAY IN DROPPING OUT">
+				<eqn>TIME</eqn>
+				<gf>
+					<yscale min="1" max="2"/>
+					<xpts>0,1</xpts>
+					<ypts>1,1</ypts>
+				</gf>
+				<units>Month</units>
+			</aux>
+			<aux name="km travelled gap">
+				<eqn>( IF (km_travelled-minimum_km_travelled)/initial_km_travelled &gt; 0 THEN (km_travelled-minimum_km_travelled)/initial_km_travelled ELSE 0 )</eqn>
+				<units>dmnl</units>
+			</aux>
+			<aux name="ADJUSTMENT TIME FOR USING CAPACITY">
+				<eqn>TIME</eqn>
+				<gf>
+					<yscale min="1" max="2"/>
+					<xpts>0,1</xpts>
+					<ypts>1,1</ypts>
+				</gf>
+				<units>Month</units>
+			</aux>
+			<stock name="Funds">
+				<eqn>0</eqn>
+				<inflow>public_sector_adds_funds</inflow>
+				<outflow>using_funds</outflow>
+				<units>SEK</units>
+			</stock>
+			<aux name="MONTHLY COST FOR ONE HUB">
+				<eqn>TIME</eqn>
+				<gf>
+					<yscale min="1" max="2"/>
+					<xpts>0,1</xpts>
+					<ypts>1,1</ypts>
+				</gf>
+				<units>SEK/(Month*Hub)</units>
+			</aux>
+			<stock name="LSP potential adopters">
+				<eqn>TOTAL_NUMBER_OF_LSPS-INITIAL_LSP_WILLING_ADOPTERS</eqn>
+				<outflow>LSP_adoption_rate</outflow>
+				<units>LSP</units>
+			</stock>
+			<aux name="ADJUSTMENT TIME FOR MAKING HUBS READY">
+				<eqn>TIME</eqn>
+				<gf>
+					<yscale min="1" max="2"/>
+					<xpts>0,1</xpts>
+					<ypts>1,1</ypts>
+				</gf>
+				<units>Month</units>
+			</aux>
+			<flow name="planning hubs">
+				<doc>	:AND:share of demand going through the hub&lt;&gt;1</doc>
+				<eqn>( IF Funds &gt;= (COST_OF_ONE_HUB*ONE_HUB) AND Hubs_under_planning = 0 AND share_of_utilized_capacity &gt;= MINIMUM_UTILIZED_CAPACITY THEN ONE_HUB/DT ELSE 0 )</eqn>
+				<units>Hub/Month</units>
+			</flow>
+			<aux name="MULTIPLIER FOR EFFECT OF USING CAPACITY ON IMPROVING FILL RATE">
+				<eqn>TIME</eqn>
+				<gf>
+					<yscale min="1" max="2"/>
+					<xpts>0,1</xpts>
+					<ypts>1,1</ypts>
+				</gf>
+				<units>dmnl</units>
+			</aux>
+			<aux name="km travelled using hubs">
+				<eqn>LSP_actual_adopters*km_travelled_if_LSP_uses_hubs</eqn>
+				<units>km/Month</units>
+			</aux>
+			<stock name="Potential for improving fill rate">
+				<eqn>MAXIMUM_FILL_RATE-FILL_RATE_CURRENT_SYSTEM</eqn>
+				<outflow>improving_fill_rate</outflow>
+				<units>dmnl</units>
+			</stock>
+			<aux name="MAXIMUM ROUTING EFFICIENCY">
+				<eqn>1</eqn>
+				<units>dmnl</units>
+			</aux>
+			<aux name="FILL RATE CURRENT SYSTEM">
+				<eqn>TIME</eqn>
+				<gf>
+					<yscale min="1" max="2"/>
+					<xpts>0,1</xpts>
+					<ypts>1,1</ypts>
+				</gf>
+				<units>dmnl</units>
+			</aux>
+			<aux name="routing efficiency current system">
+				<eqn>MINUMUM_ROUTE_LENGHT/AVERAGE_ROUTE_LENGTH_WITHOUT_HUBS</eqn>
+				<units>dmnl</units>
+			</aux>
+			<aux name="MULTIPLIER FOR EFFECT OF USING CAPACITY ON IMPROVING DELIVERY TIME">
+				<eqn>TIME</eqn>
+				<gf>
+					<yscale min="1" max="2"/>
+					<xpts>0,1</xpts>
+					<ypts>1,1</ypts>
+				</gf>
+				<units>dmnl</units>
+			</aux>
+			<flow name="public sector adds funds">
+				<eqn>( IF share_of_utilized_capacity &gt; MINIMUM_UTILIZED_CAPACITY AND Funds &lt; COST_OF_ONE_HUB*ONE_HUB THEN MAXIMUM_FUNDS_PER_UNIT_OF_TIME*(km_travelled_gap+CO2_emissions_gap) ELSE 0 )</eqn>
+				<units>SEK/Month</units>
+			</flow>
+			<stock name="Hubs">
+				<eqn>0</eqn>
+				<inflow>making_hubs_ready</inflow>
+				<units>Hub</units>
+			</stock>
+			<aux name="TOTAL DEMAND">
+				<eqn>TIME</eqn>
+				<gf>
+					<yscale min="1" max="2"/>
+					<xpts>0,1</xpts>
+					<ypts>1,1</ypts>
+				</gf>
+				<units>Box/Month</units>
+			</aux>
+			<flow name="LSP adoption rate">
+				<eqn>( IF LSP_adoption_fraction &lt; 0 THEN -LSP_willing_adopters/AVERAGE_DELAY_IN_DROPPING_OUT ELSE LSP_adoption_fraction*LSP_adopters_with_potential_adopters_contacts )</eqn>
+				<units>LSP/Month</units>
+			</flow>
+			<aux name="TOTAL NUMBER OF LSPS">
+				<eqn>TIME</eqn>
+				<gf>
+					<yscale min="1" max="2"/>
+					<xpts>0,1</xpts>
+					<ypts>1,1</ypts>
+				</gf>
+				<units>LSP</units>
+			</aux>
+			<aux name="INITIAL LSP WILLING ADOPTERS">
+				<eqn>TIME</eqn>
+				<gf>
+					<yscale min="1" max="2"/>
+					<xpts>0,1</xpts>
+					<ypts>1,1</ypts>
+				</gf>
+				<units>LSP</units>
+			</aux>
+			<stock name="LSP willing adopters">
+				<eqn>INITIAL_LSP_WILLING_ADOPTERS</eqn>
+				<inflow>LSP_adoption_rate</inflow>
+				<units>LSP</units>
+			</stock>
+			<aux name="initial km travelled">
+				<eqn>INIT(km_travelled)</eqn>
+				<units>km/Month</units>
+			</aux>
+			<aux name="km travelled">
+				<eqn>km_travelled_not_using_hubs+km_travelled_using_hubs</eqn>
+				<units>km/Month</units>
+			</aux>
+			<aux name="minimum km travelled">
+				<eqn>minimum_km_travelled_per_LSP*TOTAL_NUMBER_OF_LSPS</eqn>
+				<units>km/Month</units>
+			</aux>
+			<aux name="minimum km travelled per LSP">
+				<eqn>minimum_number_of_vans_needed_per_LSP*average_minimum_route_lenght</eqn>
+				<units>km/(LSP*Month)</units>
+			</aux>
+			<aux name="minimum number of vans needed per LSP">
+				<eqn>demand_for_each_LSP/(AVERAGE_VAN_CAPACITY*MAXIMUM_FILL_RATE)</eqn>
+				<units>Van/(LSP*Month)</units>
+			</aux>
+			<aux name="average minimum route lenght">
+				<eqn>MINUMUM_ROUTE_LENGHT/MAXIMUM_ROUTING_EFFICIENCY</eqn>
+				<units>km/Van</units>
+			</aux>
+			<aux name="LSP adoption fraction">
+				<doc>	-STEP(PUSH ADOPTION FRACTION, delay time of hubs)+share of monetary value*MULTIPLIER FOR MONETARY VALUE</doc>
+				<eqn>( IF time_of_hubs &gt; 0 AND delay_time_of_hubs = -1e+38 THEN PUSH_ADOPTION_FRACTION ELSE share_of_monetary_value*MULTIPLIER_FOR_MONETARY_VALUE )</eqn>
+				<units>LSP/Month</units>
+			</aux>
+			<aux name="LSP adopters with potential adopters contacts">
+				<eqn>LSP_potential_adopter_contacts*adopters_prevalence</eqn>
+				<units>dmnl</units>
+			</aux>
+			<aux name="COST PER VEHICLE">
+				<eqn>TIME</eqn>
+				<gf>
+					<yscale min="1" max="2"/>
+					<xpts>0,1</xpts>
+					<ypts>1,1</ypts>
+				</gf>
+				<units>SEK/Van</units>
+			</aux>
+			<aux name="time of hubs">
+				<eqn>( IF Hubs &gt; 0 THEN TIME ELSE PREVIOUS(SELF, -1e+38) )</eqn>
+				<units>Month</units>
+			</aux>
+			<aux name="delay time of hubs">
+				<eqn>DELAY(time_of_hubs+DURATION_OF_PUSH, DURATION_OF_PUSH, -1e+38)</eqn>
+				<isee:delay_aux/>
+				<units>Month</units>
+			</aux>
+			<aux name="average route lenght with hubs">
+				<eqn>MINUMUM_ROUTE_LENGHT/Routing_efficiency_with_hubs</eqn>
+				<units>km/Van</units>
+			</aux>
+			<aux name="PUSH ADOPTION FRACTION">
+				<eqn>TIME</eqn>
+				<gf>
+					<yscale min="1" max="2"/>
+					<xpts>0,1</xpts>
+					<ypts>1,1</ypts>
+				</gf>
+				<units>LSP/Month</units>
+			</aux>
+			<aux name="share of monetary value">
+				<eqn>( IF total_cost_of_LSP_not_using_hubs = 0 THEN 0 ELSE monetary_value/total_cost_of_LSP_not_using_hubs )</eqn>
+				<units>dmnl</units>
+			</aux>
+			<aux name="MULTIPLIER FOR MONETARY VALUE">
+				<eqn>TIME</eqn>
+				<gf>
+					<yscale min="1" max="2"/>
+					<xpts>0,1</xpts>
+					<ypts>1,1</ypts>
+				</gf>
+				<units>LSP/Month</units>
+			</aux>
+			<aux name="demand for each LSP">
+				<eqn>TOTAL_DEMAND/TOTAL_NUMBER_OF_LSPS</eqn>
+				<units>Box/(Month*LSP)</units>
+			</aux>
+			<aux name="AVERAGE VAN CAPACITY">
+				<eqn>TIME</eqn>
+				<gf>
+					<yscale min="1" max="2"/>
+					<xpts>0,1</xpts>
+					<ypts>1,1</ypts>
+				</gf>
+				<units>Box/Van</units>
+			</aux>
+			<aux name="MAXIMUM FILL RATE">
+				<eqn>TIME</eqn>
+				<gf>
+					<yscale min="1" max="2"/>
+					<xpts>0,1</xpts>
+					<ypts>1,1</ypts>
+				</gf>
+				<units>dmnl</units>
+			</aux>
+			<aux name="total cost for deliveries">
+				<eqn>LSP_actual_adopters*total_cost_of_LSP_using_hubs+(TOTAL_NUMBER_OF_LSPS-LSP_actual_adopters)*total_cost_of_LSP_not_using_hubs</eqn>
+				<units>SEK/Month</units>
+			</aux>
+			<aux name="CO2 EMISSION ELECTRIC VAN">
+				<eqn>TIME</eqn>
+				<gf>
+					<yscale min="1" max="2"/>
+					<xpts>0,1</xpts>
+					<ypts>1,1</ypts>
+				</gf>
+				<units>CO2/km</units>
+			</aux>
+			<aux name="LSP actual adopters">
+				<eqn>Utilized_capacity/demand_for_each_LSP</eqn>
+				<units>LSP</units>
+			</aux>
+			<aux name="total cost of LSP using hubs">
+				<eqn>cost_of_drivers_if_LSP_uses_hubs+cost_of_fuel_if_LSP_uses_hubs+cost_of_vehicles_if_LSP_uses_hubs+monthly_cost_for_companies_to_join_the_scheme</eqn>
+				<units>SEK/(Month*LSP)</units>
+			</aux>
+			<aux name="total cost of LSP not using hubs">
+				<eqn>cost_of_drivers_if_LSP_doesnt_use_hubs+cost_of_fuel_if_LSP_doesnt_use_hubs+cost_of_vehicles_if_LSP_doesnt_use_hubs</eqn>
+				<units>SEK/(Month*LSP)</units>
+			</aux>
+			<aux name="MAXIMUM FUNDS PER UNIT OF TIME">
+				<eqn>TIME</eqn>
+				<gf>
+					<yscale min="1" max="2"/>
+					<xpts>0,1</xpts>
+					<ypts>1,1</ypts>
+				</gf>
+				<units>SEK/Month</units>
+			</aux>
+			<aux name="goal of capacity">
+				<eqn>demand_for_each_LSP*LSP_willing_adopters</eqn>
+				<units>Box/Month</units>
+			</aux>
+			<aux name="total cost for deliveries at time 0">
+				<eqn>INIT(total_cost_for_deliveries)</eqn>
+				<units>SEK/Month</units>
+			</aux>
+			<aux name="MINUMUM ROUTE LENGHT">
+				<eqn>TIME</eqn>
+				<gf>
+					<yscale min="1" max="2"/>
+					<xpts>0,1</xpts>
+					<ypts>1,1</ypts>
+				</gf>
+				<units>km/Van</units>
+			</aux>
+			<aux name="CO2 emissions">
+				<eqn>km_travelled_using_hubs*CO2_EMISSION_ELECTRIC_VAN+km_travelled_not_using_hubs*CO2_EMISSION_DIESEL_VAN</eqn>
+				<units>CO2/Month</units>
+			</aux>
+			<aux name="AVERAGE ROUTE LENGTH WITHOUT HUBS">
+				<eqn>TIME</eqn>
+				<gf>
+					<yscale min="1" max="2"/>
+					<xpts>0,1</xpts>
+					<ypts>1,1</ypts>
+				</gf>
+				<units>km/Van</units>
+			</aux>
+			<aux name="km travelled if LSP doesnt use hubs">
+				<eqn>AVERAGE_ROUTE_LENGTH_WITHOUT_HUBS*number_of_vans_needed_if_LSP_doesnt_use_hubs</eqn>
+				<units>km/(Month*LSP)</units>
+			</aux>
+			<aux name="number of vans needed if LSP doesnt use hubs">
+				<eqn>demand_for_each_LSP/(FILL_RATE_CURRENT_SYSTEM*AVERAGE_VAN_CAPACITY)</eqn>
+				<units>Van/(Month*LSP)</units>
+			</aux>
+			<aux name="CO2 emissions gap">
+				<eqn>( IF (CO2_emissions-CO2_EMISSIONS_GOAL)/CO2_emissions &gt; 0 THEN (CO2_emissions-CO2_EMISSIONS_GOAL)/initial_CO2_emissions ELSE 0 )</eqn>
+				<units>dmnl</units>
+			</aux>
+			<aux name="CO2 EMISSIONS GOAL">
+				<eqn>TIME</eqn>
+				<gf>
+					<yscale min="1" max="2"/>
+					<xpts>0,1</xpts>
+					<ypts>1,1</ypts>
+				</gf>
+				<units>CO2/Month</units>
+			</aux>
+			<aux name="ONE HUB">
+				<eqn>1</eqn>
+				<units>Hub</units>
+			</aux>
+			<stock name="Hubs under planning">
+				<eqn>0</eqn>
+				<inflow>planning_hubs</inflow>
+				<outflow>making_hubs_ready</outflow>
+				<units>Hub</units>
+			</stock>
+			<aux name="share of utilized capacity">
+				<eqn>( IF total_capacity = 0 THEN 1 ELSE Utilized_capacity/total_capacity )</eqn>
+				<units>dmnl</units>
+			</aux>
+			<aux name="MINIMUM UTILIZED CAPACITY">
+				<eqn>TIME</eqn>
+				<gf>
+					<yscale min="1" max="2"/>
+					<xpts>0,1</xpts>
+					<ypts>1,1</ypts>
+				</gf>
+				<units>dmnl</units>
+			</aux>
+			<flow name="using funds">
+				<eqn>planning_hubs*COST_OF_ONE_HUB</eqn>
+				<units>SEK/Month</units>
+			</flow>
+			<aux name="DURATION OF PUSH">
+				<eqn>TIME</eqn>
+				<gf>
+					<yscale min="1" max="2"/>
+					<xpts>0,1</xpts>
+					<ypts>1,1</ypts>
+				</gf>
+				<units>Month</units>
+			</aux>
+			<aux name="share of demand going through the hub">
+				<eqn>Utilized_capacity/TOTAL_DEMAND</eqn>
+				<units>dmnl</units>
+			</aux>
+			<stock name="Utilized capacity">
+				<eqn>0</eqn>
+				<inflow>using_capacity</inflow>
+				<units>Box/Month</units>
+			</stock>
+			<aux name="km travelled if LSP uses hubs">
+				<eqn>average_route_lenght_with_hubs*number_of_vans_needed_if_LSP_uses_hubs</eqn>
+				<units>km/(Month*LSP)</units>
+			</aux>
+			<aux name="km travelled not using hubs">
+				<eqn>(TOTAL_NUMBER_OF_LSPS-LSP_actual_adopters)*km_travelled_if_LSP_doesnt_use_hubs</eqn>
+				<units>km/Month</units>
+			</aux>
+			<aux name="monthly cost for companies to join the scheme">
+				<eqn>( IF LSP_actual_adopters &gt; 0 THEN MONTHLY_COST_FOR_ONE_HUB*Hubs/LSP_actual_adopters ELSE 0 )</eqn>
+				<units>SEK/(Month*LSP)</units>
+			</aux>
+			<aux name="effect of using capacity on improving delivery time">
+				<eqn>share_of_using_capacity</eqn>
+				<units>1/Month</units>
+			</aux>
+			<aux name="share of using capacity">
+				<eqn>( IF total_capacity = 0 THEN 0 ELSE using_capacity/total_capacity )</eqn>
+				<units>1/Month</units>
+			</aux>
+			<aux name="effect of using capacity on improving routing efficiency">
+				<eqn>share_of_using_capacity</eqn>
+				<units>1/Month</units>
+			</aux>
+			<aux name="CO2 EMISSION DIESEL VAN">
+				<eqn>TIME</eqn>
+				<gf>
+					<yscale min="1" max="2"/>
+					<xpts>0,1</xpts>
+					<ypts>1,1</ypts>
+				</gf>
+				<units>CO2/km</units>
+			</aux>
+			<aux name="cost of fuel if LSP doesnt use hubs">
+				<eqn>COST_PER_KM*km_travelled_if_LSP_doesnt_use_hubs</eqn>
+				<units>SEK/(LSP*Month)</units>
+			</aux>
+			<aux name="COST PER KM">
+				<eqn>TIME</eqn>
+				<gf>
+					<yscale min="1" max="2"/>
+					<xpts>0,1</xpts>
+					<ypts>1,1</ypts>
+				</gf>
+				<units>SEK/km</units>
+			</aux>
+			<aux name="cost of fuel if LSP uses hubs">
+				<eqn>COST_PER_KM*km_travelled_if_LSP_uses_hubs</eqn>
+				<units>SEK/(LSP*Month)</units>
+			</aux>
+			<aux name="monetary value">
+				<eqn>total_cost_of_LSP_not_using_hubs-total_cost_of_LSP_using_hubs</eqn>
+				<units>SEK/(Month*LSP)</units>
+			</aux>
+			<aux name="cost of drivers if LSP doesnt use hubs">
+				<eqn>total_delivery_time_if_LSP_doesnt_use_hubs*COST_PER_HOUR</eqn>
+				<units>SEK/(LSP*Month)</units>
+			</aux>
+			<aux name="total delivery time if LSP doesnt use hubs">
+				<eqn>demand_for_each_LSP*DELIVERY_TIME_CURRENT_SYSTEM</eqn>
+				<units>h/(Month*LSP)</units>
+			</aux>
+			<aux name="COST PER HOUR">
+				<eqn>TIME</eqn>
+				<gf>
+					<yscale min="1" max="2"/>
+					<xpts>0,1</xpts>
+					<ypts>1,1</ypts>
+				</gf>
+				<units>SEK/h</units>
+			</aux>
+			<aux name="cost of drivers if LSP uses hubs">
+				<eqn>COST_PER_HOUR*total_delivery_time_if_LSP_uses_hubs</eqn>
+				<units>SEK/(LSP*Month)</units>
+			</aux>
+			<aux name="total delivery time if LSP uses hubs">
+				<eqn>Delivery_time_with_hubs*demand_for_each_LSP</eqn>
+				<units>h/(Month*LSP)</units>
+			</aux>
+			<flow name="improving routing efficiency">
+				<eqn>Potential_for_improving_routing_efficiency*effect_of_using_capacity_on_improving_routing_efficiency*MULTIPLIER_FOR_EFFECT_OF_USING_CAPACITY_ON_IMPROVING_ROUTING_EFFICIENCY</eqn>
+				<units>1/Month</units>
+			</flow>
+			<aux name="MULTIPLIER FOR EFFECT OF USING CAPACITY ON IMPROVING ROUTING EFFICIENCY">
+				<eqn>TIME</eqn>
+				<gf>
+					<yscale min="1" max="2"/>
+					<xpts>0,1</xpts>
+					<ypts>1,1</ypts>
+				</gf>
+				<units>dmnl</units>
+			</aux>
+			<aux name="cost of vehicles if LSP doesnt use hubs">
+				<eqn>COST_PER_VEHICLE*number_of_vans_needed_if_LSP_doesnt_use_hubs</eqn>
+				<units>SEK/(LSP*Month)</units>
+			</aux>
+			<aux name="cost of vehicles if LSP uses hubs">
+				<eqn>number_of_vans_needed_if_LSP_uses_hubs*COST_PER_VEHICLE</eqn>
+				<units>SEK/(LSP*Month)</units>
+			</aux>
+			<aux name="number of vans needed if LSP uses hubs">
+				<eqn>demand_for_each_LSP/(Fill_rate_with_hubs*AVERAGE_VAN_CAPACITY)</eqn>
+				<units>Van/(Month*LSP)</units>
+			</aux>
+			<aux name="DELIVERY TIME CURRENT SYSTEM">
+				<eqn>TIME</eqn>
+				<gf>
+					<yscale min="1" max="2"/>
+					<xpts>0,1</xpts>
+					<ypts>1,1</ypts>
+				</gf>
+				<units>h/Box</units>
+			</aux>
+			<stock name="Delivery time with hubs">
+				<eqn>DELIVERY_TIME_CURRENT_SYSTEM</eqn>
+				<inflow>improving_delivery_time</inflow>
+				<units>h/Box</units>
+			</stock>
+			<flow name="adding capacity">
+				<eqn>making_hubs_ready*CAPACITY_OF_ONE_HUB</eqn>
+				<units>Box/(Month*Month)</units>
+			</flow>
+			<aux name="total capacity">
+				<eqn>Hubs*CAPACITY_OF_ONE_HUB</eqn>
+				<units>Box/Month</units>
+			</aux>
+			<flow name="making hubs ready">
+				<eqn>DELAY(planning_hubs, ADJUSTMENT_TIME_FOR_MAKING_HUBS_READY, 0)</eqn>
+				<units>Hub/Month</units>
+			</flow>
+			<aux name="CAPACITY OF ONE HUB">
+				<eqn>TIME</eqn>
+				<gf>
+					<yscale min="1" max="2"/>
+					<xpts>0,1</xpts>
+					<ypts>1,1</ypts>
+				</gf>
+				<units>Box/(Hub*Month)</units>
+			</aux>
+			<aux name="effect of using capacity on improving fill rate">
+				<eqn>share_of_using_capacity</eqn>
+				<units>1/Month</units>
+			</aux>
+			<stock name="Available capacity">
+				<eqn>0</eqn>
+				<inflow>adding_capacity</inflow>
+				<outflow>using_capacity</outflow>
+				<units>Box/Month</units>
+			</stock>
+			<flow name="using capacity">
+				<eqn>( IF goal_of_capacity &lt; Utilized_capacity THEN -Utilized_capacity/ADJUSTMENT_TIME_FOR_USING_CAPACITY ELSE ( IF (goal_of_capacity-Utilized_capacity) &lt; Available_capacity THEN (goal_of_capacity-Utilized_capacity)/ADJUSTMENT_TIME_FOR_USING_CAPACITY ELSE Available_capacity/ADJUSTMENT_TIME_FOR_USING_CAPACITY ) )</eqn>
+				<units>Box/(Month*Month)</units>
+			</flow>
+			<flow name="improving fill rate">
+				<eqn>Potential_for_improving_fill_rate*MULTIPLIER_FOR_EFFECT_OF_USING_CAPACITY_ON_IMPROVING_FILL_RATE*effect_of_using_capacity_on_improving_fill_rate</eqn>
+				<units>1/Month</units>
+			</flow>
+			<stock name="Potential for improving routing efficiency">
+				<eqn>MAXIMUM_ROUTING_EFFICIENCY-routing_efficiency_current_system</eqn>
+				<outflow>improving_routing_efficiency</outflow>
+				<units>dmnl</units>
+			</stock>
+			<stock name="Routing efficiency with hubs">
+				<eqn>routing_efficiency_current_system</eqn>
+				<inflow>improving_routing_efficiency</inflow>
+				<units>dmnl</units>
+			</stock>
+			<stock name="Fill rate with hubs">
+				<eqn>FILL_RATE_CURRENT_SYSTEM</eqn>
+				<inflow>improving_fill_rate</inflow>
+				<units>dmnl</units>
+			</stock>
+			<flow name="improving delivery time">
+				<eqn>Potential_for_improving_delivery_time*MULTIPLIER_FOR_EFFECT_OF_USING_CAPACITY_ON_IMPROVING_DELIVERY_TIME*effect_of_using_capacity_on_improving_delivery_time</eqn>
+				<units>h/(Box*Month)</units>
+			</flow>
+			<stock name="Potential for improving delivery time">
+				<eqn>-DELIVERY_TIME_CURRENT_SYSTEM+MINIMUM_DELIVERY_TIME</eqn>
+				<outflow>improving_delivery_time</outflow>
+				<units>h/Box</units>
+			</stock>
+			<aux name="adopters prevalence">
+				<eqn>LSP_willing_adopters/TOTAL_NUMBER_OF_LSPS</eqn>
+				<units>dmnl</units>
+			</aux>
+			<aux name="CONTACT RATE">
+				<eqn>TIME</eqn>
+				<gf>
+					<yscale min="1" max="2"/>
+					<xpts>0,1</xpts>
+					<ypts>1,1</ypts>
+				</gf>
+				<units>1/LSP</units>
+			</aux>
+			<aux name="LSP potential adopter contacts">
+				<eqn>LSP_potential_adopters*CONTACT_RATE</eqn>
+				<units>dmnl</units>
+			</aux>
+			<aux name="MINIMUM DELIVERY TIME">
+				<eqn>TIME</eqn>
+				<gf>
+					<yscale min="1" max="2"/>
+					<xpts>0,1</xpts>
+					<ypts>1,1</ypts>
+				</gf>
+				<units>h/Box</units>
+			</aux>
+		</variables>
+		<views>
+			<style color="black" background="white" font_style="normal" font_weight="normal" text_decoration="none" text_align="center" vertical_text_align="center" font_color="black" font_family="Arial" font_size="10pt" padding="2" border_color="black" border_width="thin" border_style="none">
+				<text_box color="black" background="white" text_align="left" vertical_text_align="top" font_size="12pt"/>
+				<isee:loop_indicator color="black" background="white" text_align="left" vertical_text_align="top" font_size="12pt"/>
+				<numeric_display color="white" background="white" font_size="12pt" border_width="thin" border_style="solid" isee:transparent="false" isee:show_divider="true" isee:show_bounding_box="true" label_side="left"/>
+				<graph color="black" background="white" font_size="12pt" axis_color="#666666" grid_color="#C8C8C8" isee:graph_area_color="white" legend_position="bottom" isee:transparent="false" isee:hide_border="false" axis_title_font_style="normal" axis_title_font_weight="normal" axis_title_text_decoration="none" axis_title_text_align="center" axis_title_vertical_text_align="center" axis_title_font_color="black" axis_title_font_family="Arial" axis_title_font_size="12pt" axis_title_text_padding="2" axis_title_text_border_color="black" axis_title_text_border_width="thin" axis_title_text_border_style="none" axis_label_font_style="normal" axis_label_font_weight="normal" axis_label_text_decoration="none" axis_label_text_align="center" axis_label_vertical_text_align="center" axis_label_font_color="black" axis_label_font_family="Arial" axis_label_font_size="9pt" axis_label_text_padding="2" axis_label_text_border_color="black" axis_label_text_border_width="thin" axis_label_text_border_style="none">
+					<isee:series_styles>
+						<isee:series_style color="blue" thickness="1"/>
+						<isee:series_style color="red" thickness="1" pen_style="dot_dashed"/>
+						<isee:series_style color="fuchsia" thickness="1" pen_style="dotted"/>
+						<isee:series_style color="#008F44" thickness="1" pen_style="dashed"/>
+						<isee:series_style color="#FF7F00" thickness="1"/>
+						<isee:series_style color="#7F00FF" thickness="1" pen_style="dot_dashed"/>
+						<isee:series_style color="#0CA0FF" thickness="1" pen_style="dotted"/>
+						<isee:series_style color="lime" thickness="1" pen_style="dashed"/>
+						<isee:series_style color="#FF007F" thickness="1"/>
+						<isee:series_style color="aqua" thickness="1" pen_style="dot_dashed"/>
+						<isee:series_style color="#F586FF" thickness="1" pen_style="dotted"/>
+						<isee:series_style color="black" thickness="1" pen_style="dashed"/>
+						<isee:series_style color="#C8C8C8" thickness="1"/>
+					</isee:series_styles>
+				</graph>
+				<table color="black" background="#E0E0E0" text_align="right" font_size="12pt" orientation="vertical" wrap_text="false" isee:auto_fit="true" isee:use_alternate_row_colors="false" isee:unlimited_table_length="false" blank_column_width="80" column_width="160" interval="1" report_balances="beginning" report_flows="summed" header_font_style="normal" header_font_weight="normal" header_text_decoration="none" header_text_align="center" header_vertical_text_align="center" header_font_color="black" header_font_family="Arial" header_font_size="12pt" header_text_padding="2" header_text_border_color="black" header_text_border_width="thin" header_text_border_style="none"/>
+				<button color="black" background="#E0E0E0" font_size="12pt" border_width="thin" border_style="solid" transparent="false" corner_radius="0" isee:flat="false" icon_side="top" isee:highlight_on_hover="false" isee:highlight_color="#959595"/>
+				<isee:annotation color="black" background="#E0E0E0" font_size="12pt" border_width="thin" border_style="solid" transparent="false" corner_radius="0" isee:flat="false" icon_side="top" isee:highlight_on_hover="false" isee:highlight_color="#959595" popup_corner_radius="0" popup_background_color="#FFFECF"/>
+				<slider color="#66CC66" background="#E0E0E0" font_size="12pt" num_ticks="3" label_side="top" wrap_title="true" vertical="false" isee:fancy_appearance="false" isee:show_hover_tip="when_deciding" input_expands="true" input_width="100"/>
+				<isee:dual_slider color="#66CC66" background="silver" font_size="12pt" num_ticks="3" label_side="top" wrap_title="true" isee:show_hover_tip="when_deciding" input_expands="true" input_width="100"/>
+				<isee:sim_speed_slider color="black" background="white"/>
+				<isee:time_slider color="#E95F74" background="silver"/>
+				<isee:pie_input color="black" background="white" font_size="12pt" legend_position="bottom" isee:transparent="false"/>
+				<knob color="#66CC66" background="#E0E0E0" font_size="12pt" label_side="bottom" wrap_title="true"/>
+				<numeric_input color="black" background="#E0E0E0" font_size="12pt" label_side="left" wrap_title="true" input_expands="false" input_width="100"/>
+				<switch color="black" background="#E0E0E0" font_size="12pt" label_side="top" wrap_title="true" isee:appearance="switch" isee:on_color="green"/>
+				<options color="black" background="white" appearance="radio-buttons" arrangement="vertical"/>
+				<graphical_input color="black" background="#E0E0E0" font_size="12pt" isee:show_hover_tip="true"/>
+				<group_input color="black" background="#E0E0E0" font_size="12pt"/>
+				<lamp color="black" background="white" font_size="9pt"/>
+				<gauge color="black" background="white" font_size="9pt" needle_color="#F09F72" bar_color="#EEEEEE" bar_progress_color="black" appearance="radial" num_major_ticks="11" num_minor_ticks="11" show_numeric_value="true"/>
+				<isee:spatial_map color="black" background="white" font_size="12pt"/>
+				<isee:animation_object color="black" background="white" font_size="12pt"/>
+				<isee:navigation_widget color="black" background="white" text_align="left" vertical_text_align="top" font_size="12pt" padding="6 8" border_color="#999999" border_width="thin" border_style="solid" item_spacing="6" appearance="tabs" corner_radius="4" selected_item_color="black" selected_item_background="white" item_background="#DDDDDD" transparent_bg="false"/>
+				<isee:shape color="black" background="white" text_align="left" vertical_text_align="top" font_size="12pt" border_width="thin" border_style="solid" opacity="1" transparent_background="true" corner_radius="1"/>
+				<isee:selector color="black" background="white" text_align="left" vertical_text_align="top" font_size="12pt"/>
+				<isee:iframe color="black" background="white" text_align="left" vertical_text_align="top" font_size="12pt" border_width="thin" border_style="solid"/>
+				<isee:financial_table color="black" background="#E0E0E0" text_align="right" font_size="12pt" hide_border="false" auto_fit="true" first_column_width="250" other_column_width="100" header_font_style="normal" header_font_weight="bold" header_text_decoration="none" header_text_align="center" header_vertical_text_align="center" header_font_color="black" header_font_family="Arial" header_font_size="14pt" header_text_padding="2" header_text_border_color="black" header_text_border_width="thin" header_text_border_style="none"/>
+			</style>
+			<view isee:show_pages="false" background="white" page_width="1123" page_height="793" isee:page_cols="4" isee:page_rows="7" isee:scroll_x="847.5" isee:scroll_y="2799.38" zoom="160" isee:popup_graphs_are_comparative="true" isee:enable_non_negative_highlights="false" type="stock_flow">
+				<style color="black" background="white" font_style="normal" font_weight="normal" text_decoration="none" text_align="center" vertical_text_align="center" font_color="black" font_family="Arial" font_size="10pt" padding="2" border_color="black" border_width="thin" border_style="none">
+					<stock color="blue" background="white" font_color="blue" font_size="9pt" label_side="top">
+						<shape type="rectangle" width="45" height="35"/>
+					</stock>
+					<flow color="blue" background="white" font_color="blue" font_size="9pt" label_side="bottom">
+						<shape type="circle" radius="18"/>
+					</flow>
+					<isee:placeholder color="#228B22" background="white" font_color="#228B22" font_size="9pt" label_side="bottom"/>
+					<module color="blue" background="white" font_color="blue" font_size="9pt" label_side="top">
+						<shape type="rectangle" width="55" height="45"/>
+					</module>
+					<aux color="blue" background="white" font_color="blue" font_size="9pt" label_side="bottom">
+						<shape type="circle" radius="18"/>
+					</aux>
+					<group color="red" background="white" font_color="red" font_size="9pt"/>
+					<connector color="#FF007F" background="white" font_color="#FF007F" font_size="9pt" isee:thickness="1"/>
+					<text_box color="black" background="white" text_align="left" vertical_text_align="top" font_size="12pt"/>
+					<isee:loop_indicator color="black" background="white" text_align="left" vertical_text_align="top" font_size="12pt"/>
+					<numeric_display color="white" background="white" font_size="12pt" border_width="thin" border_style="solid" isee:transparent="false" isee:show_divider="true" isee:show_bounding_box="true" label_side="left"/>
+					<graph color="black" background="white" font_size="12pt" axis_color="#666666" grid_color="#C8C8C8" isee:graph_area_color="white" legend_position="bottom" isee:transparent="false" isee:hide_border="false" axis_title_font_style="normal" axis_title_font_weight="normal" axis_title_text_decoration="none" axis_title_text_align="center" axis_title_vertical_text_align="center" axis_title_font_color="black" axis_title_font_family="Arial" axis_title_font_size="12pt" axis_title_text_padding="2" axis_title_text_border_color="black" axis_title_text_border_width="thin" axis_title_text_border_style="none" axis_label_font_style="normal" axis_label_font_weight="normal" axis_label_text_decoration="none" axis_label_text_align="center" axis_label_vertical_text_align="center" axis_label_font_color="black" axis_label_font_family="Arial" axis_label_font_size="9pt" axis_label_text_padding="2" axis_label_text_border_color="black" axis_label_text_border_width="thin" axis_label_text_border_style="none">
+						<isee:series_styles>
+							<isee:series_style color="blue" thickness="1"/>
+							<isee:series_style color="red" thickness="1" pen_style="dot_dashed"/>
+							<isee:series_style color="fuchsia" thickness="1" pen_style="dotted"/>
+							<isee:series_style color="#008F44" thickness="1" pen_style="dashed"/>
+							<isee:series_style color="#FF7F00" thickness="1"/>
+							<isee:series_style color="#7F00FF" thickness="1" pen_style="dot_dashed"/>
+							<isee:series_style color="#0CA0FF" thickness="1" pen_style="dotted"/>
+							<isee:series_style color="lime" thickness="1" pen_style="dashed"/>
+							<isee:series_style color="#FF007F" thickness="1"/>
+							<isee:series_style color="aqua" thickness="1" pen_style="dot_dashed"/>
+							<isee:series_style color="#F586FF" thickness="1" pen_style="dotted"/>
+							<isee:series_style color="black" thickness="1" pen_style="dashed"/>
+							<isee:series_style color="#C8C8C8" thickness="1"/>
+						</isee:series_styles>
+					</graph>
+					<table color="black" background="#E0E0E0" text_align="right" font_size="12pt" orientation="vertical" wrap_text="false" isee:auto_fit="true" isee:use_alternate_row_colors="false" isee:unlimited_table_length="false" blank_column_width="80" column_width="160" interval="1" report_balances="beginning" report_flows="summed" header_font_style="normal" header_font_weight="normal" header_text_decoration="none" header_text_align="center" header_vertical_text_align="center" header_font_color="black" header_font_family="Arial" header_font_size="12pt" header_text_padding="2" header_text_border_color="black" header_text_border_width="thin" header_text_border_style="none"/>
+				</style>
+				<stock x="459" y="376" name="Hubs under planning"/>
+				<stock x="776" y="373" name="Hubs"/>
+				<flow x="617.5" y="376" name="making hubs ready">
+					<pts>
+						<pt x="481.5" y="376"/>
+						<pt x="753.5" y="376"/>
+					</pts>
+				</flow>
+				<flow x="348.25" y="384" name="planning hubs">
+					<pts>
+						<pt x="248" y="384"/>
+						<pt x="436.5" y="384"/>
+					</pts>
+				</flow>
+				<aux x="259" y="248" name="COST OF ONE HUB"/>
+				<aux x="397" y="257" name="ONE HUB"/>
+				<connector uid="14" angle="303.275">
+					<from>COST_OF_ONE_HUB</from>
+					<to>planning_hubs</to>
+				</connector>
+				<connector uid="15" angle="249">
+					<from>ONE_HUB</from>
+					<to>planning_hubs</to>
+				</connector>
+				<aux x="692" y="260" name="ADJUSTMENT TIME FOR MAKING HUBS READY"/>
+				<connector uid="19" angle="237.29">
+					<from>ADJUSTMENT_TIME_FOR_MAKING_HUBS_READY</from>
+					<to>making_hubs_ready</to>
+				</connector>
+				<connector uid="20" angle="320.964">
+					<from>planning_hubs</from>
+					<to>making_hubs_ready</to>
+				</connector>
+				<aux x="707" y="475" name="CAPACITY OF ONE HUB"/>
+				<stock x="700" y="596" name="Available capacity"/>
+				<stock x="917" y="595" name="Utilized capacity"/>
+				<flow x="606.25" y="596" name="adding capacity">
+					<pts>
+						<pt x="523" y="596"/>
+						<pt x="677.5" y="596"/>
+					</pts>
+				</flow>
+				<connector uid="29" angle="267.073">
+					<from>making_hubs_ready</from>
+					<to>adding_capacity</to>
+				</connector>
+				<flow x="808.5" y="591" name="using capacity">
+					<pts>
+						<pt x="722.5" y="591"/>
+						<pt x="894.5" y="591"/>
+					</pts>
+				</flow>
+				<aux x="903" y="507" name="ADJUSTMENT TIME FOR USING CAPACITY"/>
+				<connector uid="35" angle="92.2643">
+					<from>Available_capacity</from>
+					<to>using_capacity</to>
+				</connector>
+				<connector uid="36" angle="221.634">
+					<from>ADJUSTMENT_TIME_FOR_USING_CAPACITY</from>
+					<to>using_capacity</to>
+				</connector>
+				<connector uid="38" angle="307.256">
+					<from>
+						<alias uid="37"/>
+					</from>
+					<to>planning_hubs</to>
+				</connector>
+				<aux x="684" y="740" name="goal of capacity"/>
+				<connector uid="41" angle="230.218">
+					<from>CAPACITY_OF_ONE_HUB</from>
+					<to>adding_capacity</to>
+				</connector>
+				<connector uid="44" angle="45.6228">
+					<from>
+						<alias uid="42"/>
+					</from>
+					<to>goal_of_capacity</to>
+				</connector>
+				<connector uid="45" angle="125.538">
+					<from>
+						<alias uid="43"/>
+					</from>
+					<to>goal_of_capacity</to>
+				</connector>
+				<connector uid="46" angle="50.1189">
+					<from>goal_of_capacity</from>
+					<to>using_capacity</to>
+				</connector>
+				<connector uid="47" angle="279.799">
+					<from>Utilized_capacity</from>
+					<to>using_capacity</to>
+				</connector>
+				<aux x="920" y="421" name="total capacity"/>
+				<connector uid="49" angle="14.226">
+					<from>CAPACITY_OF_ONE_HUB</from>
+					<to>total_capacity</to>
+				</connector>
+				<connector uid="50" angle="341.565">
+					<from>Hubs</from>
+					<to>total_capacity</to>
+				</connector>
+				<aux x="1032" y="481" name="share of utilized capacity"/>
+				<connector uid="52" angle="359.687">
+					<from>Utilized_capacity</from>
+					<to>share_of_utilized_capacity</to>
+				</connector>
+				<connector uid="53" angle="34.7496">
+					<from>total_capacity</from>
+					<to>share_of_utilized_capacity</to>
+				</connector>
+				<aux x="1012" y="704" name="share of using capacity"/>
+				<connector uid="55" angle="270.779">
+					<from>using_capacity</from>
+					<to>share_of_using_capacity</to>
+				</connector>
+				<connector uid="56" angle="35.8208">
+					<from>total_capacity</from>
+					<to>share_of_using_capacity</to>
+				</connector>
+				<aux x="912" y="273" name="time of hubs"/>
+				<connector uid="58" angle="36.3268">
+					<from>Hubs</from>
+					<to>time_of_hubs</to>
+				</connector>
+				<stock x="2123" y="338" width="90" height="62" name="LSP potential adopters"/>
+				<stock x="2568" y="356" name="LSP willing adopters"/>
+				<flow x="2379.25" y="360" name="LSP adoption rate">
+					<pts>
+						<pt x="2213" y="360"/>
+						<pt x="2545.5" y="360"/>
+					</pts>
+				</flow>
+				<aux x="2237" y="231" name="TOTAL NUMBER OF LSPS"/>
+				<aux x="2413" y="280" name="AVERAGE DELAY IN DROPPING OUT"/>
+				<aux x="2020" y="491" name="CONTACT RATE"/>
+				<aux x="2264" y="573" name="LSP potential adopter contacts"/>
+				<aux x="2652" y="197" name="adopters prevalence"/>
+				<aux x="2629" y="519" name="LSP adopters with potential adopters contacts"/>
+				<aux x="2349" y="496" name="LSP adoption fraction"/>
+				<connector uid="76" angle="260.751">
+					<from>LSP_potential_adopters</from>
+					<to>LSP_potential_adopter_contacts</to>
+				</connector>
+				<connector uid="77" angle="341.424">
+					<from>CONTACT_RATE</from>
+					<to>LSP_potential_adopter_contacts</to>
+				</connector>
+				<connector uid="78" angle="346.425">
+					<from>LSP_potential_adopter_contacts</from>
+					<to>LSP_adopters_with_potential_adopters_contacts</to>
+				</connector>
+				<connector uid="79" angle="180.129">
+					<from>LSP_adopters_with_potential_adopters_contacts</from>
+					<to>LSP_adoption_rate</to>
+				</connector>
+				<connector uid="80" angle="298.976">
+					<from>adopters_prevalence</from>
+					<to>LSP_adopters_with_potential_adopters_contacts</to>
+				</connector>
+				<connector uid="81" angle="20.8875">
+					<from>TOTAL_NUMBER_OF_LSPS</from>
+					<to>adopters_prevalence</to>
+				</connector>
+				<connector uid="82" angle="62.1524">
+					<from>LSP_willing_adopters</from>
+					<to>adopters_prevalence</to>
+				</connector>
+				<connector uid="83" angle="77.46">
+					<from>LSP_adoption_fraction</from>
+					<to>LSP_adoption_rate</to>
+				</connector>
+				<aux x="2480" y="693" name="MULTIPLIER FOR MONETARY VALUE"/>
+				<connector uid="87" angle="247.126">
+					<from>AVERAGE_DELAY_IN_DROPPING_OUT</from>
+					<to>LSP_adoption_rate</to>
+				</connector>
+				<connector uid="88" angle="144.291">
+					<from>LSP_willing_adopters</from>
+					<to>LSP_adoption_rate</to>
+				</connector>
+				<aux x="1996" y="817" name="DURATION OF PUSH"/>
+				<aux x="2328" y="785" name="PUSH ADOPTION FRACTION"/>
+				<connector uid="91" angle="85.8439">
+					<from>PUSH_ADOPTION_FRACTION</from>
+					<to>LSP_adoption_fraction</to>
+				</connector>
+				<aux x="2820" y="393" name="LSP actual adopters"/>
+				<connector uid="95" angle="265.185">
+					<from>
+						<alias uid="92"/>
+					</from>
+					<to>LSP_actual_adopters</to>
+				</connector>
+				<connector uid="96" angle="212.024">
+					<from>
+						<alias uid="93"/>
+					</from>
+					<to>LSP_actual_adopters</to>
+				</connector>
+				<stock x="240" y="1336" width="122" height="48" name="Potential for improving fill rate"/>
+				<stock x="608" y="1356" name="Fill rate with hubs"/>
+				<aux x="601" y="1260" name="FILL RATE CURRENT SYSTEM"/>
+				<aux x="272" y="1260" name="MAXIMUM FILL RATE"/>
+				<flow x="473.75" y="1359" name="improving fill rate">
+					<pts>
+						<pt x="362" y="1359"/>
+						<pt x="585.5" y="1359"/>
+					</pts>
+				</flow>
+				<stock x="228" y="1628" width="104" height="72" name="Potential for improving routing efficiency"/>
+				<stock x="581" y="1636" width="80" height="56" name="Routing efficiency with hubs"/>
+				<flow x="456.5" y="1663" name="improving routing efficiency">
+					<pts>
+						<pt x="332" y="1663"/>
+						<pt x="581" y="1663"/>
+					</pts>
+				</flow>
+				<aux x="336" y="1799" name="MAXIMUM ROUTING EFFICIENCY"/>
+				<aux x="668" y="1773" name="routing efficiency current system"/>
+				<connector uid="117" angle="73.6765">
+					<from>Potential_for_improving_fill_rate</from>
+					<to>improving_fill_rate</to>
+				</connector>
+				<connector uid="118" angle="274.98">
+					<from>Potential_for_improving_routing_efficiency</from>
+					<to>improving_routing_efficiency</to>
+				</connector>
+				<aux x="881" y="1395" name="AVERAGE VAN CAPACITY"/>
+				<aux x="848" y="1508" name="number of vans needed if LSP uses hubs"/>
+				<aux x="944" y="1291" name="number of vans needed if LSP doesnt use hubs"/>
+				<connector uid="124" angle="253.72">
+					<from>AVERAGE_VAN_CAPACITY</from>
+					<to>number_of_vans_needed_if_LSP_uses_hubs</to>
+				</connector>
+				<connector uid="125" angle="58.7938">
+					<from>AVERAGE_VAN_CAPACITY</from>
+					<to>number_of_vans_needed_if_LSP_doesnt_use_hubs</to>
+				</connector>
+				<connector uid="126" angle="327.653">
+					<from>Fill_rate_with_hubs</from>
+					<to>number_of_vans_needed_if_LSP_uses_hubs</to>
+				</connector>
+				<connector uid="127" angle="354.836">
+					<from>FILL_RATE_CURRENT_SYSTEM</from>
+					<to>number_of_vans_needed_if_LSP_doesnt_use_hubs</to>
+				</connector>
+				<aux x="1201" y="1411" name="TOTAL DEMAND"/>
+				<aux x="933" y="1792" name="MINUMUM ROUTE LENGHT"/>
+				<aux x="809" y="1888" name="AVERAGE ROUTE LENGTH WITHOUT HUBS"/>
+				<aux x="801" y="1627" name="average route lenght with hubs"/>
+				<connector uid="132" angle="11.6157">
+					<from>Routing_efficiency_with_hubs</from>
+					<to>average_route_lenght_with_hubs</to>
+				</connector>
+				<connector uid="133" angle="128.66">
+					<from>MINUMUM_ROUTE_LENGHT</from>
+					<to>average_route_lenght_with_hubs</to>
+				</connector>
+				<stock x="260" y="2320" width="88" height="56" name="Potential for improving delivery time"/>
+				<stock x="604" y="2321" width="96" height="46" name="Delivery time with hubs"/>
+				<flow x="476" y="2344" name="improving delivery time">
+					<pts>
+						<pt x="348" y="2344"/>
+						<pt x="604" y="2344"/>
+					</pts>
+				</flow>
+				<aux x="305" y="2492" name="MINIMUM DELIVERY TIME"/>
+				<aux x="644" y="2488" name="DELIVERY TIME CURRENT SYSTEM"/>
+				<connector uid="145" angle="63.8736">
+					<from>Potential_for_improving_delivery_time</from>
+					<to>improving_delivery_time</to>
+				</connector>
+				<aux x="1053" y="1399" name="demand for each LSP"/>
+				<connector uid="148" angle="175.365">
+					<from>TOTAL_DEMAND</from>
+					<to>demand_for_each_LSP</to>
+				</connector>
+				<connector uid="149" angle="115.907">
+					<from>
+						<alias uid="146"/>
+					</from>
+					<to>demand_for_each_LSP</to>
+				</connector>
+				<connector uid="150" angle="135.264">
+					<from>demand_for_each_LSP</from>
+					<to>number_of_vans_needed_if_LSP_doesnt_use_hubs</to>
+				</connector>
+				<connector uid="151" angle="208">
+					<from>demand_for_each_LSP</from>
+					<to>number_of_vans_needed_if_LSP_uses_hubs</to>
+				</connector>
+				<aux x="340" y="1503" name="effect of using capacity on improving fill rate"/>
+				<aux x="572" y="1479" name="MULTIPLIER FOR EFFECT OF USING CAPACITY ON IMPROVING FILL RATE"/>
+				<aux x="604" y="1887" name="MULTIPLIER FOR EFFECT OF USING CAPACITY ON IMPROVING ROUTING EFFICIENCY"/>
+				<aux x="633" y="2127" name="MULTIPLIER FOR EFFECT OF USING CAPACITY ON IMPROVING DELIVERY TIME"/>
+				<aux x="367" y="1956" name="effect of using capacity on improving routing efficiency"/>
+				<aux x="308" y="2123" name="effect of using capacity on improving delivery time"/>
+				<connector uid="158" angle="129.309">
+					<from>MULTIPLIER_FOR_EFFECT_OF_USING_CAPACITY_ON_IMPROVING_FILL_RATE</from>
+					<to>improving_fill_rate</to>
+				</connector>
+				<connector uid="159" angle="47.1135">
+					<from>effect_of_using_capacity_on_improving_fill_rate</from>
+					<to>improving_fill_rate</to>
+				</connector>
+				<connector uid="160" angle="123.364">
+					<from>MULTIPLIER_FOR_EFFECT_OF_USING_CAPACITY_ON_IMPROVING_ROUTING_EFFICIENCY</from>
+					<to>improving_routing_efficiency</to>
+				</connector>
+				<connector uid="161" angle="73.0141">
+					<from>effect_of_using_capacity_on_improving_routing_efficiency</from>
+					<to>improving_routing_efficiency</to>
+				</connector>
+				<connector uid="162" angle="307.241">
+					<from>effect_of_using_capacity_on_improving_delivery_time</from>
+					<to>improving_delivery_time</to>
+				</connector>
+				<connector uid="163" angle="234.114">
+					<from>MULTIPLIER_FOR_EFFECT_OF_USING_CAPACITY_ON_IMPROVING_DELIVERY_TIME</from>
+					<to>improving_delivery_time</to>
+				</connector>
+				<connector uid="165" angle="24.426">
+					<from>
+						<alias uid="164"/>
+					</from>
+					<to>effect_of_using_capacity_on_improving_fill_rate</to>
+				</connector>
+				<connector uid="166" angle="307.817">
+					<from>
+						<alias uid="164"/>
+					</from>
+					<to>effect_of_using_capacity_on_improving_routing_efficiency</to>
+				</connector>
+				<connector uid="167" angle="292.149">
+					<from>
+						<alias uid="164"/>
+					</from>
+					<to>effect_of_using_capacity_on_improving_delivery_time</to>
+				</connector>
+				<aux x="1348" y="1691" name="km travelled if LSP doesnt use hubs"/>
+				<aux x="1077" y="1652" name="km travelled if LSP uses hubs"/>
+				<connector uid="170" angle="15.9396">
+					<from>number_of_vans_needed_if_LSP_doesnt_use_hubs</from>
+					<to>km_travelled_if_LSP_doesnt_use_hubs</to>
+				</connector>
+				<connector uid="171" angle="345.273">
+					<from>number_of_vans_needed_if_LSP_uses_hubs</from>
+					<to>km_travelled_if_LSP_uses_hubs</to>
+				</connector>
+				<connector uid="172" angle="334.238">
+					<from>average_route_lenght_with_hubs</from>
+					<to>km_travelled_if_LSP_uses_hubs</to>
+				</connector>
+				<connector uid="173" angle="350.725">
+					<from>AVERAGE_ROUTE_LENGTH_WITHOUT_HUBS</from>
+					<to>km_travelled_if_LSP_doesnt_use_hubs</to>
+				</connector>
+				<aux x="893" y="2463" name="total delivery time if LSP doesnt use hubs"/>
+				<aux x="896" y="2335" name="total delivery time if LSP uses hubs"/>
+				<connector uid="178" angle="166.464">
+					<from>
+						<alias uid="177"/>
+					</from>
+					<to>total_delivery_time_if_LSP_uses_hubs</to>
+				</connector>
+				<connector uid="179" angle="199.138">
+					<from>
+						<alias uid="177"/>
+					</from>
+					<to>total_delivery_time_if_LSP_doesnt_use_hubs</to>
+				</connector>
+				<connector uid="180" angle="2.11241">
+					<from>Delivery_time_with_hubs</from>
+					<to>total_delivery_time_if_LSP_uses_hubs</to>
+				</connector>
+				<connector uid="181" angle="5.73337">
+					<from>DELIVERY_TIME_CURRENT_SYSTEM</from>
+					<to>total_delivery_time_if_LSP_doesnt_use_hubs</to>
+				</connector>
+				<aux x="1400" y="1389" name="share of demand going through the hub"/>
+				<connector uid="184" angle="6.30859">
+					<from>TOTAL_DEMAND</from>
+					<to>share_of_demand_going_through_the_hub</to>
+				</connector>
+				<connector uid="185" angle="279.866">
+					<from>
+						<alias uid="182"/>
+					</from>
+					<to>share_of_demand_going_through_the_hub</to>
+				</connector>
+				<stock x="2491" y="1457" name="Funds"/>
+				<flow x="2387.75" y="1457" name="public sector adds funds">
+					<pts>
+						<pt x="2295" y="1457"/>
+						<pt x="2468.5" y="1457"/>
+					</pts>
+				</flow>
+				<aux x="2263" y="1604" name="MAXIMUM FUNDS PER UNIT OF TIME"/>
+				<aux x="2864" y="1548" name="CO2 EMISSIONS GOAL"/>
+				<aux x="2507" y="1749" name="km travelled"/>
+				<aux x="2793" y="1699" name="CO2 emissions"/>
+				<aux x="2695" y="1573" name="CO2 emissions gap"/>
+				<aux x="2560" y="1652" name="km travelled gap"/>
+				<connector uid="198" angle="188.415">
+					<from>CO2_EMISSIONS_GOAL</from>
+					<to>CO2_emissions_gap</to>
+				</connector>
+				<connector uid="199" angle="127.875">
+					<from>CO2_emissions</from>
+					<to>CO2_emissions_gap</to>
+				</connector>
+				<connector uid="200" angle="61.3482">
+					<from>km_travelled</from>
+					<to>km_travelled_gap</to>
+				</connector>
+				<connector uid="201" angle="192.806">
+					<from>CO2_emissions_gap</from>
+					<to>public_sector_adds_funds</to>
+				</connector>
+				<connector uid="202" angle="158.823">
+					<from>km_travelled_gap</from>
+					<to>public_sector_adds_funds</to>
+				</connector>
+				<connector uid="203" angle="49.6807">
+					<from>MAXIMUM_FUNDS_PER_UNIT_OF_TIME</from>
+					<to>public_sector_adds_funds</to>
+				</connector>
+				<flow x="2612.25" y="1460" name="using funds">
+					<pts>
+						<pt x="2513.5" y="1460"/>
+						<pt x="2723" y="1460"/>
+					</pts>
+				</flow>
+				<connector uid="211" angle="280.979">
+					<from>
+						<alias uid="209"/>
+					</from>
+					<to>using_funds</to>
+				</connector>
+				<connector uid="212" angle="221.352">
+					<from>
+						<alias uid="210"/>
+					</from>
+					<to>using_funds</to>
+				</connector>
+				<aux x="2308" y="1328" name="MINIMUM UTILIZED CAPACITY"/>
+				<connector uid="215" angle="301.725">
+					<from>MINIMUM_UTILIZED_CAPACITY</from>
+					<to>public_sector_adds_funds</to>
+				</connector>
+				<connector uid="217" angle="339.167">
+					<from>
+						<alias uid="216"/>
+					</from>
+					<to>public_sector_adds_funds</to>
+				</connector>
+				<aux x="2356" y="1816" name="km travelled using hubs"/>
+				<aux x="2547" y="1880" name="km travelled not using hubs"/>
+				<connector uid="222" angle="348.465">
+					<from>
+						<alias uid="219"/>
+					</from>
+					<to>km_travelled_using_hubs</to>
+				</connector>
+				<connector uid="223" angle="138.406">
+					<from>
+						<alias uid="218"/>
+					</from>
+					<to>km_travelled_not_using_hubs</to>
+				</connector>
+				<connector uid="224" angle="23.9273">
+					<from>km_travelled_using_hubs</from>
+					<to>km_travelled</to>
+				</connector>
+				<connector uid="225" angle="106.98">
+					<from>km_travelled_not_using_hubs</from>
+					<to>km_travelled</to>
+				</connector>
+				<aux x="3007" y="1824" name="CO2 EMISSION DIESEL VAN"/>
+				<aux x="2896" y="1868" name="CO2 EMISSION ELECTRIC VAN"/>
+				<connector uid="228" angle="333.869">
+					<from>km_travelled_using_hubs</from>
+					<to>CO2_emissions</to>
+				</connector>
+				<connector uid="229" angle="121.361">
+					<from>CO2_EMISSION_ELECTRIC_VAN</from>
+					<to>CO2_emissions</to>
+				</connector>
+				<connector uid="230" angle="149.71">
+					<from>CO2_EMISSION_DIESEL_VAN</from>
+					<to>CO2_emissions</to>
+				</connector>
+				<connector uid="231" angle="346.735">
+					<from>km_travelled_not_using_hubs</from>
+					<to>CO2_emissions</to>
+				</connector>
+				<connector uid="234" angle="23.3281">
+					<from>
+						<alias uid="232"/>
+					</from>
+					<to>km_travelled_using_hubs</to>
+				</connector>
+				<connector uid="235" angle="13.6005">
+					<from>
+						<alias uid="233"/>
+					</from>
+					<to>km_travelled_not_using_hubs</to>
+				</connector>
+				<connector uid="236" angle="0.816124">
+					<from>
+						<alias uid="232"/>
+					</from>
+					<to>km_travelled_not_using_hubs</to>
+				</connector>
+				<aux x="447" y="2909" name="MONTHLY COST FOR ONE HUB"/>
+				<aux x="875" y="2896" name="COST PER KM"/>
+				<aux x="1739" y="2892" name="COST PER HOUR"/>
+				<aux x="1344" y="2897" name="COST PER VEHICLE"/>
+				<aux x="344" y="3020" name="monthly cost for companies to join the scheme"/>
+				<connector uid="243" angle="227.141">
+					<from>MONTHLY_COST_FOR_ONE_HUB</from>
+					<to>monthly_cost_for_companies_to_join_the_scheme</to>
+				</connector>
+				<connector uid="245" angle="345.767">
+					<from>
+						<alias uid="244"/>
+					</from>
+					<to>monthly_cost_for_companies_to_join_the_scheme</to>
+				</connector>
+				<aux x="747" y="3061" name="cost of fuel if LSP doesnt use hubs"/>
+				<aux x="971" y="3060" name="cost of fuel if LSP uses hubs"/>
+				<connector uid="250" angle="306.069">
+					<from>
+						<alias uid="246"/>
+					</from>
+					<to>cost_of_fuel_if_LSP_doesnt_use_hubs</to>
+				</connector>
+				<connector uid="251" angle="232.197">
+					<from>COST_PER_KM</from>
+					<to>cost_of_fuel_if_LSP_doesnt_use_hubs</to>
+				</connector>
+				<connector uid="252" angle="300.343">
+					<from>COST_PER_KM</from>
+					<to>cost_of_fuel_if_LSP_uses_hubs</to>
+				</connector>
+				<connector uid="253" angle="240.317">
+					<from>
+						<alias uid="247"/>
+					</from>
+					<to>cost_of_fuel_if_LSP_uses_hubs</to>
+				</connector>
+				<aux x="1251" y="3080" name="cost of vehicles if LSP doesnt use hubs"/>
+				<aux x="1412" y="3076" name="cost of vehicles if LSP uses hubs"/>
+				<connector uid="258" angle="305.595">
+					<from>
+						<alias uid="255"/>
+					</from>
+					<to>cost_of_vehicles_if_LSP_doesnt_use_hubs</to>
+				</connector>
+				<connector uid="259" angle="241.821">
+					<from>
+						<alias uid="254"/>
+					</from>
+					<to>cost_of_vehicles_if_LSP_uses_hubs</to>
+				</connector>
+				<connector uid="260" angle="290.801">
+					<from>COST_PER_VEHICLE</from>
+					<to>cost_of_vehicles_if_LSP_uses_hubs</to>
+				</connector>
+				<connector uid="261" angle="240.236">
+					<from>COST_PER_VEHICLE</from>
+					<to>cost_of_vehicles_if_LSP_doesnt_use_hubs</to>
+				</connector>
+				<aux x="1684" y="3069" name="cost of drivers if LSP doesnt use hubs"/>
+				<aux x="1863" y="3069" name="cost of drivers if LSP uses hubs"/>
+				<connector uid="266" angle="320.583">
+					<from>
+						<alias uid="264"/>
+					</from>
+					<to>cost_of_drivers_if_LSP_doesnt_use_hubs</to>
+				</connector>
+				<connector uid="267" angle="252.738">
+					<from>COST_PER_HOUR</from>
+					<to>cost_of_drivers_if_LSP_doesnt_use_hubs</to>
+				</connector>
+				<connector uid="268" angle="253.072">
+					<from>
+						<alias uid="265"/>
+					</from>
+					<to>cost_of_drivers_if_LSP_uses_hubs</to>
+				</connector>
+				<connector uid="269" angle="305.014">
+					<from>COST_PER_HOUR</from>
+					<to>cost_of_drivers_if_LSP_uses_hubs</to>
+				</connector>
+				<aux x="595" y="3276" name="total cost of LSP using hubs"/>
+				<aux x="1239" y="3252" name="total cost of LSP not using hubs"/>
+				<connector uid="272" angle="314.435">
+					<from>monthly_cost_for_companies_to_join_the_scheme</from>
+					<to>total_cost_of_LSP_using_hubs</to>
+				</connector>
+				<connector uid="273" angle="209.876">
+					<from>cost_of_fuel_if_LSP_uses_hubs</from>
+					<to>total_cost_of_LSP_using_hubs</to>
+				</connector>
+				<connector uid="274" angle="193.755">
+					<from>cost_of_vehicles_if_LSP_uses_hubs</from>
+					<to>total_cost_of_LSP_using_hubs</to>
+				</connector>
+				<connector uid="275" angle="189.272">
+					<from>cost_of_drivers_if_LSP_uses_hubs</from>
+					<to>total_cost_of_LSP_using_hubs</to>
+				</connector>
+				<connector uid="276" angle="338.783">
+					<from>cost_of_fuel_if_LSP_doesnt_use_hubs</from>
+					<to>total_cost_of_LSP_not_using_hubs</to>
+				</connector>
+				<connector uid="277" angle="266.009">
+					<from>cost_of_vehicles_if_LSP_doesnt_use_hubs</from>
+					<to>total_cost_of_LSP_not_using_hubs</to>
+				</connector>
+				<connector uid="278" angle="202.354">
+					<from>cost_of_drivers_if_LSP_doesnt_use_hubs</from>
+					<to>total_cost_of_LSP_not_using_hubs</to>
+				</connector>
+				<aux x="925" y="3420" name="monetary value"/>
+				<connector uid="280" angle="336.425">
+					<from>total_cost_of_LSP_using_hubs</from>
+					<to>monetary_value</to>
+				</connector>
+				<connector uid="281" angle="208.148">
+					<from>total_cost_of_LSP_not_using_hubs</from>
+					<to>monetary_value</to>
+				</connector>
+				<aux x="1161" y="3531" name="share of monetary value"/>
+				<connector uid="283" angle="334.811">
+					<from>monetary_value</from>
+					<to>share_of_monetary_value</to>
+				</connector>
+				<connector uid="284" angle="254.381">
+					<from>total_cost_of_LSP_not_using_hubs</from>
+					<to>share_of_monetary_value</to>
+				</connector>
+				<connector uid="287" angle="310.236">
+					<from>
+						<alias uid="286"/>
+					</from>
+					<to>monthly_cost_for_companies_to_join_the_scheme</to>
+				</connector>
+				<connector uid="302" angle="18.8566">
+					<from>
+						<alias uid="301"/>
+					</from>
+					<to>LSP_adoption_fraction</to>
+				</connector>
+				<aux x="2116" y="705" name="delay time of hubs"/>
+				<connector uid="304" angle="327.724">
+					<from>
+						<alias uid="301"/>
+					</from>
+					<to>delay_time_of_hubs</to>
+				</connector>
+				<connector uid="305" angle="43.0251">
+					<from>DURATION_OF_PUSH</from>
+					<to>delay_time_of_hubs</to>
+				</connector>
+				<connector uid="306" angle="41.892">
+					<from>delay_time_of_hubs</from>
+					<to>LSP_adoption_fraction</to>
+				</connector>
+				<connector uid="307" angle="123.623">
+					<from>MULTIPLIER_FOR_MONETARY_VALUE</from>
+					<to>LSP_adoption_fraction</to>
+				</connector>
+				<connector uid="308" angle="151.307">
+					<from>
+						<alias uid="86"/>
+					</from>
+					<to>LSP_adoption_fraction</to>
+				</connector>
+				<connector uid="309" angle="148.043">
+					<from>Hubs_under_planning</from>
+					<to>planning_hubs</to>
+				</connector>
+				<aux x="2831" y="1623" name="initial CO2 emissions"/>
+				<connector uid="311" angle="63.4349">
+					<from>CO2_emissions</from>
+					<to>initial_CO2_emissions</to>
+				</connector>
+				<connector uid="312" angle="159.814">
+					<from>initial_CO2_emissions</from>
+					<to>CO2_emissions_gap</to>
+				</connector>
+				<connector uid="313" angle="89.4992">
+					<from>
+						<alias uid="61"/>
+					</from>
+					<to>planning_hubs</to>
+				</connector>
+				<connector uid="314" angle="286.363">
+					<from>share_of_utilized_capacity</from>
+					<to>planning_hubs</to>
+				</connector>
+				<connector uid="316" angle="244.949">
+					<from>
+						<alias uid="315"/>
+					</from>
+					<to>public_sector_adds_funds</to>
+				</connector>
+				<connector uid="317" angle="109.168">
+					<from>Funds</from>
+					<to>public_sector_adds_funds</to>
+				</connector>
+				<aux x="916" y="2012" name="average minimum route lenght"/>
+				<connector uid="320" angle="265.581">
+					<from>MINUMUM_ROUTE_LENGHT</from>
+					<to>average_minimum_route_lenght</to>
+				</connector>
+				<connector uid="321" angle="314.623">
+					<from>MAXIMUM_ROUTING_EFFICIENCY</from>
+					<to>average_minimum_route_lenght</to>
+				</connector>
+				<aux x="885" y="1147" name="minimum number of vans needed per LSP"/>
+				<connector uid="323" angle="10.4446">
+					<from>MAXIMUM_FILL_RATE</from>
+					<to>minimum_number_of_vans_needed_per_LSP</to>
+				</connector>
+				<connector uid="324" angle="64.4122">
+					<from>demand_for_each_LSP</from>
+					<to>minimum_number_of_vans_needed_per_LSP</to>
+				</connector>
+				<connector uid="325" angle="140.117">
+					<from>AVERAGE_VAN_CAPACITY</from>
+					<to>minimum_number_of_vans_needed_per_LSP</to>
+				</connector>
+				<connector uid="327" angle="1.46411">
+					<from>
+						<alias uid="326"/>
+					</from>
+					<to>public_sector_adds_funds</to>
+				</connector>
+				<aux x="1625" y="1368" name="minimum km travelled per LSP"/>
+				<connector uid="329" angle="19.0914">
+					<from>minimum_number_of_vans_needed_per_LSP</from>
+					<to>minimum_km_travelled_per_LSP</to>
+				</connector>
+				<connector uid="330" angle="8.58051">
+					<from>average_minimum_route_lenght</from>
+					<to>minimum_km_travelled_per_LSP</to>
+				</connector>
+				<aux x="2129" y="1684" name="minimum km travelled"/>
+				<connector uid="332" angle="327.913">
+					<from>minimum_km_travelled_per_LSP</from>
+					<to>minimum_km_travelled</to>
+				</connector>
+				<connector uid="333" angle="193.506">
+					<from>
+						<alias uid="233"/>
+					</from>
+					<to>minimum_km_travelled</to>
+				</connector>
+				<connector uid="334" angle="4.24619">
+					<from>minimum_km_travelled</from>
+					<to>km_travelled_gap</to>
+				</connector>
+				<aux x="545" y="3435" name="total cost for deliveries"/>
+				<connector uid="338" angle="353.538">
+					<from>
+						<alias uid="336"/>
+					</from>
+					<to>total_cost_for_deliveries</to>
+				</connector>
+				<connector uid="339" angle="7.43921">
+					<from>
+						<alias uid="337"/>
+					</from>
+					<to>total_cost_for_deliveries</to>
+				</connector>
+				<connector uid="340" angle="252.543">
+					<from>total_cost_of_LSP_using_hubs</from>
+					<to>total_cost_for_deliveries</to>
+				</connector>
+				<connector uid="341" angle="194.772">
+					<from>total_cost_of_LSP_not_using_hubs</from>
+					<to>total_cost_for_deliveries</to>
+				</connector>
+				<aux x="660" y="3525" name="total cost for deliveries at time 0"/>
+				<connector uid="343" angle="321.953">
+					<from>total_cost_for_deliveries</from>
+					<to>total_cost_for_deliveries_at_time_0</to>
+				</connector>
+				<connector uid="344" angle="140.799">
+					<from>AVERAGE_ROUTE_LENGTH_WITHOUT_HUBS</from>
+					<to>routing_efficiency_current_system</to>
+				</connector>
+				<connector uid="345" angle="175.899">
+					<from>MINUMUM_ROUTE_LENGHT</from>
+					<to>routing_efficiency_current_system</to>
+				</connector>
+				<aux x="2415" y="1705" name="initial km travelled"/>
+				<connector uid="347" angle="154.44">
+					<from>km_travelled</from>
+					<to>initial_km_travelled</to>
+				</connector>
+				<connector uid="348" angle="20.0782">
+					<from>initial_km_travelled</from>
+					<to>km_travelled_gap</to>
+				</connector>
+				<aux x="2498" y="224.5" name="INITIAL LSP WILLING ADOPTERS"/>
+				<stacked_container uid="349" x="2289" y="2825.5" width="503" height="504.75">
+					<graph width="503" height="504.75" type="time_series" show_grid="false" isee:tick_type="none" include_units_in_legend="false" plot_numbers="false" isee:label_pie_slices="false" num_x_grid_lines="0" num_y_grid_lines="0" num_x_labels="5" num_y_labels="3" isee:fill_intensity="0.1" isee:allow_zero_axis="true" left_axis_multi_scale="false" left_axis_auto_scale="true" left_include_units="true" right_axis_multi_scale="false" right_axis_auto_scale="true" right_include_units="true">
+						<plot color="fuchsia" pen_style="dotted" title="Total capacity - No policy" isee:keep_zero_visible="true" pen_width="2" index="0" show_y_axis="true">
+							<entity name="total_capacity"/>
+							<isee:data name="No policy"/>
+						</plot>
+						<plot color="#008F44" pen_style="dotted" title="Total capacity - LSP initial involvement" isee:keep_zero_visible="true" pen_width="2" index="1" show_y_axis="true">
+							<entity name="total_capacity"/>
+							<isee:data name="LSP initial involvement"/>
+						</plot>
+						<plot color="blue" pen_style="dotted" title="Total capacity - Push policy" isee:keep_zero_visible="true" pen_width="2" index="2" show_y_axis="true">
+							<entity name="total_capacity"/>
+							<isee:data name="Push policy"/>
+						</plot>
+						<plot color="fuchsia" title="CO2 emissions - No policy" isee:keep_zero_visible="true" pen_width="2" index="0" right_axis="true" show_y_axis="true">
+							<entity name="CO2_emissions"/>
+							<isee:data name="No policy"/>
+						</plot>
+						<plot color="#00AA00" title="CO2 emissions - LSP initial involvement" isee:keep_zero_visible="true" pen_width="2" index="1" right_axis="true" show_y_axis="true">
+							<entity name="CO2_emissions"/>
+							<isee:data name="LSP initial involvement"/>
+						</plot>
+						<plot color="blue" title="CO2 emissions - Push policy" isee:keep_zero_visible="true" pen_width="2" index="2" right_axis="true" show_y_axis="true">
+							<entity name="CO2_emissions"/>
+							<isee:data name="Push policy"/>
+						</plot>
+						<plot color="red" pen_style="dot_dashed" isee:keep_zero_visible="true" pen_width="1" index="3" show_y_axis="true">
+							<entity name="TOTAL_DEMAND"/>
+						</plot>
+					</graph>
+				</stacked_container>
+				<stacked_container uid="350" x="2830" y="2828.13" width="503.5" height="499.5">
+					<graph width="503.5" height="499.5" type="time_series" show_grid="false" isee:tick_type="none" include_units_in_legend="false" plot_numbers="false" isee:label_pie_slices="false" num_x_grid_lines="0" num_y_grid_lines="0" num_x_labels="5" num_y_labels="3" isee:fill_intensity="0.1" isee:allow_zero_axis="true" left_axis_multi_scale="false" left_axis_auto_scale="true" left_include_units="true" right_axis_multi_scale="false" right_axis_auto_scale="true" right_include_units="true">
+						<plot color="fuchsia" title="total cost of LSP using hubs - No policy" isee:keep_zero_visible="true" pen_width="1" index="0" show_y_axis="true">
+							<format scale_by="scientific"/>
+							<entity name="total_cost_of_LSP_using_hubs"/>
+							<isee:data name="No policy"/>
+							<scale max="200000"/>
+						</plot>
+						<plot color="#00AA00" title="total cost of LSP using hubs - LSP initial involvement" isee:keep_zero_visible="true" pen_width="1" index="1" show_y_axis="true">
+							<entity name="total_cost_of_LSP_using_hubs"/>
+							<isee:data name="LSP initial involvement"/>
+						</plot>
+						<plot color="blue" title="total cost of LSP using hubs - Push policy" isee:keep_zero_visible="true" pen_width="1" index="2" show_y_axis="true">
+							<entity name="total_cost_of_LSP_using_hubs"/>
+							<isee:data name="Push policy"/>
+						</plot>
+						<plot color="fuchsia" pen_style="dot_dashed" title="LSP adopters - No policy" isee:keep_zero_visible="true" pen_width="1" index="0" right_axis="true" show_y_axis="true">
+							<entity name="LSP_actual_adopters"/>
+							<isee:data name="No policy"/>
+						</plot>
+						<plot color="#00AA00" pen_style="dot_dashed" title="LSP adopters - LSP initial involvement" isee:keep_zero_visible="true" pen_width="1" index="1" right_axis="true" show_y_axis="true">
+							<entity name="LSP_actual_adopters"/>
+							<isee:data name="LSP initial involvement"/>
+						</plot>
+						<plot color="blue" pen_style="dot_dashed" title="LSP adopters - Push policy" isee:keep_zero_visible="true" pen_width="1" index="2" right_axis="true" show_y_axis="true">
+							<entity name="LSP_actual_adopters"/>
+							<isee:data name="Push policy"/>
+						</plot>
+					</graph>
+				</stacked_container>
+				<alias uid="37" x="126" y="256" width="45" height="35">
+					<of>Funds</of>
+				</alias>
+				<alias uid="42" x="584" y="824" width="18" height="18">
+					<of>demand_for_each_LSP</of>
+				</alias>
+				<alias uid="43" x="742" y="835" width="45" height="35">
+					<of>LSP_willing_adopters</of>
+				</alias>
+				<alias uid="61" x="338" y="518" width="18" height="18">
+					<of>MINIMUM_UTILIZED_CAPACITY</of>
+				</alias>
+				<alias uid="86" x="2583" y="620" width="18" height="18">
+					<of>share_of_monetary_value</of>
+				</alias>
+				<alias uid="92" x="2967" y="278" width="18" height="18">
+					<of>demand_for_each_LSP</of>
+				</alias>
+				<alias uid="93" x="2801" y="207" width="45" height="35">
+					<of>Utilized_capacity</of>
+				</alias>
+				<alias uid="146" x="1095" y="1495" width="18" height="18">
+					<of>TOTAL_NUMBER_OF_LSPS</of>
+				</alias>
+				<alias uid="164" x="91" y="1603" width="18" height="18">
+					<of>share_of_using_capacity</of>
+				</alias>
+				<alias uid="177" x="1103" y="2378" width="18" height="18">
+					<of>demand_for_each_LSP</of>
+				</alias>
+				<alias uid="182" x="1354" y="1234" width="45" height="35">
+					<of>Utilized_capacity</of>
+				</alias>
+				<alias uid="209" x="2579" y="1326" width="18" height="18">
+					<of>planning_hubs</of>
+				</alias>
+				<alias uid="210" x="2743" y="1328" width="18" height="18">
+					<of>COST_OF_ONE_HUB</of>
+				</alias>
+				<alias uid="216" x="2158" y="1364" width="18" height="18">
+					<of>share_of_utilized_capacity</of>
+				</alias>
+				<alias uid="218" x="2627" y="1950" width="18" height="18">
+					<of>km_travelled_if_LSP_doesnt_use_hubs</of>
+				</alias>
+				<alias uid="219" x="2151" y="1767" width="18" height="18">
+					<of>km_travelled_if_LSP_uses_hubs</of>
+				</alias>
+				<alias uid="232" x="2187" y="1876" width="18" height="18">
+					<of>LSP_actual_adopters</of>
+				</alias>
+				<alias uid="233" x="2228" y="1946" width="18" height="18">
+					<of>TOTAL_NUMBER_OF_LSPS</of>
+				</alias>
+				<alias uid="244" x="117" y="2951" width="45" height="35">
+					<of>Hubs</of>
+				</alias>
+				<alias uid="246" x="679" y="2971" width="18" height="18">
+					<of>km_travelled_if_LSP_doesnt_use_hubs</of>
+				</alias>
+				<alias uid="247" x="1019" y="2951" width="18" height="18">
+					<of>km_travelled_if_LSP_uses_hubs</of>
+				</alias>
+				<alias uid="254" x="1478" y="2927" width="18" height="18">
+					<of>number_of_vans_needed_if_LSP_uses_hubs</of>
+				</alias>
+				<alias uid="255" x="1174" y="2976" width="18" height="18">
+					<of>number_of_vans_needed_if_LSP_doesnt_use_hubs</of>
+				</alias>
+				<alias uid="264" x="1602" y="3000" width="18" height="18">
+					<of>total_delivery_time_if_LSP_doesnt_use_hubs</of>
+				</alias>
+				<alias uid="265" x="1875" y="2991" width="18" height="18">
+					<of>total_delivery_time_if_LSP_uses_hubs</of>
+				</alias>
+				<alias uid="286" x="236" y="2894" width="18" height="18">
+					<of>LSP_actual_adopters</of>
+				</alias>
+				<alias uid="301" x="1974" y="612" width="18" height="18">
+					<of>time_of_hubs</of>
+				</alias>
+				<alias uid="315" x="2454" y="1287" width="18" height="18">
+					<of>COST_OF_ONE_HUB</of>
+				</alias>
+				<alias uid="326" x="2144" y="1454" width="18" height="18">
+					<of>ONE_HUB</of>
+				</alias>
+				<alias uid="336" x="227" y="3391" width="18" height="18">
+					<of>LSP_actual_adopters</of>
+				</alias>
+				<alias uid="337" x="222" y="3467" width="18" height="18">
+					<of>TOTAL_NUMBER_OF_LSPS</of>
+				</alias>
+			</view>
+		</views>
+	</model>
+	<isee:controls>
+		<isee:control priority="imex" name="ADJUSTMENT_TIME_FOR_MAKING_HUBS_READY" type="graphical">
+			<gf>
+				<xscale min="0" max="1"/>
+				<yscale min="1" max="2"/>
+				<ypts>6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6</ypts>
+			</gf>
+		</isee:control>
+		<isee:control priority="imex" name="ADJUSTMENT_TIME_FOR_USING_CAPACITY" type="graphical">
+			<gf>
+				<xscale min="0" max="1"/>
+				<yscale min="1" max="2"/>
+				<ypts>6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6</ypts>
+			</gf>
+		</isee:control>
+		<isee:control priority="imex" name="AVERAGE_DELAY_IN_DROPPING_OUT" type="graphical">
+			<gf>
+				<xscale min="0" max="1"/>
+				<yscale min="1" max="2"/>
+				<ypts>12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12</ypts>
+			</gf>
+		</isee:control>
+		<isee:control priority="imex" name="AVERAGE_ROUTE_LENGTH_WITHOUT_HUBS" type="graphical">
+			<gf>
+				<xscale min="0" max="1"/>
+				<yscale min="1" max="2"/>
+				<ypts>30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30</ypts>
+			</gf>
+		</isee:control>
+		<isee:control priority="imex" name="AVERAGE_VAN_CAPACITY" type="graphical">
+			<gf>
+				<xscale min="0" max="1"/>
+				<yscale min="1" max="2"/>
+				<ypts>30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30</ypts>
+			</gf>
+		</isee:control>
+		<isee:control priority="imex" name="CAPACITY_OF_ONE_HUB" type="graphical">
+			<gf>
+				<xscale min="0" max="1"/>
+				<yscale min="1" max="2"/>
+				<ypts>300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000,300000</ypts>
+			</gf>
+		</isee:control>
+		<isee:control priority="imex" name="CO2_EMISSIONS_GOAL" type="graphical">
+			<gf>
+				<xscale min="0" max="1"/>
+				<yscale min="1" max="2"/>
+				<ypts>0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0</ypts>
+			</gf>
+		</isee:control>
+		<isee:control priority="imex" name="CO2_EMISSION_DIESEL_VAN" type="graphical">
+			<gf>
+				<xscale min="0" max="1"/>
+				<yscale min="1" max="2"/>
+				<ypts>500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500,500</ypts>
+			</gf>
+		</isee:control>
+		<isee:control priority="imex" name="CO2_EMISSION_ELECTRIC_VAN" type="graphical">
+			<gf>
+				<xscale min="0" max="1"/>
+				<yscale min="1" max="2"/>
+				<ypts>1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1</ypts>
+			</gf>
+		</isee:control>
+		<isee:control priority="imex" name="CONTACT_RATE" type="graphical">
+			<gf>
+				<xscale min="0" max="1"/>
+				<yscale min="1" max="2"/>
+				<ypts>2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2</ypts>
+			</gf>
+		</isee:control>
+		<isee:control priority="imex" name="COST_OF_ONE_HUB" type="graphical">
+			<gf>
+				<xscale min="0" max="1"/>
+				<yscale min="1" max="2"/>
+				<ypts>65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000,65000</ypts>
+			</gf>
+		</isee:control>
+		<isee:control priority="imex" name="COST_PER_HOUR" type="graphical">
+			<gf>
+				<xscale min="0" max="1"/>
+				<yscale min="1" max="2"/>
+				<ypts>1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1</ypts>
+			</gf>
+		</isee:control>
+		<isee:control priority="imex" name="COST_PER_KM" type="graphical">
+			<gf>
+				<xscale min="0" max="1"/>
+				<yscale min="1" max="2"/>
+				<ypts>3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3</ypts>
+			</gf>
+		</isee:control>
+		<isee:control priority="imex" name="COST_PER_VEHICLE" type="graphical">
+			<gf>
+				<xscale min="0" max="1"/>
+				<yscale min="1" max="2"/>
+				<ypts>100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100</ypts>
+			</gf>
+		</isee:control>
+		<isee:control priority="imex" name="DELIVERY_TIME_CURRENT_SYSTEM" type="graphical">
+			<gf>
+				<xscale min="0" max="1"/>
+				<yscale min="1" max="2"/>
+				<ypts>20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20</ypts>
+			</gf>
+		</isee:control>
+		<isee:control priority="imex" name="DURATION_OF_PUSH" type="graphical">
+			<gf>
+				<xscale min="0" max="1"/>
+				<yscale min="1" max="2"/>
+				<ypts>0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0</ypts>
+			</gf>
+		</isee:control>
+		<isee:control priority="imex" name="FILL_RATE_CURRENT_SYSTEM" type="graphical">
+			<gf>
+				<xscale min="0" max="1"/>
+				<yscale min="1" max="2"/>
+				<ypts>0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6</ypts>
+			</gf>
+		</isee:control>
+		<isee:control priority="imex" name="INITIAL_LSP_WILLING_ADOPTERS" type="graphical">
+			<gf>
+				<xscale min="0" max="1"/>
+				<yscale min="1" max="2"/>
+				<ypts>7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7</ypts>
+			</gf>
+		</isee:control>
+		<isee:control priority="imex" name="MAXIMUM_FILL_RATE" type="graphical">
+			<gf>
+				<xscale min="0" max="1"/>
+				<yscale min="1" max="2"/>
+				<ypts>1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1</ypts>
+			</gf>
+		</isee:control>
+		<isee:control priority="imex" name="MAXIMUM_FUNDS_PER_UNIT_OF_TIME" type="graphical">
+			<gf>
+				<xscale min="0" max="1"/>
+				<yscale min="1" max="2"/>
+				<ypts>10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000</ypts>
+			</gf>
+		</isee:control>
+		<isee:control priority="imex" name="MINIMUM_DELIVERY_TIME" type="graphical">
+			<gf>
+				<xscale min="0" max="1"/>
+				<yscale min="1" max="2"/>
+				<ypts>5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5</ypts>
+			</gf>
+		</isee:control>
+		<isee:control priority="imex" name="MINIMUM_UTILIZED_CAPACITY" type="graphical">
+			<gf>
+				<xscale min="0" max="1"/>
+				<yscale min="1" max="2"/>
+				<ypts>0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9</ypts>
+			</gf>
+		</isee:control>
+		<isee:control priority="imex" name="MINUMUM_ROUTE_LENGHT" type="graphical">
+			<gf>
+				<xscale min="0" max="1"/>
+				<yscale min="1" max="2"/>
+				<ypts>5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5</ypts>
+			</gf>
+		</isee:control>
+		<isee:control priority="imex" name="MONTHLY_COST_FOR_ONE_HUB" type="graphical">
+			<gf>
+				<xscale min="0" max="1"/>
+				<yscale min="1" max="2"/>
+				<ypts>10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000</ypts>
+			</gf>
+		</isee:control>
+		<isee:control priority="imex" name="MULTIPLIER_FOR_EFFECT_OF_USING_CAPACITY_ON_IMPROVING_DELIVERY_TIME" type="graphical">
+			<gf>
+				<xscale min="0" max="1"/>
+				<yscale min="1" max="2"/>
+				<ypts>1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1</ypts>
+			</gf>
+		</isee:control>
+		<isee:control priority="imex" name="MULTIPLIER_FOR_EFFECT_OF_USING_CAPACITY_ON_IMPROVING_FILL_RATE" type="graphical">
+			<gf>
+				<xscale min="0" max="1"/>
+				<yscale min="1" max="2"/>
+				<ypts>1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1</ypts>
+			</gf>
+		</isee:control>
+		<isee:control priority="imex" name="MULTIPLIER_FOR_EFFECT_OF_USING_CAPACITY_ON_IMPROVING_ROUTING_EFFICIENCY" type="graphical">
+			<gf>
+				<xscale min="0" max="1"/>
+				<yscale min="1" max="2"/>
+				<ypts>1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1</ypts>
+			</gf>
+		</isee:control>
+		<isee:control priority="imex" name="MULTIPLIER_FOR_MONETARY_VALUE" type="graphical">
+			<gf>
+				<xscale min="0" max="1"/>
+				<yscale min="1" max="2"/>
+				<ypts>0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1</ypts>
+			</gf>
+		</isee:control>
+		<isee:control priority="imex" name="PUSH_ADOPTION_FRACTION" type="graphical">
+			<gf>
+				<xscale min="0" max="1"/>
+				<yscale min="1" max="2"/>
+				<ypts>0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1</ypts>
+			</gf>
+		</isee:control>
+		<isee:control priority="imex" name="TOTAL_DEMAND" type="graphical">
+			<gf>
+				<xscale min="0" max="1"/>
+				<yscale min="1" max="2"/>
+				<ypts>7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000,7000000</ypts>
+			</gf>
+		</isee:control>
+		<isee:control priority="imex" name="TOTAL_NUMBER_OF_LSPS" type="graphical">
+			<gf>
+				<xscale min="0" max="1"/>
+				<yscale min="1" max="2"/>
+				<ypts>3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751,3751</ypts>
+			</gf>
+		</isee:control>
+	</isee:controls>
+</xmile>
+
