@@ -1,0 +1,422 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xmile version="1.0" xmlns="http://docs.oasis-open.org/xmile/ns/XMILE/v1.0" xmlns:isee="http://iseesystems.com/XMILE">
+	<header>
+		<smile version="1.0" namespace="std, isee"/>
+		<name>2302_StellaCLD</name>
+		<uuid>3316f65c-bcdf-4d9a-b0be-f532f6af7279</uuid>
+		<vendor>isee systems, inc.</vendor>
+		<product version="3.2.1" isee:build_number="2906" isee:saved_by_v1="true" lang="en">Stella Architect</product>
+	</header>
+	<sim_specs isee:sim_duration="1.5" isee:run_prefix="Run" isee:simulation_delay="0.125" isee:restore_on_start="false" method="Euler" time_units="Months" isee:instantaneous_flows="false" isee:ignore_module_errors="false" isee:loop_scores="true" isee:loop_exhaustive_allowed="1000">
+		<start>0</start>
+		<stop>12</stop>
+		<dt reciprocal="true">4</dt>
+	</sim_specs>
+	<isee:prefs saved_runs="5" keep="false" show_module_prefix="true" live_update_on_drag="true" show_restore_buttons="false" layer="cld" isee:design="Deluxe Prev-Next Blue Green Pastel" isee:design_custom="false" interface_scale_ui="true" interface_max_page_width="10000" interface_max_page_height="10000" interface_min_page_width="0" interface_min_page_height="0" rerun_on_structure_change="false" rifp="true"/>
+	<isee:multiplayer_settings include_chat="true" allow_observers="false" advance_time_increment="1" max_advance_time_in_ms="0" model_stops_when_players_drop="false" observer_start_page="home_page" enabled="false"/>
+	<isee:time_formats default_format="Builtin">
+		<isee:time_format name="Builtin" type="adaptive"/>
+	</isee:time_formats>
+	<default_format/>
+	<model_units/>
+	<model>
+		<variables>
+			<aux name="number of hubs">
+				<eqn>NAN(public_funding,BUILDING_COST_OF_HUB)</eqn>
+				<isee:delay_aux/>
+			</aux>
+			<aux name="BUILDING COST OF HUB">
+				<isee:delay_aux/>
+			</aux>
+			<aux name="public funding">
+				<eqn>NAN(CO2_emissions_gap,km_driven_gap)</eqn>
+				<isee:delay_aux/>
+			</aux>
+			<aux name="CO2 emissions">
+				<eqn>NAN(km_driven,usage_of_zero_emissions_vehicles)</eqn>
+				<isee:delay_aux/>
+			</aux>
+			<aux name="CO2 emissions gap">
+				<eqn>NAN(CO2_EMISSION_GOAL,CO2_emissions)</eqn>
+				<isee:delay_aux/>
+			</aux>
+			<aux name="CO2 EMISSION GOAL">
+				<isee:delay_aux/>
+			</aux>
+			<aux name="fill rate">
+				<eqn>NAN(usage_of_hubs)</eqn>
+				<isee:delay_aux/>
+			</aux>
+			<aux name="route length">
+				<eqn>NAN(usage_of_hubs)</eqn>
+				<isee:delay_aux/>
+			</aux>
+			<aux name="delivery time">
+				<eqn>NAN(usage_of_hubs)</eqn>
+				<isee:delay_aux/>
+			</aux>
+			<aux name="usage of hubs">
+				<eqn>NAN(number_of_hubs,logistic_service_providers_adopters,receivers_change_address)</eqn>
+				<isee:delay_aux/>
+			</aux>
+			<aux name="km driven">
+				<eqn>NAN(fill_rate,route_length)</eqn>
+				<isee:delay_aux/>
+			</aux>
+			<aux name="KM DRIVEN GOAL">
+				<isee:delay_aux/>
+			</aux>
+			<aux name="km driven gap">
+				<eqn>NAN(KM_DRIVEN_GOAL,km_driven)</eqn>
+				<isee:delay_aux/>
+			</aux>
+			<aux name="operation cost">
+				<eqn>NAN(delivery_time,route_length,fill_rate)</eqn>
+				<isee:delay_aux/>
+			</aux>
+			<aux name="cost for using the hub system">
+				<eqn>NAN(number_of_hubs,OPERATIONAL_COST_OF_HUBS,logistic_service_providers_adopters)</eqn>
+				<isee:delay_aux/>
+			</aux>
+			<aux name="monetary value of using the hub system">
+				<eqn>NAN(operation_cost,cost_for_using_the_hub_system,public_sector_incentives)</eqn>
+				<isee:delay_aux/>
+			</aux>
+			<aux name="logistic service providers adopters">
+				<eqn>NAN(monetary_value_of_using_the_hub_system,BARRIER_OF_BRANDING,shippers_oblige_logistic_service_providers_to_use_the_hubs)</eqn>
+				<isee:delay_aux/>
+			</aux>
+			<aux name="OPERATIONAL COST\nOF HUBS">
+				<isee:delay_aux/>
+			</aux>
+			<aux name="BARRIER OF\nBRANDING">
+				<isee:delay_aux/>
+			</aux>
+			<aux name="EXOGENOUS VARIABLE">
+				<isee:delay_aux/>
+			</aux>
+			<aux name="policy scheme">
+				<isee:delay_aux/>
+			</aux>
+			<aux name="receivers change\naddress">
+				<isee:delay_aux/>
+			</aux>
+			<aux name="public sector\nincentives">
+				<isee:delay_aux/>
+			</aux>
+			<aux name="shippers oblige\nlogistic service providers\nto use the hubs">
+				<isee:delay_aux/>
+			</aux>
+			<aux name="feedback loops">
+				<isee:delay_aux/>
+			</aux>
+			<aux name="usage of zero emissions vehicles">
+				<eqn>NAN(usage_of_hubs)</eqn>
+				<isee:delay_aux/>
+			</aux>
+		</variables>
+		<views>
+			<style color="black" background="white" font_style="normal" font_weight="normal" text_decoration="none" text_align="center" vertical_text_align="center" font_color="black" font_family="Arial" font_size="10pt" padding="2" border_color="black" border_width="thin" border_style="none">
+				<text_box color="black" background="white" text_align="left" vertical_text_align="top" font_size="12pt"/>
+				<isee:loop_indicator color="black" background="white" text_align="left" vertical_text_align="top" font_size="12pt"/>
+				<numeric_display color="white" background="white" font_size="12pt" border_width="thin" border_style="solid" isee:transparent="false" isee:show_divider="true" isee:show_bounding_box="true" label_side="left"/>
+				<graph color="black" background="white" font_size="12pt" axis_color="#666666" grid_color="#C8C8C8" isee:graph_area_color="white" legend_position="bottom" isee:transparent="false" isee:hide_border="false" axis_title_font_style="normal" axis_title_font_weight="normal" axis_title_text_decoration="none" axis_title_text_align="center" axis_title_vertical_text_align="center" axis_title_font_color="black" axis_title_font_family="Arial" axis_title_font_size="12pt" axis_title_text_padding="2" axis_title_text_border_color="black" axis_title_text_border_width="thin" axis_title_text_border_style="none" axis_label_font_style="normal" axis_label_font_weight="normal" axis_label_text_decoration="none" axis_label_text_align="center" axis_label_vertical_text_align="center" axis_label_font_color="black" axis_label_font_family="Arial" axis_label_font_size="9pt" axis_label_text_padding="2" axis_label_text_border_color="black" axis_label_text_border_width="thin" axis_label_text_border_style="none">
+					<isee:series_styles>
+						<isee:series_style color="blue" thickness="1"/>
+						<isee:series_style color="red" thickness="1" pen_style="dot_dashed"/>
+						<isee:series_style color="fuchsia" thickness="1" pen_style="dotted"/>
+						<isee:series_style color="#008F44" thickness="1" pen_style="dashed"/>
+						<isee:series_style color="#FF7F00" thickness="1"/>
+						<isee:series_style color="#7F00FF" thickness="1" pen_style="dot_dashed"/>
+						<isee:series_style color="#0CA0FF" thickness="1" pen_style="dotted"/>
+						<isee:series_style color="lime" thickness="1" pen_style="dashed"/>
+						<isee:series_style color="#FF007F" thickness="1"/>
+						<isee:series_style color="aqua" thickness="1" pen_style="dot_dashed"/>
+						<isee:series_style color="#F586FF" thickness="1" pen_style="dotted"/>
+						<isee:series_style color="black" thickness="1" pen_style="dashed"/>
+						<isee:series_style color="#C8C8C8" thickness="1"/>
+					</isee:series_styles>
+				</graph>
+				<table color="black" background="#E0E0E0" text_align="right" font_size="12pt" orientation="vertical" wrap_text="false" isee:auto_fit="true" isee:use_alternate_row_colors="false" isee:unlimited_table_length="false" blank_column_width="80" column_width="160" interval="1" report_balances="beginning" report_flows="summed" header_font_style="normal" header_font_weight="normal" header_text_decoration="none" header_text_align="center" header_vertical_text_align="center" header_font_color="black" header_font_family="Arial" header_font_size="12pt" header_text_padding="2" header_text_border_color="black" header_text_border_width="thin" header_text_border_style="none"/>
+				<button color="black" background="#E0E0E0" font_size="12pt" border_width="thin" border_style="solid" transparent="false" corner_radius="0" isee:flat="false" icon_side="top" isee:highlight_on_hover="false" isee:highlight_color="#959595"/>
+				<isee:annotation color="black" background="#E0E0E0" font_size="12pt" border_width="thin" border_style="solid" transparent="false" corner_radius="0" isee:flat="false" icon_side="top" isee:highlight_on_hover="false" isee:highlight_color="#959595" popup_corner_radius="0" popup_background_color="#FFFECF"/>
+				<slider color="#66CC66" background="#E0E0E0" font_size="12pt" num_ticks="3" label_side="top" wrap_title="true" vertical="false" isee:fancy_appearance="false" isee:show_hover_tip="when_deciding" input_expands="true" input_width="100"/>
+				<isee:dual_slider color="#66CC66" background="silver" font_size="12pt" num_ticks="3" label_side="top" wrap_title="true" isee:show_hover_tip="when_deciding" input_expands="true" input_width="100"/>
+				<isee:sim_speed_slider color="black" background="white"/>
+				<isee:time_slider color="#E95F74" background="silver"/>
+				<isee:pie_input color="black" background="white" font_size="12pt" legend_position="bottom" isee:transparent="false"/>
+				<knob color="#66CC66" background="#E0E0E0" font_size="12pt" label_side="bottom" wrap_title="true"/>
+				<numeric_input color="black" background="#E0E0E0" font_size="12pt" label_side="left" wrap_title="true" input_expands="false" input_width="100"/>
+				<switch color="black" background="#E0E0E0" font_size="12pt" label_side="top" wrap_title="true" isee:appearance="switch" isee:on_color="green"/>
+				<options color="black" background="white" appearance="radio-buttons" arrangement="vertical"/>
+				<graphical_input color="black" background="#E0E0E0" font_size="12pt" isee:show_hover_tip="true"/>
+				<group_input color="black" background="#E0E0E0" font_size="12pt"/>
+				<lamp color="black" background="white" font_size="9pt"/>
+				<gauge color="black" background="white" font_size="9pt" needle_color="#F09F72" bar_color="#EEEEEE" bar_progress_color="black" appearance="radial" num_major_ticks="11" num_minor_ticks="11" show_numeric_value="true"/>
+				<isee:spatial_map color="black" background="white" font_size="12pt"/>
+				<isee:animation_object color="black" background="white" font_size="12pt"/>
+				<isee:navigation_widget color="black" background="white" text_align="left" vertical_text_align="top" font_size="12pt" padding="6 8" border_color="#999999" border_width="thin" border_style="solid" item_spacing="6" appearance="tabs" corner_radius="4" selected_item_color="black" selected_item_background="white" item_background="#DDDDDD" transparent_bg="false"/>
+				<isee:shape color="black" background="white" text_align="left" vertical_text_align="top" font_size="12pt" border_width="thin" border_style="solid" opacity="1" transparent_background="true" corner_radius="1"/>
+				<isee:selector color="black" background="white" text_align="left" vertical_text_align="top" font_size="12pt"/>
+				<isee:iframe color="black" background="white" text_align="left" vertical_text_align="top" font_size="12pt" border_width="thin" border_style="solid"/>
+				<isee:financial_table color="black" background="#E0E0E0" text_align="right" font_size="12pt" hide_border="false" auto_fit="true" first_column_width="250" other_column_width="100" header_font_style="normal" header_font_weight="bold" header_text_decoration="none" header_text_align="center" header_vertical_text_align="center" header_font_color="black" header_font_family="Arial" header_font_size="14pt" header_text_padding="2" header_text_border_color="black" header_text_border_width="thin" header_text_border_style="none"/>
+			</style>
+			<view isee:show_pages="false" background="white" isee:converter_size="name_only" page_width="1123" page_height="793" isee:popup_graphs_are_comparative="true" isee:enable_non_negative_highlights="false" type="stock_flow">
+				<style color="black" background="white" font_style="normal" font_weight="normal" text_decoration="none" text_align="center" vertical_text_align="center" font_color="black" font_family="Arial" font_size="10pt" padding="2" border_color="black" border_width="thin" border_style="none">
+					<stock color="blue" background="white" font_color="blue" font_size="9pt" label_side="top">
+						<shape type="rectangle" width="45" height="35"/>
+					</stock>
+					<flow color="blue" background="white" font_color="blue" font_size="9pt" label_side="bottom">
+						<shape type="circle" radius="18"/>
+					</flow>
+					<isee:placeholder color="#228B22" background="white" font_color="#228B22" font_size="9pt" label_side="bottom"/>
+					<module color="blue" background="white" font_color="blue" font_size="9pt" label_side="top">
+						<shape type="rectangle" width="55" height="45"/>
+					</module>
+					<aux color="blue" background="white" font_color="blue" font_size="9pt" label_side="bottom">
+						<shape type="name_only"/>
+					</aux>
+					<group color="red" background="white" font_color="red" font_size="9pt"/>
+					<connector color="#FF007F" background="white" font_color="#FF007F" font_size="9pt" isee:thickness="1"/>
+					<text_box color="black" background="white" text_align="left" vertical_text_align="top" font_size="12pt"/>
+					<isee:loop_indicator color="black" background="white" text_align="left" vertical_text_align="top" font_size="12pt"/>
+					<numeric_display color="white" background="white" font_size="12pt" border_width="thin" border_style="solid" isee:transparent="false" isee:show_divider="true" isee:show_bounding_box="true" label_side="left"/>
+					<graph color="black" background="white" font_size="12pt" axis_color="#666666" grid_color="#C8C8C8" isee:graph_area_color="white" legend_position="bottom" isee:transparent="false" isee:hide_border="false" axis_title_font_style="normal" axis_title_font_weight="normal" axis_title_text_decoration="none" axis_title_text_align="center" axis_title_vertical_text_align="center" axis_title_font_color="black" axis_title_font_family="Arial" axis_title_font_size="12pt" axis_title_text_padding="2" axis_title_text_border_color="black" axis_title_text_border_width="thin" axis_title_text_border_style="none" axis_label_font_style="normal" axis_label_font_weight="normal" axis_label_text_decoration="none" axis_label_text_align="center" axis_label_vertical_text_align="center" axis_label_font_color="black" axis_label_font_family="Arial" axis_label_font_size="9pt" axis_label_text_padding="2" axis_label_text_border_color="black" axis_label_text_border_width="thin" axis_label_text_border_style="none">
+						<isee:series_styles>
+							<isee:series_style color="blue" thickness="1"/>
+							<isee:series_style color="red" thickness="1" pen_style="dot_dashed"/>
+							<isee:series_style color="fuchsia" thickness="1" pen_style="dotted"/>
+							<isee:series_style color="#008F44" thickness="1" pen_style="dashed"/>
+							<isee:series_style color="#FF7F00" thickness="1"/>
+							<isee:series_style color="#7F00FF" thickness="1" pen_style="dot_dashed"/>
+							<isee:series_style color="#0CA0FF" thickness="1" pen_style="dotted"/>
+							<isee:series_style color="lime" thickness="1" pen_style="dashed"/>
+							<isee:series_style color="#FF007F" thickness="1"/>
+							<isee:series_style color="aqua" thickness="1" pen_style="dot_dashed"/>
+							<isee:series_style color="#F586FF" thickness="1" pen_style="dotted"/>
+							<isee:series_style color="black" thickness="1" pen_style="dashed"/>
+							<isee:series_style color="#C8C8C8" thickness="1"/>
+						</isee:series_styles>
+					</graph>
+					<table color="black" background="#E0E0E0" text_align="right" font_size="12pt" orientation="vertical" wrap_text="false" isee:auto_fit="true" isee:use_alternate_row_colors="false" isee:unlimited_table_length="false" blank_column_width="80" column_width="160" interval="1" report_balances="beginning" report_flows="summed" header_font_style="normal" header_font_weight="normal" header_text_decoration="none" header_text_align="center" header_vertical_text_align="center" header_font_color="black" header_font_family="Arial" header_font_size="12pt" header_text_padding="2" header_text_border_color="black" header_text_border_width="thin" header_text_border_style="none"/>
+				</style>
+				<aux color="black" font_color="black" font_size="11pt" x="413.625" y="193" width="82.75" height="16" name="number of hubs"/>
+				<aux color="#FF5500" font_weight="bold" font_color="#FF5500" font_size="11pt" x="321.125" y="146" width="129.75" height="16" name="BUILDING COST OF HUB"/>
+				<aux color="#00AA00" font_weight="bold" font_color="#00AA00" font_size="11pt" x="224.625" y="228" width="84.75" height="16" name="public funding"/>
+				<aux color="black" font_color="black" font_size="11pt" x="301.375" y="433" width="78.75" height="16" name="CO2 emissions"/>
+				<aux color="black" font_color="black" font_size="11pt" x="177.125" y="348" width="99.75" height="16" name="CO2 emissions gap"/>
+				<aux color="#FF5500" font_weight="bold" font_color="#FF5500" font_size="11pt" x="98.875" y="417" width="116.75" height="16" name="CO2 EMISSION GOAL"/>
+				<connector uid="1" color="#FF5500" font_color="#FF5500" polarity="-" isee:polarity_placement="inside" angle="44.6903">
+					<from>CO2_EMISSION_GOAL</from>
+					<to>CO2_emissions_gap</to>
+				</connector>
+				<connector uid="2" color="#AA0000" font_color="#AA0000" polarity="+" isee:polarity_placement="outside" angle="170.969">
+					<from>CO2_emissions</from>
+					<to>CO2_emissions_gap</to>
+				</connector>
+				<connector uid="3" color="#AA0000" font_color="#AA0000" polarity="+" isee:polarity_placement="outside" angle="86.0548">
+					<from>CO2_emissions_gap</from>
+					<to>public_funding</to>
+				</connector>
+				<connector uid="4" color="#00AA00" font_color="#00AA00" polarity="+" isee:polarity_placement="outside" angle="36.8699">
+					<from>public_funding</from>
+					<to>number_of_hubs</to>
+				</connector>
+				<connector uid="5" color="#FF5500" font_color="#FF5500" polarity="-" isee:polarity_placement="outside" angle="325.739">
+					<from>BUILDING_COST_OF_HUB</from>
+					<to>number_of_hubs</to>
+				</connector>
+				<aux color="black" font_color="black" font_size="11pt" x="470.375" y="270" width="38.75" height="16" name="fill rate"/>
+				<aux color="black" font_color="black" font_size="11pt" x="509.125" y="324" width="63.75" height="16" name="route length"/>
+				<aux color="black" font_color="black" font_size="11pt" x="583.875" y="353" width="66.75" height="16" name="delivery time"/>
+				<aux color="black" font_color="black" font_size="11pt" x="599.875" y="207" width="76.75" height="16" name="usage of hubs"/>
+				<connector uid="6" color="#AA0000" font_color="#AA0000" polarity="+" isee:polarity_placement="outside" angle="13.3925">
+					<from>number_of_hubs</from>
+					<to>usage_of_hubs</to>
+				</connector>
+				<connector uid="7" color="#AA0000" font_color="#AA0000" polarity="+" isee:polarity_placement="outside" angle="186.86">
+					<from>usage_of_hubs</from>
+					<to>fill_rate</to>
+				</connector>
+				<connector uid="8" color="#AA0000" font_color="#AA0000" polarity="-" isee:polarity_placement="outside" angle="229.497">
+					<from>usage_of_hubs</from>
+					<to>route_length</to>
+				</connector>
+				<connector uid="9" color="#0055FF" font_color="#0055FF" polarity="-" isee:polarity_placement="outside" angle="240.396">
+					<from>usage_of_hubs</from>
+					<to>delivery_time</to>
+				</connector>
+				<aux color="black" font_color="black" font_size="11pt" x="474.625" y="444" width="52.75" height="16" name="km driven"/>
+				<connector uid="10" color="#AA0000" font_color="#AA0000" polarity="-" isee:polarity_placement="outside" angle="235.491">
+					<from>fill_rate</from>
+					<to>km_driven</to>
+				</connector>
+				<connector uid="11" color="#AA0000" font_color="#AA0000" polarity="+" isee:polarity_placement="outside" angle="288.435">
+					<from>route_length</from>
+					<to>km_driven</to>
+				</connector>
+				<connector uid="13" color="#AA0000" font_color="#AA0000" polarity="+" isee:polarity_placement="inside" angle="213.959">
+					<from>km_driven</from>
+					<to>CO2_emissions</to>
+				</connector>
+				<aux color="#FF5500" font_weight="bold" font_color="#FF5500" font_size="11pt" x="359.625" y="324" width="98.75" height="16" name="KM DRIVEN GOAL"/>
+				<aux color="black" font_color="black" font_size="11pt" x="309.875" y="369" width="73.75" height="16" name="km driven gap"/>
+				<connector uid="14" color="#FF5500" font_color="#FF5500" polarity="-" isee:polarity_placement="inside" angle="215.863">
+					<from>KM_DRIVEN_GOAL</from>
+					<to>km_driven_gap</to>
+				</connector>
+				<connector uid="15" color="#AA0000" font_color="#AA0000" polarity="+" isee:polarity_placement="outside" angle="173.019">
+					<from>km_driven</from>
+					<to>km_driven_gap</to>
+				</connector>
+				<connector uid="16" color="#AA0000" font_color="#AA0000" polarity="+" isee:polarity_placement="inside" angle="154.997">
+					<from>km_driven_gap</from>
+					<to>public_funding</to>
+				</connector>
+				<aux color="black" font_color="black" font_size="11pt" x="722.125" y="444" width="75.75" height="16" name="operation cost"/>
+				<aux color="black" font_color="black" font_size="11pt" x="779.625" y="142" width="150.75" height="16" name="cost for using the hub system"/>
+				<connector uid="17" color="black" font_color="black" polarity="+" isee:polarity_placement="outside" angle="61.3895">
+					<from>number_of_hubs</from>
+					<to>cost_for_using_the_hub_system</to>
+				</connector>
+				<connector uid="18" color="#0055FF" font_color="#0055FF" polarity="+" isee:polarity_placement="inside" angle="295.115">
+					<from>delivery_time</from>
+					<to>operation_cost</to>
+				</connector>
+				<connector uid="19" color="#0055FF" font_color="#0055FF" polarity="+" isee:polarity_placement="outside" angle="298.072">
+					<from>route_length</from>
+					<to>operation_cost</to>
+				</connector>
+				<connector uid="20" color="#0055FF" font_color="#0055FF" polarity="-" isee:polarity_placement="outside" angle="266.698">
+					<from>fill_rate</from>
+					<to>operation_cost</to>
+				</connector>
+				<aux color="black" font_color="black" font_size="11pt" x="839.375" y="286" width="109.75" height="30" name="monetary value of using the hub system"/>
+				<connector uid="21" color="#0055FF" font_color="#0055FF" polarity="-" isee:polarity_placement="outside" angle="14.0362">
+					<from>operation_cost</from>
+					<to>monetary_value_of_using_the_hub_system</to>
+				</connector>
+				<connector uid="22" color="#AA007F" font_color="#AA007F" polarity="-" isee:polarity_placement="inside" angle="348.69">
+					<from>cost_for_using_the_hub_system</from>
+					<to>monetary_value_of_using_the_hub_system</to>
+				</connector>
+				<aux color="black" font_color="black" font_size="11pt" x="710.625" y="214" width="98.75" height="30" name="logistic service providers adopters"/>
+				<connector uid="23" color="#0055FF" font_color="#0055FF" polarity="+" isee:polarity_placement="inside" angle="124.729">
+					<from>monetary_value_of_using_the_hub_system</from>
+					<to>logistic_service_providers_adopters</to>
+				</connector>
+				<connector uid="24" color="#0055FF" font_color="#0055FF" polarity="+" isee:polarity_placement="outside" angle="143.881">
+					<from>logistic_service_providers_adopters</from>
+					<to>usage_of_hubs</to>
+				</connector>
+				<aux color="#FF5500" font_weight="bold" font_color="#FF5500" font_size="11pt" x="913.625" y="96" width="114.75" height="30" name="OPERATIONAL COST\nOF HUBS"/>
+				<connector uid="25" color="#FF5500" font_color="#FF5500" polarity="+" isee:polarity_placement="inside" angle="198.583">
+					<from>OPERATIONAL_COST_OF_HUBS</from>
+					<to>cost_for_using_the_hub_system</to>
+				</connector>
+				<aux color="#FF5500" font_weight="bold" font_color="#FF5500" font_size="11pt" x="682.125" y="278.5" width="68.75" height="30" name="BARRIER OF\nBRANDING"/>
+				<connector uid="26" color="#FF5500" font_color="#FF5500" polarity="-" isee:polarity_placement="inside" angle="56.0035">
+					<from>BARRIER_OF_BRANDING</from>
+					<to>logistic_service_providers_adopters</to>
+				</connector>
+				<aux color="#FF5500" font_weight="bold" font_color="#FF5500" font_size="11pt" x="67.875" y="136" width="126.75" height="16" name="EXOGENOUS VARIABLE"/>
+				<aux color="#00AA00" font_weight="bold" font_color="#00AA00" font_size="11pt" x="87.875" y="156" width="86.75" height="16" name="policy scheme"/>
+				<aux color="#00AA00" font_weight="bold" font_color="#00AA00" font_size="11pt" x="549.625" y="136" width="102.75" height="30" name="receivers change\naddress"/>
+				<connector uid="27" color="#00AA00" font_color="#00AA00" polarity="+" isee:polarity_placement="outside" angle="300.201">
+					<from>receivers_change_address</from>
+					<to>usage_of_hubs</to>
+				</connector>
+				<aux color="#00AA00" font_weight="bold" font_color="#00AA00" font_size="11pt" x="911.625" y="346" width="78.75" height="30" name="public sector\nincentives"/>
+				<connector uid="28" color="#00AA00" font_color="#00AA00" polarity="+" isee:polarity_placement="outside" angle="133.405">
+					<from>public_sector_incentives</from>
+					<to>monetary_value_of_using_the_hub_system</to>
+				</connector>
+				<aux color="#00AA00" font_weight="bold" font_color="#00AA00" font_size="11pt" x="714.625" y="316" width="147.75" height="44" name="shippers oblige\nlogistic service providers\nto use the hubs"/>
+				<connector uid="29" color="#00AA00" font_color="#00AA00" polarity="+" isee:polarity_placement="outside" angle="104.653">
+					<from>shippers_oblige_logistic_service_providers_to_use_the_hubs</from>
+					<to>logistic_service_providers_adopters</to>
+				</connector>
+				<isee:loop_indicator color="#AA0000" font_color="#AA0000" text="" orientation="clockwise" uid="31" x="303.625" y="272" width="49" height="43">
+					<isee:entities>
+						<entity name="km_driven_gap"/>
+						<item uid="16"/>
+						<item uid="15"/>
+						<entity name="km_driven"/>
+						<item uid="13"/>
+						<entity name="CO2_emissions"/>
+						<item uid="2"/>
+						<entity name="CO2_emissions_gap"/>
+						<item uid="3"/>
+						<entity name="public_funding"/>
+						<item uid="4"/>
+						<entity name="number_of_hubs"/>
+						<item uid="6"/>
+						<item uid="9"/>
+						<item uid="8"/>
+						<entity name="usage_of_hubs"/>
+						<item uid="7"/>
+						<entity name="route_length"/>
+						<entity name="delivery_time"/>
+						<item uid="12"/>
+						<item uid="11"/>
+						<item uid="10"/>
+						<entity name="fill_rate"/>
+					</isee:entities>
+				</isee:loop_indicator>
+				<text_box font_weight="bold" font_color="#AA0000" appearance="transparent" uid="30" x="323" y="250" width="126" height="46">Balancing loop
+of achieving the goals
+by using hubs</text_box>
+				<isee:loop_indicator color="#0055FF" text="" orientation="counter_clockwise" uid="32" x="690" y="364" width="39" height="36">
+					<isee:entities>
+						<entity name="monetary_value_of_using_the_hub_system"/>
+						<item uid="23"/>
+						<entity name="logistic_service_providers_adopters"/>
+						<item uid="24"/>
+						<item uid="21"/>
+						<entity name="operation_cost"/>
+						<item uid="18"/>
+						<item uid="19"/>
+						<item uid="20"/>
+						<entity name="fill_rate"/>
+						<entity name="route_length"/>
+						<item uid="8"/>
+						<item uid="9"/>
+						<item uid="7"/>
+						<entity name="usage_of_hubs"/>
+					</isee:entities>
+				</isee:loop_indicator>
+				<text_box font_weight="bold" font_color="#0055FF" border_color="#0055FF" appearance="transparent" uid="33" x="713.375" y="385" width="126" height="46">Reinforcing loop
+of improving efficiencies</text_box>
+				<connector uid="34" color="#AA007F" font_color="#AA007F" polarity="-" isee:polarity_placement="inside" angle="67.9638">
+					<from>logistic_service_providers_adopters</from>
+					<to>cost_for_using_the_hub_system</to>
+				</connector>
+				<text_box font_weight="bold" font_color="#AA007F" border_color="#0055FF" appearance="transparent" uid="35" x="827" y="178" width="126" height="29">Reinforcing loop
+of scale up</text_box>
+				<isee:loop_indicator color="#AA007F" font_color="#AA007F" text="" orientation="clockwise" uid="36" x="814" y="191" width="35" height="37">
+					<isee:entities>
+						<entity name="logistic_service_providers_adopters"/>
+						<item uid="34"/>
+						<entity name="cost_for_using_the_hub_system"/>
+						<item uid="22"/>
+						<entity name="monetary_value_of_using_the_hub_system"/>
+						<item uid="23"/>
+					</isee:entities>
+				</isee:loop_indicator>
+				<isee:loop_indicator text="" orientation="clockwise" uid="37" x="71.375" y="179" width="18" height="36"/>
+				<aux color="black" font_weight="bold" font_color="black" font_size="11pt" x="89.375" y="177" width="91.75" height="16" name="feedback loops"/>
+				<text_box font_weight="bold" appearance="transparent" uid="38" x="104.875" y="113" width="52.75" height="18">LEGEND</text_box>
+				<aux font_color="black" font_size="11pt" x="479.125" y="485" width="97.75" height="30" name="usage of zero emissions vehicles"/>
+				<connector uid="39" color="#AA0000" font_color="#AA0000" polarity="+" isee:polarity_placement="outside" angle="305.166">
+					<from>usage_of_hubs</from>
+					<to>usage_of_zero_emissions_vehicles</to>
+				</connector>
+				<connector uid="40" color="#AA0000" font_color="#AA0000" polarity="-" isee:polarity_placement="outside" angle="206.565">
+					<from>usage_of_zero_emissions_vehicles</from>
+					<to>CO2_emissions</to>
+				</connector>
+			</view>
+		</views>
+	</model>
+</xmile>
+
