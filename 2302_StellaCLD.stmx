@@ -230,7 +230,7 @@
 				<aux color="black" font_color="black" font_size="11pt" x="509.125" y="324" width="63.75" height="16" name="route length"/>
 				<aux color="black" font_color="black" font_size="11pt" x="583.875" y="353" width="66.75" height="16" name="delivery time"/>
 				<aux color="black" font_color="black" font_size="11pt" x="599.875" y="207" width="76.75" height="16" name="usage of hubs"/>
-				<connector uid="6" color="#AA0000" font_color="#AA0000" polarity="+" isee:polarity_placement="outside" angle="13.3925">
+				<connector uid="6" color="#AA0000" font_color="#AA0000" polarity="+" isee:polarity_placement="outside" angle="7.85331">
 					<from>number_of_hubs</from>
 					<to>usage_of_hubs</to>
 				</connector>
@@ -255,7 +255,7 @@
 					<from>route_length</from>
 					<to>km_driven</to>
 				</connector>
-				<connector uid="13" color="#AA0000" font_color="#AA0000" polarity="+" isee:polarity_placement="inside" angle="213.959">
+				<connector uid="13" color="#AA0000" font_color="#AA0000" polarity="+" isee:polarity_placement="inside" angle="225">
 					<from>km_driven</from>
 					<to>CO2_emissions</to>
 				</connector>
@@ -275,7 +275,7 @@
 				</connector>
 				<aux color="black" font_color="black" font_size="11pt" x="722.125" y="444" width="75.75" height="16" name="operation cost"/>
 				<aux color="black" font_color="black" font_size="11pt" x="779.625" y="142" width="150.75" height="16" name="cost for using the hub system"/>
-				<connector uid="17" color="black" font_color="black" polarity="+" isee:polarity_placement="outside" angle="61.3895">
+				<connector uid="17" color="black" font_color="black" polarity="+" isee:polarity_placement="outside" angle="48.3665">
 					<from>number_of_hubs</from>
 					<to>cost_for_using_the_hub_system</to>
 				</connector>
